@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     llm_model: str = "qwen3:4b"
     llm_timeout_seconds: int = 30
 
+    tts_binary: str = "piper"
+    tts_model_path: str = ""
+    tts_supported_languages: tuple[str, ...] = ("uz",)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="",
