@@ -1,0 +1,63 @@
+[
+  {
+    "id": "internet_problem",
+    "title": "Internet connection problem",
+    "description": "Basic troubleshooting for an internet connectivity issue.",
+    "language": "uz",
+    "keywords": [
+      "internet",
+      "ishlamayapti",
+      "ulanmayapti",
+      "wi-fi",
+      "wifi"
+    ],
+    "steps": [
+      {
+        "id": "check_power",
+        "message": "Modem quvvatini va indikatorlarini tekshiring.",
+        "next_scenario": null
+      },
+      {
+        "id": "restart",
+        "message": "Modemni o'chirib, 30 soniyadan so'ng qayta yoqing.",
+        "next_scenario": null
+      },
+      {
+        "id": "operator",
+        "message": "Muammo davom etsa, operator bilan bog'lanish uchun 0 ni bosing.",
+        "next_scenario": null
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "equipment_problem",
+    "title": "Equipment problem",
+    "description": "Basic troubleshooting for equipment failures.",
+    "language": "uz",
+    "keywords": [
+      "qurilma",
+      "uskunam",
+      "ishlamayapti",
+      "apparat"
+    ],
+    "steps": [
+      {
+        "id": "power",
+        "message": "Qurilma elektr tarmog'iga ulanganini tekshiring.",
+        "next_scenario": null
+      },
+      {
+        "id": "restart",
+        "message": "Qurilmani qayta ishga tushiring.",
+        "next_scenario": null
+      },
+      {
+        "id": "operator",
+        "message": "Muammo davom etsa, operator bilan bog'lanish uchun 0 ni bosing.",
+        "next_scenario": null
+      }
+    ],
+    "enabled": true
+  }
+]
