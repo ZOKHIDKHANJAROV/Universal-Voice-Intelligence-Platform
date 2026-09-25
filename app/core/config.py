@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     app_port: int = 8000
     log_level: str = "INFO"
 
+    stt_model: str = "small"
+    stt_device: str = "cpu"
+    stt_compute_type: str = "int8"
+    stt_supported_languages: tuple[str, ...] = ("uz", "ru", "en")
+    stt_max_upload_bytes: int = 25 * 1024 * 1024
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="",
