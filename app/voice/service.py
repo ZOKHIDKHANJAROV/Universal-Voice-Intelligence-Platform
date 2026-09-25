@@ -24,7 +24,7 @@ class VoicePipelineService:
         if scenario is None:
             response_text = "Kechirasiz, muammoingizni aniqlay olmadim. Operator bilan bog'lanish uchun 0 ni bosing."
         else:
-            response_text = scenario.response
+            response_text = scenario.steps[0].message if scenario.steps else "Operator bilan bog'lanish uchun 0 ni bosing."
 
         output_path = self._settings.tts_output_dir / f"{call_id}.wav"
         tts_result = synthesize(response_text, output_path, language=language)
