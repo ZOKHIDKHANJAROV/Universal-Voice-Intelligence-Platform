@@ -6,4 +6,30 @@ services:
       - .env
     ports:
       - "8000:8000"
+    volumes:
+      - voice-audio:/var/lib/univoice/audio
     restart: unless-stopped
+
+  asterisk:
+    build:
+      context: .
+      dockerfile: infrastructure/asterisk/Dockerfile
+    container_name: univoice-asterisk
+    depends_on:
+      - api
+    ports:
+      - "5060:5060/udp"
+      - "10000-10100:10000-10100/udp"
+    volumes:
+      - ./infrastructure/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf:ro
+      - ./infrastructure/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf:ro
+      - ./infrastructure/asterisk/extensions.conf:/etc/asterisk/extensions.conf:ro
+      - ./infrastructure/asterisk/rtp.conf:/etc/asterisk/rtp.conf:ro
+      - ./infrastructure/asterisk/modules.conf:/etc/asterisk/modules.conf:ro
+      - asterisk-recordings:/var/spool/asterisk/recordings
+      - voice-audio:/var/lib/univoice/audio
+    restart: unless-stopped
+
+volumes:
+  asterisk-recordings:
+  voice-audio:
