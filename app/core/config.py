@@ -21,8 +21,16 @@ class Settings(BaseSettings):
     llm_model: str = "qwen3:4b"
     llm_timeout_seconds: int = 30
 
+    tts_provider: str = "piper"
     tts_binary: str = "piper"
     tts_model_path: str = ""
+    tts_python_binary: str = "python"
+    tts_navoiy_inference_script: str = ""
+    tts_navoiy_cosyvoice_dir: str = ""
+    tts_navoiy_base_model_dir: str = ""
+    tts_navoiy_checkpoint: str = ""
+    tts_navoiy_reference_audio: str = ""
+    tts_navoiy_emotion: str = "warm"
     tts_output_dir: Path = Path("/var/lib/univoice/audio")
     tts_supported_languages: tuple[str, ...] = ("uz",)
 
