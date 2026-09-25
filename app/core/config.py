@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     stt_supported_languages: tuple[str, ...] = ("uz", "ru", "en")
     stt_max_upload_bytes: int = 25 * 1024 * 1024
 
+    llm_enabled: bool = False
+    llm_base_url: str = "http://ollama:11434"
+    llm_model: str = "qwen3:4b"
+    llm_timeout_seconds: int = 30
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="",
