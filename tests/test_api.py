@@ -32,3 +32,11 @@ def test_resolve_scenario() -> None:
 def test_get_unknown_scenario() -> None:
     response = client.get("/api/v1/scenarios/unknown")
     assert response.status_code == 404
+
+
+def test_stt_rejects_unsupported_language() -> None:
+    response = client.post(
+        "/api/v1/stt/transcribe?language=de",
+        files={"audio": ("test.wav", b"not-a-real-audio-file", "audio/wav")},
+    )
+    assert response.status_code == 400
