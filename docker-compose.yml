@@ -7,3 +7,17 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
+
+  asterisk:
+    image: andrius/asterisk:20
+    container_name: univoice-asterisk
+    ports:
+      - "5060:5060/udp"
+      - "10000-10100:10000-10100/udp"
+    volumes:
+      - ./infrastructure/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf:ro
+      - ./infrastructure/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf:ro
+      - ./infrastructure/asterisk/extensions.conf:/etc/asterisk/extensions.conf:ro
+      - ./infrastructure/asterisk/rtp.conf:/etc/asterisk/rtp.conf:ro
+      - ./infrastructure/asterisk/modules.conf:/etc/asterisk/modules.conf:ro
+    restart: unless-stopped
