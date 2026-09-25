@@ -4,75 +4,58 @@ Universal Voice Intelligence Platform for voice automation and AI-assisted call 
 
 ## Current scope
 
-Phase 1 of the platform focuses on a deterministic Scenario Engine that can later be connected to:
-
-- Asterisk / SIP telephony
+- Scenario Engine for controlled business flows
+- Asterisk / SIP voice gateway
 - Speech-to-Text (STT)
-- LLM-based intent detection
+- Intent detection and LLM routing
 - Text-to-Speech (TTS)
-- PostgreSQL
-- Redis
-
-The first API is intentionally runnable without external AI providers.
+- PostgreSQL persistence
+- Call history and analytics
 
 ## Architecture
 
-```
-Caller / Telephony
-       |
-       v
-   Voice Gateway
-       |
-       v
-      STT
-       |
-       v
- Intent / LLM
-       |
-       v
- Scenario Engine
-       |
-       v
-      TTS
-       |
-       v
-     Caller
-```
+Caller -> Asterisk / SIP -> STT -> Intent / LLM -> Scenario Engine -> TTS -> Caller
 
-The current repository implements the **Scenario Engine + REST API**.
+## STT
+
+The current STT layer uses faster-whisper with a provider abstraction. The default configuration is CPU-based small Whisper with int8 compute type and Uzbek (uz) as the default language.
+
+The STT API accepts an audio file and returns transcription text, detected language, language probability, and duration.
+
+### Endpoint
+
+POST /api/v1/stt/transcribe?language=uz
+
+Example:
+
+    curl -X POST \
+      -F "audio=@sample.wav" \
+      "http://127.0.0.1:8000/api/v1/stt/transcribe?language=uz"
+
+The first transcription initializes/downloads the configured Whisper model. Model files should be cached in the runtime environment.
 
 ## Run locally
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .[dev]
-uvicorn app.main:app --reload
-```
-
-Open:
-
-- http://127.0.0.1:8000/health
-- http://127.0.0.1:8000/docs
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -e ".[dev]"
+    uvicorn app.main:app --reload
 
 ## Run with Docker
 
-```bash
-docker compose up --build
-```
+    docker compose up --build
 
 ## Test
 
-```bash
-pytest
-```
+    pytest
 
 ## API
 
-- `GET /health`
-- `GET /api/v1/scenarios`
-- `GET /api/v1/scenarios/{scenario_id}`
-- `POST /api/v1/scenarios/resolve`
+- GET /health
+- GET /api/v1/scenarios
+- GET /api/v1/scenarios/{scenario_id}
+- POST /api/v1/scenarios/resolve
+- POST /api/v1/stt/transcribe
 
 ## Roadmap
 
