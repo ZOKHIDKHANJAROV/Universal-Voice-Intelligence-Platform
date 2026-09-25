@@ -23,6 +23,7 @@ class Settings(BaseSettings):
 
     tts_binary: str = "piper"
     tts_model_path: str = ""
+    tts_output_dir: Path = Path("/var/lib/univoice/audio")
     tts_supported_languages: tuple[str, ...] = ("uz",)
 
     model_config = SettingsConfigDict(
