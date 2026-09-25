@@ -9,8 +9,12 @@ services:
     restart: unless-stopped
 
   asterisk:
-    image: andrius/asterisk:20
+    build:
+      context: .
+      dockerfile: infrastructure/asterisk/Dockerfile
     container_name: univoice-asterisk
+    depends_on:
+      - api
     ports:
       - "5060:5060/udp"
       - "10000-10100:10000-10100/udp"
@@ -20,4 +24,8 @@ services:
       - ./infrastructure/asterisk/extensions.conf:/etc/asterisk/extensions.conf:ro
       - ./infrastructure/asterisk/rtp.conf:/etc/asterisk/rtp.conf:ro
       - ./infrastructure/asterisk/modules.conf:/etc/asterisk/modules.conf:ro
+      - asterisk-recordings:/var/spool/asterisk/recordings
     restart: unless-stopped
+
+volumes:
+  asterisk-recordings:
