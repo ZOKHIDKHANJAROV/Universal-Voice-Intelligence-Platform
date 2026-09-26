@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field
 
 
+class IntentResolveRequest(BaseModel):
+    text: str = Field(min_length=1)
+
+
 class IntentResult(BaseModel):
     intent: str | None
     scenario_id: str | None
