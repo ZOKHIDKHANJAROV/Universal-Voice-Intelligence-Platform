@@ -4,10 +4,48 @@ services:
     container_name: univoice-api
     env_file:
       - .env
+    depends_on:
+      navoiy-tts:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - voice-audio:/var/lib/univoice/audio
+    restart: unless-stopped
+
+  navoiy-tts:
+    build:
+      context: .
+      dockerfile: infrastructure/navoiy-tts/Dockerfile
+    container_name: univoice-navoiy-tts
+    environment:
+      NAVOIY_BASE_MODEL_DIR: /models/CosyVoice2-0.5B
+      NAVOIY_CHECKPOINT: /models/navoiy/emotion_600h_joint.pt
+      NAVOIY_EMOTIONS_FILE: /models/navoiy/emotions_40h.json
+      NAVOIY_REFERENCE_AUDIO: /models/reference.wav
+      NAVOIY_MODEL_CACHE: /models/hf-cache
+      NAVOIY_BASE_REVISION: eec1ae6c79877dbd9379285cf8789c9e0879293d
+      NAVOIY_MODEL_REVISION: 912e6bb6663f11e5dec5de830ca06ea8dd4c985f
+      NAVOIY_EMOTION: warm
+      NAVOIY_SPEED: "1.0"
+    ports:
+      - "8100:8100"
+    volumes:
+      - navoiy-models:/models
+      - ./infrastructure/navoiy-tts/reference.wav:/models/reference.wav:ro
+    gpus: all
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8100/health', timeout=3)"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
     restart: unless-stopped
 
   asterisk:
@@ -33,3 +71,4 @@ services:
 volumes:
   asterisk-recordings:
   voice-audio:
+  navoiy-models:

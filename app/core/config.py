@@ -22,7 +22,9 @@ class Settings(BaseSettings):
     llm_model: str = "qwen3:4b"
     llm_timeout_seconds: int = 30
 
-    tts_provider: str = "piper"
+    tts_provider: str = "navoiy-http"
+    tts_base_url: str = "http://navoiy-tts:8100"
+    tts_timeout_seconds: int = 120
     tts_binary: str = "piper"
     tts_model_path: str = ""
     tts_python_binary: str = "python"
