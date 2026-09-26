@@ -22,7 +22,7 @@ services:
       NAVOIY_BASE_MODEL_DIR: /models/CosyVoice2-0.5B
       NAVOIY_CHECKPOINT: /models/navoiy/emotion_600h_joint.pt
       NAVOIY_EMOTIONS_FILE: /models/navoiy/emotions_40h.json
-      NAVOIY_REFERENCE_AUDIO: /models/reference.wav
+      NAVOIY_REFERENCE_AUDIO: /opt/tts-config/reference.wav
       NAVOIY_MODEL_CACHE: /models/hf-cache
       NAVOIY_BASE_REVISION: eec1ae6c79877dbd9379285cf8789c9e0879293d
       NAVOIY_MODEL_REVISION: 912e6bb6663f11e5dec5de830ca06ea8dd4c985f
@@ -32,7 +32,7 @@ services:
       - "8100:8100"
     volumes:
       - navoiy-models:/models
-      - ./infrastructure/navoiy-tts/reference.wav:/models/reference.wav:ro
+      - ./infrastructure/navoiy-tts:/opt/tts-config:ro
     gpus: all
     healthcheck:
       test:
@@ -44,7 +44,7 @@ services:
         ]
       interval: 15s
       timeout: 5s
-      retries: 20
+      retries: 60
       start_period: 60s
     restart: unless-stopped
 

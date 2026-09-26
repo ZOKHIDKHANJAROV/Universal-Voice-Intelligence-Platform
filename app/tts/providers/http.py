@@ -1,3 +1,4 @@
+import json
 import urllib.error
 import urllib.request
 import wave
@@ -19,11 +20,14 @@ class NavoiyHttpTextToSpeech(TextToSpeech):
             raise ValueError("Navoiy HTTP TTS currently supports Uzbek only")
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        payload = f'{{"text": {text!r}, "language": {language!r}}}'.replace("'", '"')
+        payload = json.dumps(
+            {"text": text, "language": language},
+            ensure_ascii=False,
+        ).encode("utf-8")
         request = urllib.request.Request(
             f"{self._base_url}/v1/synthesize",
-            data=payload.encode("utf-8"),
-            headers={"Content-Type": "application/json"},
+            data=payload,
+            headers={"Content-Type": "application/json; charset=utf-8"},
             method="POST",
         )
 

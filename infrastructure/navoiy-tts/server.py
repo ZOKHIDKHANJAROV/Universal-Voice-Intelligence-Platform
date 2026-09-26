@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import threading
+import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -196,7 +197,7 @@ def synthesize(request: SynthesizeRequest):
 
     output_dir = Path("/tmp/univoice-tts")
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"response-{random.getrandbits(64):016x}.wav"
+    output_path = output_dir / f"response-{uuid.uuid4().hex}.wav"
 
     chunks = []
     with torch.inference_mode():
