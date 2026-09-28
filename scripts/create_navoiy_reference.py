@@ -57,7 +57,7 @@ def decode_audio(audio: dict) -> tuple[np.ndarray, int]:
             return np.asarray(samples, dtype=np.float32), int(sample_rate)
 
     raise RuntimeError(
-        "The dataset returned audio without decodable bytes or a local path."
+        "The dataset returned an audio path without decodable bytes or a local path."
     )
 
 
@@ -134,7 +134,7 @@ def main() -> None:
     print(f"Selected speaker: {speaker}")
 
     for index, clip in enumerate(clips, 1):
-        samples, sample_rate = decode_audio(clip["audio"])
+        samples, sample_rate = decode_audio(clip["path"])
 
         if samples.ndim > 1:
             samples = samples.mean(axis=1)
