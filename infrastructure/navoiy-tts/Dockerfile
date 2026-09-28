@@ -10,7 +10,7 @@ RUN conda create -y -n cosyvoice python=3.10     && conda install -y -n cosyvoic
 
 RUN git clone --recursive https://github.com/FunAudioLLM/CosyVoice.git /opt/CosyVoice     && cd /opt/CosyVoice     && git checkout 074ca6dc9e80a2f424f1f74b48bdd7d3fea531cc     && git submodule update --init --recursive
 
-RUN cd /opt/CosyVoice     && pip install --no-cache-dir -r requirements.txt     && pip install --no-cache-dir huggingface_hub==0.36.2 numpy==1.26.4 transformers==4.51.3
+RUN cd /opt/CosyVoice     && pip install --no-cache-dir setuptools==81.0.0 wheel     && pip install --no-cache-dir --no-build-isolation --no-deps openai-whisper==20231117     && pip install --no-cache-dir -r requirements.txt     && pip install --no-cache-dir huggingface_hub==0.36.2 numpy==1.26.4 transformers==4.51.3
 
 WORKDIR /opt/univoice-tts
 COPY infrastructure/navoiy-tts/server.py ./server.py
