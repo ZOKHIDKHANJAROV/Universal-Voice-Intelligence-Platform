@@ -5,16 +5,45 @@ CosyVoice2-0.5B runtime.
 
 ## Reference voice
 
-Place a short, clean WAV recording from a speaker who has explicitly consented
-to voice cloning at:
+Place a short, clean Uzbek WAV recording from a speaker who has explicitly
+consented to voice cloning at:
 
 `infrastructure/navoiy-tts/reference.wav`
 
-The file is intentionally not committed to the repository.
+Recommended reference:
 
-The Navoiy model release requires CUDA and uses the CosyVoice2-0.5B base model.
-The service downloads both model artifacts into the `navoiy-models` Docker
-volume on first startup.
+- 5-15 seconds
+- Uzbek speech
+- one speaker
+- clean voice without music or background noise
+- WAV
+- mono
+- 16 kHz or 24 kHz
+
+The reference audio is intentionally not committed to Git. It is a runtime
+asset and may contain a person's biometric voice data.
+
+### Generate a test reference from UzbekVoice
+
+For development/testing, the repository includes a helper that selects clips
+from the Apache-2.0 licensed UzbekVoice dataset and creates a single-speaker
+16 kHz mono WAV:
+
+```bash
+python scripts/create_navoiy_reference.py
+```
+
+Install the helper dependencies first:
+
+```bash
+python -m pip install datasets soundfile numpy librosa
+```
+
+The script creates:
+
+`infrastructure/navoiy-tts/reference.wav`
+
+Review the resulting audio before using it for voice cloning.
 
 ## Start
 
