@@ -12,3 +12,6 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+
+# Local Navoiy/CosyVoice reference voice (biometric voice data)
+infrastructure/navoiy-tts/reference.wav
