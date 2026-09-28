@@ -4,16 +4,21 @@ Create infrastructure/navoiy-tts/reference.wav from UzbekVoice.
 
 The generated reference is intentionally kept out of Git. It is a local
 runtime asset for Navoiy/CosyVoice voice cloning.
+
+This script deliberately avoids automatic Hugging Face audio decoding.
+That keeps the Windows development environment free from a PyTorch/TorchCodec
+dependency just for creating the reference WAV.
 """
 
 from __future__ import annotations
 
+import io
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from datasets import load_dataset
+from datasets import Audio, load_dataset
 
 OUTPUT = Path("infrastructure/navoiy-tts/reference.wav")
 DATASET = "DavronSherbaev/uzbekvoice-filtered"
@@ -30,9 +35,50 @@ def is_uzbek(item: dict) -> bool:
     return "o'zbek" in value or "uzbek" in value or "ўзбек" in value
 
 
+def decode_audio(audio: dict) -> tuple[np.ndarray, int]:
+    """
+    Decode an audio item returned with Audio(decode=False).
+
+    Hugging Face may expose the audio as in-memory bytes. We intentionally
+    decode those bytes with soundfile instead of TorchCodec.
+    """
+    audio_bytes = audio.get("bytes")
+    if audio_bytes:
+        samples, sample_rate = sf.read(
+            io.BytesIO(audio_bytes),
+            dtype="float32",
+            always_2d=False,
+        )
+        return np.asarray(samples, dtype=np.float32), int(sample_rate)
+
+    audio_path = audio.get("path")
+    if audio_path:
+        path = Path(audio_path)
+        if path.exists():
+            samples, sample_rate = sf.read(
+                path,
+                dtype="float32",
+                always_2d=False,
+            )
+            return np.asarray(samples, dtype=np.float32), int(sample_rate)
+
+    raise RuntimeError(
+        "The dataset returned an audio item without decodable bytes or a "
+        "local path. The Hugging Face dataset schema may have changed."
+    )
+
+
 def main() -> None:
     print(f"Loading {DATASET} in streaming mode...")
-    dataset = load_dataset(DATASET, split="train", streaming=True)
+
+    dataset = load_dataset(
+        DATASET,
+        split="train",
+        streaming=True,
+    )
+
+    # Prevent datasets from invoking TorchCodec/PyTorch when reading audio.
+    dataset = dataset.cast_column("audio", Audio(decode=False))
 
     speakers: dict[str, list[dict]] = defaultdict(list)
     checked = 0
@@ -64,8 +110,12 @@ def main() -> None:
         total = 0.0
         chosen: list[dict] = []
 
-        for clip in sorted(clips, key=lambda x: float(x.get("duration", 0.0))):
+        for clip in sorted(
+            clips,
+            key=lambda x: float(x.get("duration", 0.0)),
+        ):
             duration = float(clip["duration"])
+
             if total + duration > MAX_TOTAL_SECONDS:
                 continue
 
@@ -90,12 +140,10 @@ def main() -> None:
     print(f"Selected speaker: {speaker}")
 
     for index, clip in enumerate(clips, 1):
-        audio = clip["audio"]
-        samples = np.asarray(audio["array"], dtype=np.float32)
-        sample_rate = int(audio["sampling_rate"])
+        samples, sample_rate = decode_audio(clip["audio"])
 
         if samples.ndim > 1:
-            samples = samples.mean(axis=0)
+            samples = samples.mean(axis=1)
 
         if sample_rate != TARGET_SAMPLE_RATE:
             import librosa
@@ -106,7 +154,8 @@ def main() -> None:
                 target_sr=TARGET_SAMPLE_RATE,
             )
 
-        parts.append(samples)
+        parts.append(samples.astype(np.float32, copy=False))
+
         print(
             f"  {index}. {float(clip['duration']):.2f}s "
             f"{clip.get('sentence', '')}"
@@ -119,6 +168,7 @@ def main() -> None:
         final_audio = final_audio / peak * 0.95
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+
     sf.write(
         OUTPUT,
         final_audio,
