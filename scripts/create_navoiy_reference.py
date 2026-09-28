@@ -5,9 +5,8 @@ Create infrastructure/navoiy-tts/reference.wav from UzbekVoice.
 The generated reference is intentionally kept out of Git. It is a local
 runtime asset for Navoiy/CosyVoice voice cloning.
 
-This script deliberately avoids automatic Hugging Face audio decoding.
-That keeps the Windows development environment free from a PyTorch/TorchCodec
-dependency just for creating the reference WAV.
+The script disables Hugging Face audio decoding while streaming. This avoids
+the PyTorch/TorchCodec dependency in the Windows development environment.
 """
 
 from __future__ import annotations
@@ -18,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from datasets import Audio, load_dataset
+from datasets import load_dataset
 
 OUTPUT = Path("infrastructure/navoiy-tts/reference.wav")
 DATASET = "DavronSherbaev/uzbekvoice-filtered"
@@ -36,12 +35,7 @@ def is_uzbek(item: dict) -> bool:
 
 
 def decode_audio(audio: dict) -> tuple[np.ndarray, int]:
-    """
-    Decode an audio item returned with Audio(decode=False).
-
-    Hugging Face may expose the audio as in-memory bytes. We intentionally
-    decode those bytes with soundfile instead of TorchCodec.
-    """
+    """Decode raw audio bytes/path with soundfile, not TorchCodec."""
     audio_bytes = audio.get("bytes")
     if audio_bytes:
         samples, sample_rate = sf.read(
@@ -63,8 +57,7 @@ def decode_audio(audio: dict) -> tuple[np.ndarray, int]:
             return np.asarray(samples, dtype=np.float32), int(sample_rate)
 
     raise RuntimeError(
-        "The dataset returned an audio item without decodable bytes or a "
-        "local path. The Hugging Face dataset schema may have changed."
+        "The dataset returned audio without decodable bytes or a local path."
     )
 
 
@@ -77,8 +70,9 @@ def main() -> None:
         streaming=True,
     )
 
-    # Prevent datasets from invoking TorchCodec/PyTorch when reading audio.
-    dataset = dataset.cast_column("audio", Audio(decode=False))
+    # Critical: decode(False) is the supported streaming API for exposing
+    # media paths/bytes without constructing TorchCodec audio decoders.
+    dataset = dataset.decode(False)
 
     speakers: dict[str, list[dict]] = defaultdict(list)
     checked = 0
@@ -114,7 +108,7 @@ def main() -> None:
             clips,
             key=lambda x: float(x.get("duration", 0.0)),
         ):
-            duration = float(clip["duration"])
+            duration = float(clip.get("duration", 0.0))
 
             if total + duration > MAX_TOTAL_SECONDS:
                 continue
@@ -168,7 +162,6 @@ def main() -> None:
         final_audio = final_audio / peak * 0.95
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-
     sf.write(
         OUTPUT,
         final_audio,
