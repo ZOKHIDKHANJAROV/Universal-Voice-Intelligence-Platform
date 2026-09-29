@@ -59,6 +59,7 @@ def _ensure_models() -> None:
         revision=BASE_REVISION,
         local_dir=BASE_MODEL_DIR,
         cache_dir=MODEL_CACHE,
+        max_workers=2,
     )
     snapshot_download(
         "aisha-org/navoiy-tts",
@@ -70,6 +71,7 @@ def _ensure_models() -> None:
             "uztts/*",
         ],
         cache_dir=MODEL_CACHE,
+        max_workers=1,
     )
 
 
