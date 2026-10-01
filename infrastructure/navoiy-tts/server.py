@@ -13,6 +13,9 @@ from pydantic import BaseModel, Field
 COSYVOICE_DIR = Path("/opt/CosyVoice")
 sys.path.insert(0, str(COSYVOICE_DIR))
 sys.path.insert(0, str(COSYVOICE_DIR / "third_party" / "Matcha-TTS"))
+# Navoiy publishes the uztts normalization package inside the model repository.
+# snapshot_download places that package under NAVOIY_DIR.
+sys.path.insert(0, str(NAVOIY_DIR))
 
 BASE_MODEL_DIR = Path(os.getenv("NAVOIY_BASE_MODEL_DIR", "/models/CosyVoice2-0.5B"))
 NAVOIY_DIR = Path(os.getenv("NAVOIY_MODEL_DIR", "/models/navoiy"))
