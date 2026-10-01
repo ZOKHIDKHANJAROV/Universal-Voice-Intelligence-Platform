@@ -37,7 +37,6 @@ def process_voice(audio: UploadFile = File(...), language: str = "uz"):
         media_type="audio/wav",
         filename="response.wav",
         headers={
-            "X-Transcription": result.transcription,
             "X-Intent": result.intent.intent or "",
             "X-Scenario": result.intent.scenario_id or "",
         },
