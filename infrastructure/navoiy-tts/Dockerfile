@@ -1,6 +1,6 @@
 FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 
-ENV LANG=C.UTF-8     LC_ALL=C.UTF-8     DEBIAN_FRONTEND=noninteractive     PYTHONUNBUFFERED=1     PYTHONDONTWRITEBYTECODE=1     HF_HUB_DISABLE_XET=1     HF_HUB_DOWNLOAD_TIMEOUT=120     HF_HUB_ETAG_TIMEOUT=30     CONDA_DEFAULT_ENV=cosyvoice     PATH=/opt/conda/envs/cosyvoice/bin:/opt/conda/bin:$PATH     PYTHONPATH=/opt/CosyVoice:/opt/CosyVoice/third_party/Matcha-TTS
+ENV LANG=C.UTF-8     LC_ALL=C.UTF-8     DEBIAN_FRONTEND=noninteractive     PYTHONUNBUFFERED=1     PYTHONDONTWRITEBYTECODE=1     HF_HUB_DISABLE_XET=1     HF_HUB_DOWNLOAD_TIMEOUT=120     HF_HUB_ETAG_TIMEOUT=30     CONDA_DEFAULT_ENV=cosyvoice     PATH=/opt/conda/envs/cosyvoice/bin:/opt/conda/bin:$PATH     PYTHONPATH=/opt/CosyVoice:/opt/CosyVoice/third_party/Matcha-TTS:/models/navoiy
 
 RUN apt-get update && apt-get install -y --no-install-recommends     git git-lfs build-essential curl wget ffmpeg sox libsox-dev     && rm -rf /var/lib/apt/lists/*     && git lfs install
 
