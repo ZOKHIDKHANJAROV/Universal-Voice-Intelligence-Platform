@@ -10,6 +10,7 @@ dependencies = [
     "pydantic-settings>=2.10,<3.0",
     "python-multipart>=0.0.20,<1.0",
     "faster-whisper>=1.2,<2.0",
+    "av>=11,<19",
 ]
 
 [project.optional-dependencies]
