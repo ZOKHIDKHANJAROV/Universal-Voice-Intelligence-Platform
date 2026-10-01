@@ -11,6 +11,8 @@ from pydantic import BaseModel, Field
 
 
 COSYVOICE_DIR = Path("/opt/CosyVoice")
+NAVOIY_DIR = Path(os.getenv("NAVOIY_MODEL_DIR", "/models/navoiy"))
+
 sys.path.insert(0, str(COSYVOICE_DIR))
 sys.path.insert(0, str(COSYVOICE_DIR / "third_party" / "Matcha-TTS"))
 # Navoiy publishes the uztts normalization package inside the model repository.
@@ -18,7 +20,6 @@ sys.path.insert(0, str(COSYVOICE_DIR / "third_party" / "Matcha-TTS"))
 sys.path.insert(0, str(NAVOIY_DIR))
 
 BASE_MODEL_DIR = Path(os.getenv("NAVOIY_BASE_MODEL_DIR", "/models/CosyVoice2-0.5B"))
-NAVOIY_DIR = Path(os.getenv("NAVOIY_MODEL_DIR", "/models/navoiy"))
 CHECKPOINT = Path(
     os.getenv("NAVOIY_CHECKPOINT", str(NAVOIY_DIR / "emotion_600h_joint.pt"))
 )
@@ -71,7 +72,8 @@ def _ensure_models() -> None:
         allow_patterns=[
             "emotion_600h_joint.pt",
             "emotions_40h.json",
-            "uztts/*",
+            "uztts/__init__.py",
+            "uztts/normalize.py",
         ],
         cache_dir=MODEL_CACHE,
         max_workers=1,
