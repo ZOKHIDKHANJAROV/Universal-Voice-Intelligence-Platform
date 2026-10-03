@@ -11,6 +11,8 @@ dependencies = [
     "python-multipart>=0.0.20,<1.0",
     "faster-whisper>=1.2,<2.0",
     "av>=11,<19",
+    "numpy>=1.26,<3.0",
+    "webrtcvad-wheels>=2.0.14.post1,<3.0",
 ]
 
 [project.optional-dependencies]
