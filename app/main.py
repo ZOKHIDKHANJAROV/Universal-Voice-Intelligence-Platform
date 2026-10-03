@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.api.routes.health import router as health_router
@@ -7,13 +9,26 @@ from app.api.routes.stt import router as stt_router
 from app.api.routes.voice import router as voice_router
 from app.api.routes.tts import router as tts_router
 from app.core.config import get_settings
+from app.realtime.audio_socket import AudioSocketServer
 
 settings = get_settings()
+realtime_server = AudioSocketServer()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await realtime_server.start()
+    try:
+        yield
+    finally:
+        await realtime_server.stop()
+
 
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="Universal Voice Intelligence Platform API",
+    lifespan=lifespan,
 )
 
 app.include_router(health_router)
