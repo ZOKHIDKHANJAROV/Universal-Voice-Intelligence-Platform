@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import struct
 import uuid
 from collections import deque
 from dataclasses import dataclass
-from typing import Awaitable, Callable
 
 import numpy as np
 import webrtcvad
@@ -46,7 +44,7 @@ class AudioSocketServer:
         self.max_utterance_ms = settings.realtime_max_utterance_ms
         self.min_utterance_ms = settings.realtime_min_utterance_ms
         self.server: asyncio.AbstractServer | None = None
-        self._sessions: set[AudioSocketSession] = set()
+        self._sessions: dict[str, AudioSocketSession] = {}
 
     async def start(self) -> None:
         self.server = await asyncio.start_server(
@@ -77,7 +75,7 @@ class AudioSocketServer:
             writer=writer,
             output_lock=asyncio.Lock(),
         )
-        self._sessions.add(session)
+        self._sessions[session.call_id] = session
         LOGGER.info("AudioSocket connected call_id=%s peer=%s", call_id, peer)
 
         try:
@@ -89,7 +87,7 @@ class AudioSocketServer:
         finally:
             if session.response_task and not session.response_task.done():
                 session.response_task.cancel()
-            self._sessions.discard(session)
+            self._sessions.pop(session.call_id, None)
             writer.close()
             await writer.wait_closed()
 
