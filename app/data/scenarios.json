@@ -1,60 +1,135 @@
 [
   {
-    "id": "internet_problem",
-    "title": "Internet connection problem",
-    "description": "Basic troubleshooting for an internet connectivity issue.",
+    "id": "vending_no_water_uz",
+    "title": "Water not dispensing (UZ)",
+    "description": "Apparat suv quymayotgan holat.",
     "language": "uz",
     "keywords": [
-      "internet",
-      "ishlamayapti",
-      "ulanmayapti",
-      "wi-fi",
-      "wifi"
+      "suv", "chiqmayapti", "quymayapti", "to'xtab qoldi", "suv bermayapti"
     ],
     "steps": [
       {
-        "id": "check_power",
-        "message": "Modem quvvatini va indikatorlarini tekshiring.",
-        "next_scenario": null
-      },
-      {
-        "id": "restart",
-        "message": "Modemni o'chirib, 30 soniyadan so'ng qayta yoqing.",
-        "next_scenario": null
-      },
-      {
-        "id": "operator",
-        "message": "Muammo davom etsa, operator bilan bog'lanish uchun 0 ni bosing.",
+        "id": "step_1",
+        "message": "Uzur so'raymiz. Iltimos, idish to'g'ri qo'yilganini tekshiring va tugmani qayta bosing. Agar suv chiqmasa, pulingizni qaytarib beramiz. Operator bilan bog'lanish uchun nolni bosing.",
         "next_scenario": null
       }
     ],
     "enabled": true
   },
   {
-    "id": "equipment_problem",
-    "title": "Equipment problem",
-    "description": "Basic troubleshooting for equipment failures.",
-    "language": "uz",
+    "id": "vending_no_water_ru",
+    "title": "Water not dispensing (RU)",
+    "description": "Аппарат не наливает воду.",
+    "language": "ru",
     "keywords": [
-      "qurilma",
-      "uskunam",
-      "ishlamayapti",
-      "apparat"
+      "вода", "не идет", "не наливается", "не льется", "не дает воду", "аппарат не работает"
     ],
     "steps": [
       {
-        "id": "power",
-        "message": "Qurilma elektr tarmog'iga ulanganini tekshiring.",
+        "id": "step_1",
+        "message": "Приносим извинения. Пожалуйста, проверьте, правильно ли стоит баклажка, и нажмите кнопку еще раз. Если вода не нальется, мы вернем вам деньги. Нажмите ноль для связи с оператором.",
         "next_scenario": null
-      },
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "vending_payment_uz",
+    "title": "Payment issue (UZ)",
+    "description": "Pul yeb qo'yish yoki qaytim bermaslik.",
+    "language": "uz",
+    "keywords": [
+      "pul", "yeb qo'ydi", "qaytarib bermadi", "payme", "click", "pulimni", "qaytim", "plastik", "karta"
+    ],
+    "steps": [
       {
-        "id": "restart",
-        "message": "Qurilmani qayta ishga tushiring.",
+        "id": "step_1",
+        "message": "To'lov bilan bog'liq noqulaylik uchun uzr. Pulingizni qaytarish uchun, iltimos apparat raqamini telegram botimizga yuboring yoki operator bilan bog'lanish uchun nolni bosing.",
         "next_scenario": null
-      },
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "vending_payment_ru",
+    "title": "Payment issue (RU)",
+    "description": "Съел деньги, проблемы с оплатой.",
+    "language": "ru",
+    "keywords": [
+      "деньги", "съел", "не вернул", "сдачу", "пейми", "клик", "оплата", "карту", "зависло"
+    ],
+    "steps": [
       {
-        "id": "operator",
-        "message": "Muammo davom etsa, operator bilan bog'lanish uchun 0 ni bosing.",
+        "id": "step_1",
+        "message": "Извините за проблемы с оплатой. Чтобы вернуть деньги, пожалуйста, отправьте номер аппарата в наш телеграм-бот или нажмите ноль для связи с оператором.",
+        "next_scenario": null
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "vending_leak_uz",
+    "title": "Water leak / Broken (UZ)",
+    "description": "Apparatdan suv oqishi, truba yorilishi.",
+    "language": "uz",
+    "keywords": [
+      "oqib", "toshdi", "teshik", "suv toshib", "buzilgan", "truba yorildi", "yotibdi"
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "message": "Xabaringiz uchun rahmat! Biz nosozlik haqida ustalarga xabar berdik. Ular tez orada yetib borishadi. Operatorga ulanish uchun nolni bosing.",
+        "next_scenario": null
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "vending_leak_ru",
+    "title": "Water leak / Broken (RU)",
+    "description": "Протечка, лужа, сломанный аппарат.",
+    "language": "ru",
+    "keywords": [
+      "течет", "протекает", "лужа", "сломан", "разбит", "затопило", "трубу прорвало", "хлещет"
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "message": "Спасибо за сигнал! Мы уже передали экстренную заявку мастерам, они скоро приедут и все починят. Для связи с оператором нажмите ноль.",
+        "next_scenario": null
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "vending_taste_uz",
+    "title": "Bad taste / dirty water (UZ)",
+    "description": "Suv sifati, ta'mi va rangi buzilishi.",
+    "language": "uz",
+    "keywords": [
+      "ta'mi", "yomon", "hid", "sassiq", "loy", "rangi", "iflos", "achchiq"
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "message": "Suv sifati bo'yicha shikoyatingiz qabul qilindi. Biz tezda filtrlarni tekshiramiz. Pulingizni qaytarish uchun operatorga ulaning, nolni bosing.",
+        "next_scenario": null
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "id": "vending_taste_ru",
+    "title": "Bad taste / dirty water (RU)",
+    "description": "Невкусная, грязная вода.",
+    "language": "ru",
+    "keywords": [
+      "вкус", "горькая", "запах", "воняет", "грязная", "цвет", "невкусная", "мутная"
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "message": "Ваша жалоба на качество воды принята. Мы срочно проверим фильтры на этом аппарате. Для возврата средств нажмите ноль.",
         "next_scenario": null
       }
     ],
