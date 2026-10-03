@@ -12,6 +12,7 @@ services:
     volumes:
       - voice-audio:/var/lib/univoice/audio
     restart: unless-stopped
+    gpus: all
 
   navoiy-tts:
     build:
