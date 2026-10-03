@@ -17,14 +17,14 @@ def get_stt() -> SpeechToText:
     )
 
 
-def transcribe(audio_path: Path, language: str = "uz") -> TranscriptionResult:
+def transcribe(audio_path: Path, language: str | None = None) -> TranscriptionResult:
     return get_stt().transcribe(audio_path, language=language)
 
 
 def transcribe_pcm16(
     audio,
     sample_rate: int = 8000,
-    language: str = "uz",
+    language: str | None = None,
 ) -> TranscriptionResult:
     return get_stt().transcribe_pcm16(
         audio,
