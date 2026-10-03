@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     tts_output_dir: Path = Path("/var/lib/univoice/audio")
     tts_supported_languages: tuple[str, ...] = ("uz",)
 
+    # Realtime telephony audio bridge
+    realtime_audio_host: str = "0.0.0.0"
+    realtime_audio_port: int = 9019
+    realtime_vad_mode: int = 2
+    realtime_silence_ms: int = 700
+    realtime_min_utterance_ms: int = 400
+    realtime_max_utterance_ms: int = 12000
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="",
