@@ -26,6 +26,7 @@ class FasterWhisperSpeechToText(SpeechToText):
             task="transcribe",
             beam_size=5,
             vad_filter=True,
+            initial_prompt="Здравствуйте! Assalomu alaykum! Оператор, колл-центр, техподдержка, тикет, Zokhidkhanjarov.",
         )
         text = " ".join(segment.text.strip() for segment in segments).strip()
         return TranscriptionResult(
@@ -50,6 +51,7 @@ class FasterWhisperSpeechToText(SpeechToText):
             task="transcribe",
             beam_size=5,
             vad_filter=True,
+            initial_prompt="Здравствуйте! Assalomu alaykum! Оператор, колл-центр, техподдержка, тикет, Zokhidkhanjarov.",
         )
         text = " ".join(segment.text.strip() for segment in segments).strip()
         return TranscriptionResult(
