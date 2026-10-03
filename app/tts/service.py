@@ -34,3 +34,13 @@ def get_tts() -> TextToSpeech:
 
 def synthesize(text: str, output_path: Path, language: str = "uz"):
     return get_tts().synthesize(text, output_path, language)
+
+
+def synthesize_bytes(text: str, language: str = "uz") -> bytes:
+    settings = get_settings()
+    if settings.tts_provider != "navoiy-http":
+        raise ValueError("Realtime TTS requires TTS_PROVIDER=navoiy-http")
+    provider = get_tts()
+    if not isinstance(provider, NavoiyHttpTextToSpeech):
+        raise ValueError("Realtime TTS requires the Navoiy HTTP provider")
+    return provider.synthesize_bytes(text, language=language)
