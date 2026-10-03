@@ -34,3 +34,27 @@ class FasterWhisperSpeechToText(SpeechToText):
             language_probability=float(info.language_probability),
             duration_seconds=float(info.duration),
         )
+
+
+    def transcribe_pcm16(
+        self,
+        audio,
+        sample_rate: int = 8000,
+        language: str = "uz",
+    ) -> TranscriptionResult:
+        if sample_rate != 8000:
+            raise ValueError("Realtime STT currently expects 8000 Hz PCM")
+        segments, info = self._model.transcribe(
+            audio,
+            language=language,
+            task="transcribe",
+            beam_size=5,
+            vad_filter=True,
+        )
+        text = " ".join(segment.text.strip() for segment in segments).strip()
+        return TranscriptionResult(
+            text=text,
+            language=info.language,
+            language_probability=float(info.language_probability),
+            duration_seconds=float(info.duration),
+        )
