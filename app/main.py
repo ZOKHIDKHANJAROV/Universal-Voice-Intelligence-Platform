@@ -10,6 +10,9 @@ from app.api.routes.voice import router as voice_router
 from app.api.routes.tts import router as tts_router
 from app.core.config import get_settings
 from app.realtime.audio_socket import AudioSocketServer
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 settings = get_settings()
 realtime_server = AudioSocketServer()

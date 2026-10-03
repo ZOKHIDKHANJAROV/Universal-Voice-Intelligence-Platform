@@ -17,8 +17,8 @@ class NavoiyHttpTextToSpeech(TextToSpeech):
     def synthesize(
         self, text: str, output_path: Path, language: str = "uz"
     ) -> SpeechSynthesisResult:
-        if language != "uz":
-            raise ValueError("Navoiy HTTP TTS currently supports Uzbek only")
+        if language not in ("uz", "ru"):
+            raise ValueError("Navoiy HTTP TTS currently supports Uzbek and Russian")
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         payload = json.dumps(
@@ -56,8 +56,8 @@ class NavoiyHttpTextToSpeech(TextToSpeech):
 
 
     def synthesize_bytes(self, text: str, language: str = "uz") -> bytes:
-        if language != "uz":
-            raise ValueError("Navoiy HTTP TTS currently supports Uzbek only")
+        if language not in ("uz", "ru"):
+            raise ValueError("Navoiy HTTP TTS currently supports Uzbek and Russian")
 
         payload = json.dumps(
             {"text": text, "language": language},

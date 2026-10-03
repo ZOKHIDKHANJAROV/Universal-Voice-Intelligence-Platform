@@ -77,19 +77,36 @@ class AudioSocketServer:
         )
         self._sessions[session.call_id] = session
         LOGGER.info("AudioSocket connected call_id=%s peer=%s", call_id, peer)
+        keepalive_task = asyncio.create_task(self._keepalive(session))
 
         try:
             await self._run_session(session)
-        except (ConnectionError, asyncio.IncompleteReadError, asyncio.CancelledError):
-            LOGGER.info("AudioSocket disconnected call_id=%s", call_id)
+        except (ConnectionError, asyncio.IncompleteReadError, asyncio.CancelledError) as e:
+            LOGGER.info("AudioSocket disconnected call_id=%s reason=%r", call_id, e)
         except Exception:
             LOGGER.exception("AudioSocket session failed call_id=%s", call_id)
         finally:
+            keepalive_task.cancel()
             if session.response_task and not session.response_task.done():
                 session.response_task.cancel()
             self._sessions.pop(session.call_id, None)
             writer.close()
             await writer.wait_closed()
+
+    async def _keepalive(self, session: AudioSocketSession) -> None:
+        try:
+            while True:
+                await asyncio.sleep(1.0)
+                LOGGER.info("Sending keepalive for call_id=%s", session.call_id)
+                async with session.output_lock:
+                    session.writer.write(
+                        bytes((AUDIO_TYPE,))
+                        + struct.pack(">H", FRAME_BYTES)
+                        + (b"\x00" * FRAME_BYTES)
+                    )
+                    await session.writer.drain()
+        except Exception as e:
+            LOGGER.error("Keepalive failed: %s", e)
 
     async def _run_session(self, session: AudioSocketSession) -> None:
         vad = webrtcvad.Vad(self.vad_mode)
@@ -176,16 +193,19 @@ class AudioSocketServer:
                 transcribe_pcm16,
                 audio,
                 8000,
-                "uz",
+                None,
             )
             text = transcription.text.strip()
             if not text:
                 return
 
+            detected_lang = transcription.language if transcription.language in ("uz", "ru") else "uz"
+
             LOGGER.info(
-                "STT call_id=%s text=%r confidence=%.3f",
+                "STT call_id=%s text=%r lang=%s confidence=%.3f",
                 session.call_id,
                 text,
+                transcription.language,
                 transcription.language_probability,
             )
 
@@ -199,12 +219,15 @@ class AudioSocketServer:
                 response_text = (
                     "Kechirasiz, muammoingizni aniqlay olmadim. "
                     "Operator bilan bog'lanish uchun 0 ni bosing."
+                ) if detected_lang == "uz" else (
+                    "Извините, не удалось определить проблему. "
+                    "Нажмите 0 для связи с оператором."
                 )
             else:
                 response_text = (
                     scenario.steps[0].message
                     if scenario.steps
-                    else "Operator bilan bog'lanish uchun 0 ni bosing."
+                    else ("Operator bilan bog'lanish uchun 0 ni bosing." if detected_lang == "uz" else "Нажмите 0 для связи с оператором.")
                 )
 
             LOGGER.info(
@@ -217,7 +240,7 @@ class AudioSocketServer:
             wav_bytes = await asyncio.to_thread(
                 synthesize_bytes,
                 response_text,
-                "uz",
+                detected_lang,
             )
             pcm8 = await asyncio.to_thread(_wav24_to_pcm8, wav_bytes)
             await self._send_pcm(session, pcm8)

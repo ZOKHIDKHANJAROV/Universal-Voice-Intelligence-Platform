@@ -19,7 +19,7 @@ class FasterWhisperSpeechToText(SpeechToText):
             compute_type=compute_type,
         )
 
-    def transcribe(self, audio_path: Path, language: str = "uz") -> TranscriptionResult:
+    def transcribe(self, audio_path: Path, language: str | None = None) -> TranscriptionResult:
         segments, info = self._model.transcribe(
             str(audio_path),
             language=language,
@@ -40,7 +40,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         self,
         audio,
         sample_rate: int = 8000,
-        language: str = "uz",
+        language: str | None = None,
     ) -> TranscriptionResult:
         if sample_rate != 8000:
             raise ValueError("Realtime STT currently expects 8000 Hz PCM")

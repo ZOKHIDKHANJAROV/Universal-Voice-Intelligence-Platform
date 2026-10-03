@@ -6,5 +6,5 @@ from app.speech.models import TranscriptionResult
 
 class SpeechToText(ABC):
     @abstractmethod
-    def transcribe(self, audio_path: Path, language: str = "uz") -> TranscriptionResult:
+    def transcribe(self, audio_path: Path, language: str | None = None) -> TranscriptionResult:
         raise NotImplementedError
