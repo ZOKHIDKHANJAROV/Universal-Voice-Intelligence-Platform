@@ -19,3 +19,15 @@ def get_stt() -> SpeechToText:
 
 def transcribe(audio_path: Path, language: str = "uz") -> TranscriptionResult:
     return get_stt().transcribe(audio_path, language=language)
+
+
+def transcribe_pcm16(
+    audio,
+    sample_rate: int = 8000,
+    language: str = "uz",
+) -> TranscriptionResult:
+    return get_stt().transcribe_pcm16(
+        audio,
+        sample_rate=sample_rate,
+        language=language,
+    )
