@@ -1,6 +1,5 @@
 import tempfile
 from pathlib import Path
-from uuid import uuid4
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -22,13 +21,11 @@ def process_voice(audio: UploadFile = File(...), language: str = "uz"):
         raise HTTPException(status_code=413, detail="Audio file is too large")
 
     suffix = Path(audio.filename or "audio.wav").suffix or ".wav"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as temp_file:
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete_on_close=False) as temp_file:
         temp_file.write(content)
         temp_file.flush()
         try:
-            result = VoicePipelineService().process(
-                Path(temp_file.name), call_id=f"voice-{uuid4().hex}", language=language
-            )
+            result = VoicePipelineService().process(Path(temp_file.name), language=language)
         except (OSError, ValueError) as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 

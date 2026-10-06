@@ -18,7 +18,7 @@ def transcribe_audio(audio: UploadFile = File(...), language: str = "uz") -> dic
     content = audio.file.read(settings.stt_max_upload_bytes + 1)
     if len(content) > settings.stt_max_upload_bytes:
         raise HTTPException(status_code=413, detail="Audio file is too large")
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as temp_file:
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete_on_close=False) as temp_file:
         temp_file.write(content)
         temp_file.flush()
         result = transcribe(Path(temp_file.name), language=language)

@@ -3,26 +3,32 @@ from __future__ import annotations
 import asyncio
 import logging
 import struct
+import time
 import uuid
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-import numpy as np
 import webrtcvad
 
+from app.audio.resample import pcm16_to_float
 from app.core.config import get_settings
 from app.intent.service import get_intent_service
-from app.services.scenario_service import ScenarioService
 from app.speech.service import transcribe_pcm16
-from app.tts.service import synthesize_bytes
+from app.tts.prompt_cache import get_prompt_cache
+from app.tts.prompts import prompt_text
+from app.voice.responses import build_response
 
 LOGGER = logging.getLogger("univoice.realtime")
 
 AUDIO_TYPE = 0x10
 UUID_TYPE = 0x01
 HANGUP_TYPE = 0x00
+SAMPLE_RATE = 8000
 FRAME_BYTES = 320  # 20 ms @ 8 kHz, 16-bit mono
 FRAME_MS = 20
+# Asterisk drops an AudioSocket that stays silent for too long, so a silent
+# frame is sent whenever nothing else went out for this long.
+KEEPALIVE_SECONDS = 1.0
 
 
 @dataclass
@@ -32,6 +38,7 @@ class AudioSocketSession:
     writer: asyncio.StreamWriter
     output_lock: asyncio.Lock
     response_task: asyncio.Task | None = None
+    last_output: float = field(default_factory=time.monotonic)
 
 
 class AudioSocketServer:
@@ -43,6 +50,8 @@ class AudioSocketServer:
         self.silence_ms = settings.realtime_silence_ms
         self.max_utterance_ms = settings.realtime_max_utterance_ms
         self.min_utterance_ms = settings.realtime_min_utterance_ms
+        self.barge_in_frames = max(1, settings.realtime_barge_in_frames)
+        self.languages = settings.stt_realtime_languages
         self.server: asyncio.AbstractServer | None = None
         self._sessions: dict[str, AudioSocketSession] = {}
 
@@ -96,17 +105,25 @@ class AudioSocketServer:
     async def _keepalive(self, session: AudioSocketSession) -> None:
         try:
             while True:
-                await asyncio.sleep(1.0)
-                LOGGER.info("Sending keepalive for call_id=%s", session.call_id)
+                await asyncio.sleep(KEEPALIVE_SECONDS)
+                if time.monotonic() - session.last_output < KEEPALIVE_SECONDS:
+                    continue
                 async with session.output_lock:
+                    # Playback may have held the lock while we waited.
+                    if time.monotonic() - session.last_output < KEEPALIVE_SECONDS:
+                        continue
                     session.writer.write(
                         bytes((AUDIO_TYPE,))
                         + struct.pack(">H", FRAME_BYTES)
                         + (b"\x00" * FRAME_BYTES)
                     )
                     await session.writer.drain()
+                    session.last_output = time.monotonic()
+                    LOGGER.debug("Sent keepalive call_id=%s", session.call_id)
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
-            LOGGER.error("Keepalive failed: %s", e)
+            LOGGER.error("Keepalive failed call_id=%s: %s", session.call_id, e)
 
     async def _run_session(self, session: AudioSocketSession) -> None:
         vad = webrtcvad.Vad(self.vad_mode)
@@ -115,6 +132,7 @@ class AudioSocketServer:
         preroll: deque[bytes] = deque(maxlen=10)
         in_speech = False
         silence_frames = 0
+        barge_in_frames = 0
         max_frames = max(1, self.max_utterance_ms // FRAME_MS)
         min_frames = max(1, self.min_utterance_ms // FRAME_MS)
         speech_frames = 0
@@ -141,17 +159,26 @@ class AudioSocketServer:
             while len(frame_buffer) >= FRAME_BYTES:
                 frame = bytes(frame_buffer[:FRAME_BYTES])
                 del frame_buffer[:FRAME_BYTES]
-                is_speech = vad.is_speech(frame, 8000)
+                is_speech = vad.is_speech(frame, SAMPLE_RATE)
                 preroll.append(frame)
 
                 if session.response_task and not session.response_task.done():
-                    if is_speech:
-                        session.response_task.cancel()
-                        LOGGER.info(
-                            "barge-in call_id=%s: stopping response playback",
-                            session.call_id,
-                        )
-                    continue
+                    # A single VAD hit is usually line noise or our own echo;
+                    # require sustained speech before cutting the bot off.
+                    barge_in_frames = barge_in_frames + 1 if is_speech else 0
+                    if barge_in_frames < self.barge_in_frames:
+                        continue
+                    # Cancellation completes on a later loop iteration; drop the
+                    # reference now so following frames are not treated as playback.
+                    session.response_task.cancel()
+                    session.response_task = None
+                    barge_in_frames = 0
+                    LOGGER.info(
+                        "barge-in call_id=%s: stopping response playback",
+                        session.call_id,
+                    )
+                    # Fall through: preroll holds the interrupting speech, so the
+                    # new utterance is captured from its first frame.
 
                 if is_speech and not in_speech:
                     in_speech = True
@@ -185,18 +212,14 @@ class AudioSocketServer:
 
     async def _play_greeting(self, session: AudioSocketSession) -> None:
         try:
-            greeting_text = "Здравствуйте! Assalomu alaykum! Вы позвонили в службу поддержки."
-            LOGGER.info("Generating greeting for call_id=%s", session.call_id)
-            wav_bytes = await asyncio.to_thread(
-                synthesize_bytes,
-                greeting_text,
-                "ru",
-            )
-            pcm8 = await asyncio.to_thread(_wav24_to_pcm8, wav_bytes)
+            text, language = prompt_text("greeting", self.languages[0])
+            pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
             await self._send_pcm(session, pcm8)
             LOGGER.info("Greeting sent for call_id=%s", session.call_id)
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
-            LOGGER.error("Greeting failed: %s", e)
+            LOGGER.error("Greeting failed call_id=%s: %s", session.call_id, e)
 
     async def _process_utterance(
         self,
@@ -204,19 +227,24 @@ class AudioSocketServer:
         pcm16: bytes,
     ) -> None:
         try:
-            audio = np.frombuffer(pcm16, dtype="<i2").astype(np.float32) / 32768.0
+            started = time.perf_counter()
             transcription = await asyncio.to_thread(
                 transcribe_pcm16,
-                audio,
-                8000,
+                pcm16_to_float(pcm16),
+                SAMPLE_RATE,
                 None,
+                self.languages,
             )
+            stt_done = time.perf_counter()
             text = transcription.text.strip()
             if not text:
                 return
 
-            detected_lang = transcription.language if transcription.language in ("uz", "ru") else "uz"
-
+            caller_language = (
+                transcription.language
+                if transcription.language in self.languages
+                else self.languages[0]
+            )
             LOGGER.info(
                 "STT call_id=%s text=%r lang=%s confidence=%.3f",
                 session.call_id,
@@ -225,42 +253,35 @@ class AudioSocketServer:
                 transcription.language_probability,
             )
 
-            intent = get_intent_service().resolve(text)
-            scenario = (
-                ScenarioService().get_scenario(intent.scenario_id)
-                if intent.scenario_id
-                else None
-            )
-            if scenario is None:
-                response_text = (
-                    "Kechirasiz, muammoingizni aniqlay olmadim. "
-                    "Operator bilan bog'lanish uchun 0 ni bosing."
-                ) if detected_lang == "uz" else (
-                    "Извините, не удалось определить проблему. "
-                    "Нажмите 0 для связи с оператором."
-                )
-            else:
-                response_text = (
-                    scenario.steps[0].message
-                    if scenario.steps
-                    else ("Operator bilan bog'lanish uchun 0 ni bosing." if detected_lang == "uz" else "Нажмите 0 для связи с оператором.")
-                )
-
+            intent = get_intent_service().resolve(text, caller_language)
+            response_text, response_language = build_response(intent.scenario_id, caller_language)
+            intent_done = time.perf_counter()
             LOGGER.info(
-                "Scenario call_id=%s scenario=%s confidence=%.3f",
+                "Scenario call_id=%s scenario=%s confidence=%.3f source=%s",
                 session.call_id,
                 intent.scenario_id,
                 intent.confidence,
+                intent.source,
             )
 
-            wav_bytes = await asyncio.to_thread(
-                synthesize_bytes,
+            pcm8 = await asyncio.to_thread(
+                get_prompt_cache().get_or_render_pcm8,
                 response_text,
-                detected_lang,
+                response_language,
             )
-            pcm8 = await asyncio.to_thread(_wav24_to_pcm8, wav_bytes)
-            await self._send_pcm(session, pcm8)
+            audio_ready = time.perf_counter()
+            LOGGER.info(
+                "Latency call_id=%s stt=%.0fms intent=%.0fms audio=%.0fms total=%.0fms "
+                "(+%dms end-of-speech wait)",
+                session.call_id,
+                (stt_done - started) * 1000,
+                (intent_done - stt_done) * 1000,
+                (audio_ready - intent_done) * 1000,
+                (audio_ready - started) * 1000,
+                self.silence_ms,
+            )
 
+            await self._send_pcm(session, pcm8)
             LOGGER.info(
                 "TTS call_id=%s bytes=%d response=%r",
                 session.call_id,
@@ -280,8 +301,10 @@ class AudioSocketServer:
         session: AudioSocketSession,
         pcm8: bytes,
     ) -> None:
+        loop = asyncio.get_running_loop()
         async with session.output_lock:
-            for offset in range(0, len(pcm8), FRAME_BYTES):
+            started = loop.time()
+            for index, offset in enumerate(range(0, len(pcm8), FRAME_BYTES)):
                 frame = pcm8[offset : offset + FRAME_BYTES]
                 if len(frame) < FRAME_BYTES:
                     frame += b"\x00" * (FRAME_BYTES - len(frame))
@@ -291,7 +314,12 @@ class AudioSocketServer:
                     + frame
                 )
                 await session.writer.drain()
-                await asyncio.sleep(FRAME_MS / 1000)
+                session.last_output = time.monotonic()
+                # Pace against a fixed schedule; sleeping a flat 20 ms per frame
+                # accumulates scheduler overhead and drifts behind real time.
+                delay = started + (index + 1) * FRAME_MS / 1000 - loop.time()
+                if delay > 0:
+                    await asyncio.sleep(delay)
 
     @staticmethod
     async def _read_message(
@@ -302,36 +330,3 @@ class AudioSocketServer:
         length = struct.unpack(">H", header[1:3])[0]
         payload = await reader.readexactly(length)
         return message_type, payload
-
-
-def _wav24_to_pcm8(wav_bytes: bytes) -> bytes:
-    import io
-    import wave
-
-    with wave.open(io.BytesIO(wav_bytes), "rb") as wav:
-        channels = wav.getnchannels()
-        sample_width = wav.getsampwidth()
-        rate = wav.getframerate()
-        frames = wav.readframes(wav.getnframes())
-
-    if channels != 1 or sample_width != 2:
-        raise ValueError(
-            f"Unsupported Navoiy WAV: channels={channels}, sample_width={sample_width}"
-        )
-    if rate != 24000:
-        raise ValueError(f"Expected Navoiy WAV at 24000 Hz, got {rate}")
-
-    samples = np.frombuffer(frames, dtype="<i2")
-    usable = len(samples) - (len(samples) % 3)
-    if usable <= 0:
-        return b""
-    # Navoiy outputs 24 kHz; 3-sample averaging produces 8 kHz telephony PCM.
-    downsampled = (
-        samples[:usable]
-        .reshape(-1, 3)
-        .astype(np.int32)
-        .mean(axis=1)
-        .clip(-32768, 32767)
-        .astype("<i2")
-    )
-    return downsampled.tobytes()

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "univoice-ai"
 version = "0.1.0"
@@ -13,13 +17,25 @@ dependencies = [
     "av>=11,<19",
     "numpy>=1.26,<3.0",
     "webrtcvad-wheels>=2.0.14.post1,<3.0",
+    "rapidfuzz>=3.9,<4.0",
 ]
 
 [project.optional-dependencies]
+# CUDA runtime libraries for faster-whisper (CTranslate2) on GPU.
+gpu = [
+    "nvidia-cublas-cu12>=12.4,<13",
+    "nvidia-cudnn-cu12>=9.1,<10",
+]
 dev = [
     "httpx>=0.28,<1.0",
     "pytest>=8.4,<9.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+app = ["data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
