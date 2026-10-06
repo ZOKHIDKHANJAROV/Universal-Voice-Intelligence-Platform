@@ -33,14 +33,17 @@ Laptop) that also drives a desktop:
 | Navoiy / CosyVoice2 TTS | only while running `make render-prompts` | ~3 GB |
 | Ollama LLM (optional) | CPU by default (`LLM_NUM_GPU=0`) | 0 |
 
-On a machine without a GPU use `STT_MODEL=small`, `STT_DEVICE=cpu`,
-`STT_COMPUTE_TYPE=int8` and build with `--build-arg INSTALL_GPU=0`.
+Do not drop to a smaller Whisper model to save resources: `small` does not
+recognize Uzbek at all (on the sample recordings it gives `uz` a detection
+probability of 0.000 and transcribes Uzbek speech as Turkish or Russian). Without
+a GPU, keep `large-v3` with `STT_DEVICE=cpu`, `STT_COMPUTE_TYPE=int8` (slower
+replies) and build with `--build-arg INSTALL_GPU=0`.
 
 ## STT
 
 The STT layer uses faster-whisper with a provider abstraction. Code defaults
-are CPU-based small Whisper with int8; `.env.example` switches to GPU
-`large-v3`.
+are CPU-based small Whisper with int8, which is only good enough for tests;
+`.env.example` switches to GPU `large-v3`, which Uzbek needs.
 
 On calls, 8 kHz telephony audio is resampled to the 16 kHz Whisper expects,
 and language detection is limited to `STT_REALTIME_LANGUAGES` (Uzbek and
