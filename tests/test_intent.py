@@ -19,6 +19,9 @@ def scenarios() -> ScenarioService:
         ("apparatdan suvi chiqmayobdi", "uz", "vending_no_water_uz"),
         ("Pulimni yeb qoʻydi", "uz", "vending_payment_uz"),
         ("Suvning ta’mi yomon", "uz", "vending_taste_uz"),
+        # Uzbek transcribed in Cyrillic, as Whisper often does.
+        ("Сув чиқмаяпти", "uz", "vending_no_water_uz"),
+        ("Пулимни еб қўйди", "uz", "vending_payment_uz"),
         ("Воды нет, ничего не льётся", "ru", "vending_no_water_ru"),
         ("Аппарат сломался, всё течёт", "ru", "vending_leak_ru"),
         ("Автомат съел мои деньги", "ru", "vending_payment_ru"),
@@ -45,6 +48,11 @@ def test_falls_back_to_other_language_when_needed(scenarios) -> None:
 def test_normalizes_apostrophes_and_yo() -> None:
     assert normalize_text("Toʻxtab QOLDI!") == "to'xtab qoldi"
     assert normalize_text("Течёт") == "течет"
+
+
+def test_normalizes_turkish_letters_whisper_leaks_into_uzbek() -> None:
+    # Real large-v3 output for "Internet ishlamayapti" forced to Uzbek.
+    assert normalize_text("İnternet işlemeyabdi") == "internet ishlemeyabdi"
 
 
 def test_short_keywords_need_exact_tokens() -> None:
