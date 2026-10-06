@@ -6,8 +6,9 @@ import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
+from starlette.background import BackgroundTask
 
 
 COSYVOICE_DIR = Path("/opt/CosyVoice")
@@ -40,6 +41,7 @@ NAVOIY_REVISION = os.getenv(
 )
 DEFAULT_EMOTION = os.getenv("NAVOIY_EMOTION", "warm")
 DEFAULT_SPEED = float(os.getenv("NAVOIY_SPEED", "1.0"))
+SUPPORTED_LANGUAGES = ("uz", "ru")
 
 app = FastAPI(title="UniVoice Navoiy TTS", version="0.1.0")
 _engine = None
@@ -160,17 +162,25 @@ def startup() -> None:
 def health():
     if _engine is not None:
         return {"ok": True, "ready": True, "gpu": True}
-    return {
-        "ok": True,
-        "ready": False,
-        "error": str(_init_error) if _init_error else "initializing",
-    }
+    # 503 keeps the container unhealthy until the model is loaded, so
+    # `docker compose up --wait` does not hand out a broken service.
+    return JSONResponse(
+        status_code=503,
+        content={
+            "ok": False,
+            "ready": False,
+            "error": str(_init_error) if _init_error else "initializing",
+        },
+    )
 
 
 @app.post("/v1/synthesize")
 def synthesize(request: SynthesizeRequest):
-    if request.language != "uz":
-        raise HTTPException(status_code=400, detail="Only Uzbek TTS is supported")
+    if request.language not in SUPPORTED_LANGUAGES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Supported languages: {', '.join(SUPPORTED_LANGUAGES)}",
+        )
 
     if not REFERENCE_AUDIO.exists():
         raise HTTPException(
@@ -192,7 +202,9 @@ def synthesize(request: SynthesizeRequest):
         raise HTTPException(status_code=400, detail=f"Unknown emotion: {emotion_name}")
 
     speed = request.speed or DEFAULT_SPEED
-    text = normalize(request.text, mode="infer")
+    # uztts normalization is Uzbek-specific (numbers, Latin orthography); Russian
+    # text goes to the multilingual CosyVoice2 base as-is.
+    text = normalize(request.text, mode="infer") if request.language == "uz" else request.text
     instruction = emotion["instruct"].strip() + "<|endofprompt|>"
 
     import torch
@@ -227,6 +239,7 @@ def synthesize(request: SynthesizeRequest):
         output_path,
         media_type="audio/wav",
         filename="response.wav",
+        background=BackgroundTask(output_path.unlink, missing_ok=True),
     )
 
 

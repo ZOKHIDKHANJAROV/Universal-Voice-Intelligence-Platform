@@ -10,23 +10,42 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     log_level: str = "INFO"
+    # When set, every /api/v1 route requires the X-API-Key header.
+    api_key: str = ""
 
     stt_model: str = "small"
     stt_device: str = "cpu"
     stt_compute_type: str = "int8"
+    stt_beam_size: int = 1
+    stt_max_concurrency: int = 1
+    stt_initial_prompt: str = (
+        "Здравствуйте! Assalomu alaykum! Оператор, колл-центр, техподдержка, тикет, Zokhidkhanjarov."
+    )
     stt_supported_languages: tuple[str, ...] = ("uz", "ru", "en")
+    # Languages a phone caller is expected to speak; detection is clamped to these.
+    stt_realtime_languages: tuple[str, ...] = ("uz", "ru")
     stt_max_upload_bytes: int = 25 * 1024 * 1024
+
+    intent_min_confidence: float = 0.6
 
     llm_enabled: bool = False
     llm_base_url: str = "http://ollama:11434"
     llm_model: str = "qwen3:4b"
     llm_timeout_seconds: int = 30
+    # Ollama layers to offload to GPU; 0 keeps the LLM on CPU so it does not
+    # compete with Whisper for VRAM. -1 lets Ollama decide.
+    llm_num_gpu: int = 0
+    # Keyword matches at or above this confidence skip the LLM call.
+    llm_skip_confidence: float = 0.8
 
     tts_provider: str = "navoiy-http"
+    # Optional separate provider for Russian, e.g. "piper". Empty = tts_provider.
+    tts_provider_ru: str = ""
     tts_base_url: str = "http://navoiy-tts:8100"
     tts_timeout_seconds: int = 120
     tts_binary: str = "piper"
     tts_model_path: str = ""
+    tts_model_path_ru: str = ""
     tts_python_binary: str = "python"
     tts_navoiy_inference_script: str = ""
     tts_navoiy_cosyvoice_dir: str = ""
@@ -35,7 +54,9 @@ class Settings(BaseSettings):
     tts_navoiy_reference_audio: str = ""
     tts_navoiy_emotion: str = "warm"
     tts_output_dir: Path = Path("/var/lib/univoice/audio")
-    tts_supported_languages: tuple[str, ...] = ("uz",)
+    # Pre-rendered 8 kHz phrases played on calls (see scripts/render_prompts.py).
+    tts_prompt_cache_dir: Path = Path("/var/lib/univoice/audio/prompts")
+    tts_supported_languages: tuple[str, ...] = ("uz", "ru")
 
     # Realtime telephony audio bridge
     realtime_audio_host: str = "0.0.0.0"
@@ -44,6 +65,8 @@ class Settings(BaseSettings):
     realtime_silence_ms: int = 700
     realtime_min_utterance_ms: int = 400
     realtime_max_utterance_ms: int = 12000
+    # Consecutive 20 ms speech frames needed to interrupt playback.
+    realtime_barge_in_frames: int = 5
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -16,9 +16,35 @@ Universal Voice Intelligence Platform for voice automation and AI-assisted call 
 
 Caller -> Asterisk / SIP -> STT -> Intent / LLM -> Scenario Engine -> TTS -> Caller
 
+Asterisk streams call audio to the API over AudioSocket (port 9019). The API
+segments speech with webrtcvad, transcribes it with Whisper, matches a scenario,
+and plays the answer back. Answers are fixed scenario texts, so their audio is
+rendered once ahead of time and played from disk; the GPU TTS model does not
+run during calls.
+
+## Hardware budget
+
+The default `.env.example` is sized for a single 8 GB GPU (e.g. an RTX 4060
+Laptop) that also drives a desktop:
+
+| Component | Where | VRAM |
+|---|---|---|
+| Whisper `large-v3`, `int8_float16`, beam 1 | API container, during calls | ~1.6 GB |
+| Navoiy / CosyVoice2 TTS | only while running `make render-prompts` | ~3 GB |
+| Ollama LLM (optional) | CPU by default (`LLM_NUM_GPU=0`) | 0 |
+
+On a machine without a GPU use `STT_MODEL=small`, `STT_DEVICE=cpu`,
+`STT_COMPUTE_TYPE=int8` and build with `--build-arg INSTALL_GPU=0`.
+
 ## STT
 
-The current STT layer uses faster-whisper with a provider abstraction. The default configuration is CPU-based small Whisper with int8 compute type and Uzbek (uz) as the default language.
+The STT layer uses faster-whisper with a provider abstraction. Code defaults
+are CPU-based small Whisper with int8; `.env.example` switches to GPU
+`large-v3`.
+
+On calls, 8 kHz telephony audio is resampled to the 16 kHz Whisper expects,
+and language detection is limited to `STT_REALTIME_LANGUAGES` (Uzbek and
+Russian by default).
 
 The STT API accepts an audio file and returns transcription text, detected language, language probability, and duration.
 
@@ -32,18 +58,34 @@ Example:
       -F "audio=@sample.wav" \
       "http://127.0.0.1:8000/api/v1/stt/transcribe?language=uz"
 
-The first transcription initializes/downloads the configured Whisper model. Model files should be cached in the runtime environment.
+The first transcription initializes/downloads the configured Whisper model. In
+Docker the model is kept in the `whisper-models` volume.
+
+## Call audio (pre-rendered prompts)
+
+Everything the bot says comes from `app/data/scenarios.json` and
+`app/data/prompts.json`. Render it to 8 kHz WAV after changing either file:
+
+    make render-prompts
+
+This starts the Navoiy TTS container, renders missing phrases into
+`TTS_PROMPT_CACHE_DIR`, and stops the container again to free the GPU. Files
+are named by a hash of their text, so only edited phrases are re-rendered. Use
+`python -m scripts.render_prompts --dry-run` to see what is missing. A phrase
+that was never rendered is synthesized live on first use, which only works
+while the TTS service is running.
 
 ## Run locally
 
     python -m venv .venv
-    source .venv/bin/activate
-    pip install -e ".[dev]"
+    source .venv/bin/activate        # Windows: .venv\Scripts\activate
+    pip install -e ".[dev]"          # add ,gpu for CUDA: ".[dev,gpu]"
     uvicorn app.main:app --reload
 
 ## Run with Docker
 
     docker compose up --build
+    make render-prompts              # once, and after editing phrases
 
 ## Test
 
@@ -51,11 +93,16 @@ The first transcription initializes/downloads the configured Whisper model. Mode
 
 ## API
 
+Set `API_KEY` to require an `X-API-Key` header on all `/api/v1` routes.
+
 - GET /health
 - GET /api/v1/scenarios
 - GET /api/v1/scenarios/{scenario_id}
 - POST /api/v1/scenarios/resolve
+- POST /api/v1/intent/resolve
 - POST /api/v1/stt/transcribe
+- POST /api/v1/tts/synthesize
+- POST /api/v1/voice/process
 
 ## Roadmap
 

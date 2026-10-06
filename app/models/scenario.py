@@ -19,6 +19,7 @@ class Scenario(BaseModel):
 
 class ScenarioResolveRequest(BaseModel):
     text: str = Field(min_length=1)
+    language: str | None = None
 
 
 class ScenarioResolveResponse(BaseModel):
