@@ -8,6 +8,19 @@ from app.speech.models import TranscriptionResult
 
 WHISPER_SAMPLE_RATE = 16000
 
+# Whisper's language ID barely knows Uzbek: on real Uzbek calls large-v3 gives
+# "uz" ~0.0 and answers Azerbaijani, Kazakh or Turkish instead. Probability on
+# a related language therefore counts toward the allowed language of its family.
+LANGUAGE_FAMILIES = {
+    "uz": ("az", "kk", "tr", "tk", "tt", "ba"),
+    "ru": ("uk", "be"),
+}
+
+
+def _family_score(code: str, probabilities: dict[str, float]) -> float:
+    relatives = LANGUAGE_FAMILIES.get(code, ())
+    return probabilities.get(code, 0.0) + sum(probabilities.get(r, 0.0) for r in relatives)
+
 
 class FasterWhisperSpeechToText(SpeechToText):
     def __init__(
@@ -56,14 +69,15 @@ class FasterWhisperSpeechToText(SpeechToText):
         language_probability = float(info.language_probability)
 
         # Language detection runs eagerly; decoding only starts when segments are
-        # iterated. If Whisper picked a language the caller cannot speak (Uzbek is
-        # often detected as Kazakh or Turkish), redo it with the best allowed one.
+        # iterated. If Whisper picked a language the caller cannot speak, redo it
+        # with the allowed language whose family got the most probability.
         if language is None and allowed_languages and info.language not in allowed_languages:
             probabilities = dict(info.all_language_probs or ())
-            fallback = max(allowed_languages, key=lambda code: probabilities.get(code, 0.0))
+            scores = {code: _family_score(code, probabilities) for code in allowed_languages}
+            fallback = max(allowed_languages, key=scores.__getitem__)
             segments, info = self._transcribe(audio, fallback, vad_filter)
             # A forced language reports 1.0; keep what detection actually thought.
-            language_probability = float(probabilities.get(fallback, 0.0))
+            language_probability = min(1.0, scores[fallback])
 
         text = " ".join(segment.text.strip() for segment in segments).strip()
         return TranscriptionResult(

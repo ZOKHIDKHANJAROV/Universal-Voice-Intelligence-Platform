@@ -9,8 +9,24 @@ from rapidfuzz import fuzz
 from app.models.scenario import Scenario
 
 # Uzbek Latin uses several look-alike apostrophes (o', o‘, oʻ, o`); STT output
-# and hand-written keywords rarely agree on which one.
-_APOSTROPHES = str.maketrans({c: "'" for c in "‘’ʻʼ`´"})
+# and hand-written keywords rarely agree on which one. Whisper also leaks
+# Turkish letters into Uzbek transcripts ("işlemeyabdi"), so map those to the
+# Uzbek Latin spelling.
+_APOSTROPHES = str.maketrans(
+    {c: "'" for c in "‘’ʻʼ`´"} | {"ş": "sh", "ç": "ch", "ı": "i", "ğ": "g'", "ö": "o'", "ü": "u"}
+    # casefold() turns Turkish "İ" into "i" plus a combining dot.
+    | {"\u0307": ""}
+)
+# Whisper writes Uzbek in Cyrillic about as often as in Latin, while scenario
+# keywords are Latin. Used only when matching Uzbek scenarios.
+_UZ_CYRILLIC_TO_LATIN = str.maketrans({
+    "а": "a", "б": "b", "в": "v", "г": "g", "ғ": "g'", "д": "d", "е": "e",
+    "ё": "yo", "ж": "j", "з": "z", "и": "i", "й": "y", "к": "k", "қ": "q",
+    "л": "l", "м": "m", "н": "n", "о": "o", "ў": "o'", "п": "p", "р": "r",
+    "с": "s", "т": "t", "у": "u", "ф": "f", "х": "x", "ҳ": "h", "ц": "ts",
+    "ч": "ch", "ш": "sh", "ъ": "'", "ь": "", "ы": "i", "э": "e", "ю": "yu",
+    "я": "ya",
+})
 _NON_WORD = re.compile(r"[^\w']+")
 _FUZZY_MIN_RATIO = 85
 
@@ -89,7 +105,9 @@ class ScenarioService:
         Scenarios in ``language`` are tried first; the rest only if none of them
         match, so a Russian caller is not routed to the Uzbek twin of a scenario.
         """
-        tokens = normalize_text(text).split()
+        normalized = normalize_text(text)
+        tokens = normalized.split()
+        latin_tokens = normalized.translate(_UZ_CYRILLIC_TO_LATIN).split()
         candidates = self.list_scenarios()
         if language:
             preferred = [s for s in candidates if s.language == language]
@@ -99,18 +117,21 @@ class ScenarioService:
             groups = [candidates]
 
         for group in groups:
-            best_scenario, best_score = self._best_match(tokens, group)
+            best_scenario, best_score = self._best_match(tokens, latin_tokens, group)
             if best_scenario is not None:
                 confidence = min(1.0, 0.5 + 0.15 * best_score)
                 return best_scenario, round(confidence, 2)
         return None, 0.0
 
     @staticmethod
-    def _best_match(tokens: list[str], scenarios: list[Scenario]) -> tuple[Scenario | None, int]:
+    def _best_match(
+        tokens: list[str], latin_tokens: list[str], scenarios: list[Scenario]
+    ) -> tuple[Scenario | None, int]:
         best_scenario: Scenario | None = None
         best_score = 0
         for scenario in scenarios:
-            score = sum(1 for keyword in scenario.keywords if keyword_matches(keyword, tokens))
+            words = latin_tokens if scenario.language == "uz" else tokens
+            score = sum(1 for keyword in scenario.keywords if keyword_matches(keyword, words))
             if score > best_score:
                 best_score = score
                 best_scenario = scenario

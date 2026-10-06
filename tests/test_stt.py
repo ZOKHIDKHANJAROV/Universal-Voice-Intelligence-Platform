@@ -47,8 +47,31 @@ def test_unexpected_language_is_redone_with_best_allowed() -> None:
     )
     assert [call["language"] for call in model.calls] == [None, "uz"]
     assert result.language == "uz"
-    assert result.language_probability == 0.3  # detection score, not the forced 1.0
+    # Detection score (uz 0.3 + Kazakh 0.5), not the 1.0 a forced language reports.
+    assert result.language_probability == 0.8
     assert result.text == "text in uz"
+
+
+def test_uzbek_detected_as_relative_turkic_language_maps_to_uzbek() -> None:
+    # Detection large-v3 actually returned for two Uzbek recordings over 8 kHz.
+    for probabilities in (
+        [("az", 0.44), ("kk", 0.3), ("tr", 0.04), ("ru", 0.012), ("uz", 0.0)],
+        [("kk", 0.95), ("ru", 0.03), ("be", 0.0), ("uz", 0.0)],
+    ):
+        model = _FakeModel(probabilities[0][0], probabilities)
+        result = _stt(model).transcribe_pcm16(
+            np.zeros(8000, dtype=np.float32), 8000, allowed_languages=("uz", "ru")
+        )
+        assert result.language == "uz"
+        assert result.language_probability > 0.7
+
+
+def test_ukrainian_detection_maps_to_russian() -> None:
+    model = _FakeModel("uk", [("uk", 0.6), ("ru", 0.3), ("kk", 0.05)])
+    result = _stt(model).transcribe_pcm16(
+        np.zeros(8000, dtype=np.float32), 8000, allowed_languages=("uz", "ru")
+    )
+    assert result.language == "ru"
 
 
 def test_allowed_language_is_decoded_once() -> None:
