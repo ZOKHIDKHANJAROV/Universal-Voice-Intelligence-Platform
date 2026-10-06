@@ -53,6 +53,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         allowed_languages: tuple[str, ...] = (),
     ) -> TranscriptionResult:
         segments, info = self._transcribe(audio, language, vad_filter)
+        language_probability = float(info.language_probability)
 
         # Language detection runs eagerly; decoding only starts when segments are
         # iterated. If Whisper picked a language the caller cannot speak (Uzbek is
@@ -61,12 +62,14 @@ class FasterWhisperSpeechToText(SpeechToText):
             probabilities = dict(info.all_language_probs or ())
             fallback = max(allowed_languages, key=lambda code: probabilities.get(code, 0.0))
             segments, info = self._transcribe(audio, fallback, vad_filter)
+            # A forced language reports 1.0; keep what detection actually thought.
+            language_probability = float(probabilities.get(fallback, 0.0))
 
         text = " ".join(segment.text.strip() for segment in segments).strip()
         return TranscriptionResult(
             text=text,
             language=info.language,
-            language_probability=float(info.language_probability),
+            language_probability=language_probability,
             duration_seconds=float(info.duration),
         )
 

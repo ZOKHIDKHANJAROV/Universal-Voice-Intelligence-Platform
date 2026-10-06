@@ -47,6 +47,7 @@ def test_unexpected_language_is_redone_with_best_allowed() -> None:
     )
     assert [call["language"] for call in model.calls] == [None, "uz"]
     assert result.language == "uz"
+    assert result.language_probability == 0.3  # detection score, not the forced 1.0
     assert result.text == "text in uz"
 
 
