@@ -36,6 +36,11 @@ def normalize_text(text: str) -> str:
     return " ".join(_NON_WORD.sub(" ", text).split())
 
 
+def to_uzbek_latin(text: str) -> str:
+    """Normalize and transliterate Uzbek Cyrillic to Latin."""
+    return normalize_text(text).translate(_UZ_CYRILLIC_TO_LATIN)
+
+
 def _common_prefix(a: str, b: str) -> int:
     size = 0
     for left, right in zip(a, b):
@@ -107,7 +112,7 @@ class ScenarioService:
         """
         normalized = normalize_text(text)
         tokens = normalized.split()
-        latin_tokens = normalized.translate(_UZ_CYRILLIC_TO_LATIN).split()
+        latin_tokens = to_uzbek_latin(text).split()
         candidates = self.list_scenarios()
         if language:
             preferred = [s for s in candidates if s.language == language]

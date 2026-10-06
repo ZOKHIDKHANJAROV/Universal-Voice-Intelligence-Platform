@@ -15,3 +15,6 @@ build/
 
 # Local Navoiy/CosyVoice reference voice (biometric voice data)
 infrastructure/navoiy-tts/reference.wav
+
+# STT evaluation recordings are callers' voices; keep them out of Git.
+data/eval/
