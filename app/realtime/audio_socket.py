@@ -132,6 +132,7 @@ class AudioSocketServer:
                         session.call_id,
                         call_uuid,
                     )
+                    session.response_task = asyncio.create_task(self._play_greeting(session))
                 continue
             if message_type != AUDIO_TYPE:
                 continue
@@ -181,6 +182,21 @@ class AudioSocketServer:
                             session.response_task = asyncio.create_task(
                                 self._process_utterance(session, utterance)
                             )
+
+    async def _play_greeting(self, session: AudioSocketSession) -> None:
+        try:
+            greeting_text = "Здравствуйте! Assalomu alaykum! Вы позвонили в службу поддержки."
+            LOGGER.info("Generating greeting for call_id=%s", session.call_id)
+            wav_bytes = await asyncio.to_thread(
+                synthesize_bytes,
+                greeting_text,
+                "ru",
+            )
+            pcm8 = await asyncio.to_thread(_wav24_to_pcm8, wav_bytes)
+            await self._send_pcm(session, pcm8)
+            LOGGER.info("Greeting sent for call_id=%s", session.call_id)
+        except Exception as e:
+            LOGGER.error("Greeting failed: %s", e)
 
     async def _process_utterance(
         self,
