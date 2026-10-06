@@ -8,17 +8,17 @@ from app.tts.providers.navoiy import NavoiyTextToSpeech
 from app.tts.providers.piper import PiperTextToSpeech
 
 
-@lru_cache(maxsize=1)
-def get_tts() -> TextToSpeech:
+@lru_cache(maxsize=4)
+def _build_provider(name: str) -> TextToSpeech:
     settings = get_settings()
 
-    if settings.tts_provider == "navoiy-http":
+    if name == "navoiy-http":
         return NavoiyHttpTextToSpeech(
             settings.tts_base_url,
             settings.tts_timeout_seconds,
         )
 
-    if settings.tts_provider == "navoiy":
+    if name == "navoiy":
         return NavoiyTextToSpeech(
             settings.tts_python_binary,
             settings.tts_navoiy_inference_script,
@@ -29,18 +29,27 @@ def get_tts() -> TextToSpeech:
             settings.tts_navoiy_emotion,
         )
 
-    return PiperTextToSpeech(settings.tts_binary, settings.tts_model_path)
+    if name == "piper":
+        return PiperTextToSpeech(
+            settings.tts_binary,
+            {"uz": settings.tts_model_path, "ru": settings.tts_model_path_ru},
+        )
+
+    raise ValueError(f"Unknown TTS provider: {name}")
+
+
+def get_tts(language: str = "uz") -> TextToSpeech:
+    settings = get_settings()
+    name = settings.tts_provider
+    if language == "ru" and settings.tts_provider_ru:
+        name = settings.tts_provider_ru
+    return _build_provider(name)
 
 
 def synthesize(text: str, output_path: Path, language: str = "uz"):
-    return get_tts().synthesize(text, output_path, language)
+    return get_tts(language).synthesize(text, output_path, language)
 
 
 def synthesize_bytes(text: str, language: str = "uz") -> bytes:
-    settings = get_settings()
-    if settings.tts_provider != "navoiy-http":
-        raise ValueError("Realtime TTS requires TTS_PROVIDER=navoiy-http")
-    provider = get_tts()
-    if not isinstance(provider, NavoiyHttpTextToSpeech):
-        raise ValueError("Realtime TTS requires the Navoiy HTTP provider")
-    return provider.synthesize_bytes(text, language=language)
+    """Synthesize to in-memory WAV bytes with the provider for ``language``."""
+    return get_tts(language).synthesize_bytes(text, language)
