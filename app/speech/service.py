@@ -1,3 +1,4 @@
+import logging
 import threading
 from functools import lru_cache
 from pathlib import Path
@@ -8,6 +9,16 @@ from app.core.config import get_settings
 from app.speech.base import SpeechToText
 from app.speech.models import TranscriptionResult
 
+LOGGER = logging.getLogger("univoice.stt")
+
+
+def _missing_local_model(name: str) -> bool:
+    """True for a local model path that does not exist (vs. a Hugging Face repo id)."""
+    path = Path(name)
+    # path.root also catches "/models/..." on Windows, where it is not absolute.
+    looks_local = bool(path.root) or name.startswith((".", "models/", "models\\"))
+    return looks_local and not path.exists()
+
 
 @lru_cache(maxsize=1)
 def get_stt() -> SpeechToText:
@@ -16,20 +27,29 @@ def get_stt() -> SpeechToText:
 
     settings = get_settings()
 
-    def load(model_name: str, initial_prompt: str) -> FasterWhisperSpeechToText:
+    def load(model_name: str, initial_prompt: str, without_timestamps: bool = False) -> FasterWhisperSpeechToText:
         return FasterWhisperSpeechToText(
             model_name=model_name,
             device=settings.stt_device,
             compute_type=settings.stt_compute_type,
             beam_size=settings.stt_beam_size,
             initial_prompt=initial_prompt,
+            without_timestamps=without_timestamps,
         )
 
     general = load(settings.stt_model, settings.stt_initial_prompt)
     if not settings.stt_model_uz:
         return general
+    if _missing_local_model(settings.stt_model_uz):
+        LOGGER.warning(
+            "STT_MODEL_UZ=%s not found; Uzbek uses %s. Run `make uz-model`.",
+            settings.stt_model_uz,
+            settings.stt_model,
+        )
+        return general
     return LanguageRoutedSpeechToText(
-        general, {"uz": load(settings.stt_model_uz, settings.stt_initial_prompt_uz)}
+        general,
+        {"uz": load(settings.stt_model_uz, settings.stt_initial_prompt_uz, settings.stt_without_timestamps_uz)},
     )
 
 

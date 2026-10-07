@@ -28,6 +28,7 @@ def _stt(model: _FakeModel) -> FasterWhisperSpeechToText:
     stt._model = model
     stt._beam_size = 1
     stt._initial_prompt = None
+    stt._without_timestamps = False
     return stt
 
 
@@ -78,3 +79,11 @@ def test_allowed_language_is_decoded_once() -> None:
     model = _FakeModel("ru", [("ru", 0.8)])
     _stt(model).transcribe_pcm16(np.zeros(8000, dtype=np.float32), 8000, allowed_languages=("uz", "ru"))
     assert len(model.calls) == 1
+
+
+def test_without_timestamps_is_passed_to_whisper() -> None:
+    model = _FakeModel("uz", [("uz", 0.9)])
+    stt = _stt(model)
+    stt._without_timestamps = True
+    stt.transcribe_pcm16(np.zeros(8000, dtype=np.float32), 8000, language="uz")
+    assert model.calls[0]["without_timestamps"] is True

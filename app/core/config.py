@@ -18,15 +18,18 @@ class Settings(BaseSettings):
     stt_compute_type: str = "int8"
     stt_beam_size: int = 1
     stt_max_concurrency: int = 1
-    stt_initial_prompt: str = (
-        "Здравствуйте! Assalomu alaykum! Оператор, колл-центр, техподдержка, тикет, Zokhidkhanjarov."
-    )
+    # Optional decoder prompt for STT_MODEL. Empty by default: all measured
+    # configurations (docs/stt-evaluation.md) ran without one.
+    stt_initial_prompt: str = ""
     # Optional Uzbek fine-tune (faster-whisper format). Uzbek speech goes to it,
     # forced to "uz"; STT_MODEL keeps detecting the language and handles Russian.
     stt_model_uz: str = ""
     # Fine-tunes trained without prompts continue the prompt instead of
     # transcribing, so the Uzbek model gets none by default.
     stt_initial_prompt_uz: str = ""
+    # Fine-tunes trained on plain text drop the first words when asked for
+    # timestamps (75% -> 20% WER on affected clips without them).
+    stt_without_timestamps_uz: bool = True
     stt_supported_languages: tuple[str, ...] = ("uz", "ru", "en")
     # Languages a phone caller is expected to speak; detection is clamped to these.
     stt_realtime_languages: tuple[str, ...] = ("uz", "ru")
