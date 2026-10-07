@@ -11,15 +11,25 @@ from app.speech.models import TranscriptionResult
 
 @lru_cache(maxsize=1)
 def get_stt() -> SpeechToText:
+    from app.speech.providers.routed import LanguageRoutedSpeechToText
     from app.speech.providers.whisper import FasterWhisperSpeechToText
 
     settings = get_settings()
-    return FasterWhisperSpeechToText(
-        model_name=settings.stt_model,
-        device=settings.stt_device,
-        compute_type=settings.stt_compute_type,
-        beam_size=settings.stt_beam_size,
-        initial_prompt=settings.stt_initial_prompt,
+
+    def load(model_name: str, initial_prompt: str) -> FasterWhisperSpeechToText:
+        return FasterWhisperSpeechToText(
+            model_name=model_name,
+            device=settings.stt_device,
+            compute_type=settings.stt_compute_type,
+            beam_size=settings.stt_beam_size,
+            initial_prompt=initial_prompt,
+        )
+
+    general = load(settings.stt_model, settings.stt_initial_prompt)
+    if not settings.stt_model_uz:
+        return general
+    return LanguageRoutedSpeechToText(
+        general, {"uz": load(settings.stt_model_uz, settings.stt_initial_prompt_uz)}
     )
 
 

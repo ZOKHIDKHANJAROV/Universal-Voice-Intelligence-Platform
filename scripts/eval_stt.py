@@ -77,6 +77,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--model", default=settings.stt_model, help="name, HF repo or local CTranslate2 dir")
+    parser.add_argument(
+        "--model-uz",
+        default=settings.stt_model_uz,
+        help="Uzbek specialist; --model then detects the language and handles the rest",
+    )
     parser.add_argument("--device", default=settings.stt_device)
     parser.add_argument("--compute-type", default=settings.stt_compute_type)
     parser.add_argument("--beam-size", type=int, default=settings.stt_beam_size)
@@ -92,19 +97,27 @@ def main() -> int:
 
     from faster_whisper import decode_audio
 
+    from app.speech.providers.routed import LanguageRoutedSpeechToText
     from app.speech.providers.whisper import FasterWhisperSpeechToText
 
     rows = load_manifest(args.manifest)
     started = time.perf_counter()
-    stt = FasterWhisperSpeechToText(
-        args.model,
-        device=args.device,
-        compute_type=args.compute_type,
-        beam_size=args.beam_size,
-        initial_prompt=args.initial_prompt,
-    )
+
+    def load(name: str, prompt: str) -> FasterWhisperSpeechToText:
+        return FasterWhisperSpeechToText(
+            name,
+            device=args.device,
+            compute_type=args.compute_type,
+            beam_size=args.beam_size,
+            initial_prompt=prompt,
+        )
+
+    stt = load(args.model, args.initial_prompt)
+    if args.model_uz:
+        stt = LanguageRoutedSpeechToText(stt, {"uz": load(args.model_uz, settings.stt_initial_prompt_uz)})
     print(f"prompt: {args.initial_prompt!r}")
-    print(f"model {args.model} on {args.device}/{args.compute_type}: loaded in {time.perf_counter() - started:.1f}s")
+    print(f"model {args.model}{' + uz ' + args.model_uz if args.model_uz else ''} "
+          f"on {args.device}/{args.compute_type}: loaded in {time.perf_counter() - started:.1f}s")
     intent = get_intent_service()
     allowed = settings.stt_realtime_languages
 
