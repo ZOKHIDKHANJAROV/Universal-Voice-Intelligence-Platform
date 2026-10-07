@@ -53,7 +53,9 @@ Russian by default).
 Stock Whisper barely understands Uzbek over the phone (88% word error rate).
 `make uz-model` downloads and converts an Uzbek fine-tune; with
 `STT_MODEL_UZ` set, Uzbek speech goes to it and `STT_MODEL` keeps handling
-Russian. That brings Uzbek to 22% WER with Russian unchanged at 4.5%. See
+Russian. That brings Uzbek to 22% WER with Russian unchanged at 4.5%.
+`make uz-finetune` further adapts it to conversational Tashkent-dialect
+speech (73.5% -> 34.5% WER on podcasts, read speech unchanged). See
 [docs/stt-evaluation.md](docs/stt-evaluation.md) for the measurements and
 how to re-run them on your own recordings.
 

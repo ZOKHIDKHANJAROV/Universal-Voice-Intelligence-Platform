@@ -76,7 +76,25 @@ audio, 2 epochs, rank 32, lr 1e-4:
 | FLEURS read speech, 60 clips | 17.5% / 6.4% | 18.7% / 6.3% |
 
 Held-out loss fell from 2.31 to 0.90 over 105 steps (52 minutes, 2.96 GiB
-peak VRAM). Caveats:
+peak VRAM).
+
+The full run used all 25 training shards (~14,000 clips, ~95 h), one epoch,
+same settings, training while the corpus downloaded (`--expect-shards 25`):
+438 steps in 3.2 h on the RTX 4060 Laptop, 2.97 GiB peak VRAM, best held-out
+loss 0.628.
+
+| Test set (GPU, forced `uz`, no timestamps) | `navai-uz` | pilot (12 h) | **full (~95 h)** |
+|---|---|---|---|
+| Podcasts, held-out shard, 100 clips: WER | 73.5% | 48.8% | **34.5%** |
+| Podcasts: CER | 45.2% | 23.0% | **15.8%** |
+| FLEURS read speech, 60 clips: WER | 17.5% | 18.7% | **17.3%** |
+| FLEURS: CER | 6.4% | 6.3% | **5.0%** |
+
+In the production setup (`large-v3` detecting the language and handling
+Russian, the full fine-tune for Uzbek): Uzbek FLEURS 19.6% WER, Russian
+unchanged at 4.5%, median latency 1.4 s (Uzbek) and 1.6 s (Russian).
+
+Caveats:
 
 - Test transcripts come from the same labeller (Gemini) as the training
   ones, and the held-out shard may share podcast channels and speakers with
@@ -93,6 +111,18 @@ peak VRAM). Caveats:
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.
 - Scenario false triggers: on this non-complaint speech 8 of 60 Uzbek clips
   matched a scenario through short keywords such as `loy`, `pul`, `hid`.
+
+## Reproduce the fine-tune
+
+Needs a CUDA build of torch, `peft` and `pyarrow` (see the script header).
+
+    # 26 shards, ~10.4 GB; shard 3 is held out for evaluation
+    python -c "from huggingface_hub import snapshot_download as s; s('islomov/podcasts_tashkent_dialect_youtube_uzbek_speech_dataset', repo_type='dataset', local_dir='data/train/podcasts_tashkent')"
+    make uz-finetune
+
+`make uz-finetune` trains from `models/_src/whisper-medium-uzbek` (left there
+by `make uz-model`) and writes `models/whisper-medium-uzbek-podcasts-ct2`;
+point `STT_MODEL_UZ` at it.
 
 ## Reproduce
 
