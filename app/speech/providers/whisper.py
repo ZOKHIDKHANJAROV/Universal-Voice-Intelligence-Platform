@@ -22,6 +22,13 @@ def _family_score(code: str, probabilities: dict[str, float]) -> float:
     return probabilities.get(code, 0.0) + sum(probabilities.get(r, 0.0) for r in relatives)
 
 
+def pick_language(probabilities: dict[str, float], allowed: tuple[str, ...]) -> tuple[str, float]:
+    """Best allowed language by family score, with that score as its probability."""
+    scores = {code: _family_score(code, probabilities) for code in allowed}
+    best = max(allowed, key=scores.__getitem__)
+    return best, min(1.0, scores[best])
+
+
 class FasterWhisperSpeechToText(SpeechToText):
     def __init__(
         self,
@@ -30,6 +37,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         compute_type: str = "int8",
         beam_size: int = 1,
         initial_prompt: str | None = None,
+        without_timestamps: bool = False,
     ) -> None:
         from faster_whisper import WhisperModel
 
@@ -40,6 +48,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         )
         self._beam_size = beam_size
         self._initial_prompt = initial_prompt or None
+        self._without_timestamps = without_timestamps
 
     def transcribe(self, audio_path: Path, language: str | None = None) -> TranscriptionResult:
         # Uploaded files may contain long silences, so keep Silero VAD here.
@@ -58,6 +67,11 @@ class FasterWhisperSpeechToText(SpeechToText):
         # The realtime bridge already trimmed the utterance with webrtcvad.
         return self._run(audio16, language, vad_filter=False, allowed_languages=allowed_languages)
 
+    def detect_language(self, audio16: np.ndarray, allowed: tuple[str, ...]) -> tuple[str, float]:
+        """Pick one of ``allowed`` for 16 kHz audio without transcribing it."""
+        _, _, probabilities = self._model.detect_language(audio16)
+        return pick_language(dict(probabilities), allowed)
+
     def _run(
         self,
         audio,
@@ -72,12 +86,11 @@ class FasterWhisperSpeechToText(SpeechToText):
         # iterated. If Whisper picked a language the caller cannot speak, redo it
         # with the allowed language whose family got the most probability.
         if language is None and allowed_languages and info.language not in allowed_languages:
-            probabilities = dict(info.all_language_probs or ())
-            scores = {code: _family_score(code, probabilities) for code in allowed_languages}
-            fallback = max(allowed_languages, key=scores.__getitem__)
-            segments, info = self._transcribe(audio, fallback, vad_filter)
+            fallback, language_probability = pick_language(
+                dict(info.all_language_probs or ()), allowed_languages
+            )
             # A forced language reports 1.0; keep what detection actually thought.
-            language_probability = min(1.0, scores[fallback])
+            segments, info = self._transcribe(audio, fallback, vad_filter)
 
         text = " ".join(segment.text.strip() for segment in segments).strip()
         return TranscriptionResult(
@@ -96,4 +109,5 @@ class FasterWhisperSpeechToText(SpeechToText):
             vad_filter=vad_filter,
             condition_on_previous_text=False,
             initial_prompt=self._initial_prompt,
+            without_timestamps=self._without_timestamps,
         )
