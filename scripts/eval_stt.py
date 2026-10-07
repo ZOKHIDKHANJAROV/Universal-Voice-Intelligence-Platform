@@ -81,6 +81,11 @@ def main() -> int:
     parser.add_argument("--compute-type", default=settings.stt_compute_type)
     parser.add_argument("--beam-size", type=int, default=settings.stt_beam_size)
     parser.add_argument("--language", help="force one language instead of detecting it")
+    parser.add_argument(
+        "--initial-prompt",
+        default=settings.stt_initial_prompt,
+        help='decoder prompt; "" disables it (fine-tunes may continue the prompt instead of transcribing)',
+    )
     parser.add_argument("--no-mu-law", action="store_true", help="skip G.711 simulation")
     parser.add_argument("--output", type=Path, help="write per-clip results as CSV")
     args = parser.parse_args()
@@ -96,8 +101,9 @@ def main() -> int:
         device=args.device,
         compute_type=args.compute_type,
         beam_size=args.beam_size,
-        initial_prompt=settings.stt_initial_prompt,
+        initial_prompt=args.initial_prompt,
     )
+    print(f"prompt: {args.initial_prompt!r}")
     print(f"model {args.model} on {args.device}/{args.compute_type}: loaded in {time.perf_counter() - started:.1f}s")
     intent = get_intent_service()
     allowed = settings.stt_realtime_languages
