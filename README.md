@@ -29,7 +29,8 @@ Laptop) that also drives a desktop:
 
 | Component | Where | VRAM |
 |---|---|---|
-| Whisper `large-v3`, `int8_float16`, beam 1 | API container, during calls | ~1.6 GB |
+| Whisper `large-v3`, `int8_float16`, beam 1 | API container, during calls | ~2.0 GB (measured) |
+| Uzbek Whisper medium fine-tune (`STT_MODEL_UZ`) | API container, during calls | ~0.8 GB |
 | Navoiy / CosyVoice2 TTS | only while running `make render-prompts` | ~3 GB |
 | Ollama LLM (optional) | CPU by default (`LLM_NUM_GPU=0`) | 0 |
 
@@ -48,6 +49,13 @@ are CPU-based small Whisper with int8, which is only good enough for tests;
 On calls, 8 kHz telephony audio is resampled to the 16 kHz Whisper expects,
 and language detection is limited to `STT_REALTIME_LANGUAGES` (Uzbek and
 Russian by default).
+
+Stock Whisper barely understands Uzbek over the phone (88% word error rate).
+`make uz-model` downloads and converts an Uzbek fine-tune; with
+`STT_MODEL_UZ` set, Uzbek speech goes to it and `STT_MODEL` keeps handling
+Russian. That brings Uzbek to 22% WER with Russian unchanged at 4.5%. See
+[docs/stt-evaluation.md](docs/stt-evaluation.md) for the measurements and
+how to re-run them on your own recordings.
 
 The STT API accepts an audio file and returns transcription text, detected language, language probability, and duration.
 
@@ -87,6 +95,7 @@ while the TTS service is running.
 
 ## Run with Docker
 
+    pip install -e ".[convert]" && make uz-model   # once: Uzbek STT model
     docker compose up --build
     make render-prompts              # once, and after editing phrases
 
