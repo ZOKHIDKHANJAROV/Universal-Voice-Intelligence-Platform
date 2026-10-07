@@ -46,11 +46,50 @@ Notes:
 | With timestamps the fine-tune dropped the first words ("ishlamayapti" instead of "internet ishlamayapti") | WER 75% instead of 20% on affected clips | `STT_WITHOUT_TIMESTAMPS_UZ=true` |
 | Picking the best of uz/ru chose Russian for Uzbek speech | Uzbek written as Cyrillic transliteration | Family scoring |
 
+## GPU latency
+
+RTX 4060 Laptop, `int8_float16`, `large-v3` + `navai` loaded together,
+greedy decoding only (`STT_TEMPERATURE_FALLBACK=false`):
+
+| Utterance length | Median | Max |
+|---|---|---|
+| under 8 s | 1.2 s | 1.6 s |
+| 8–15 s | 1.5 s | 2.3 s |
+| 15–30 s | 1.8 s | 2.3 s |
+
+Peak VRAM with both models: ~4.1 GB. With temperature fallback on, one
+Uzbek clip misrouted to Russian produced "Субтитры добавил DimaTorzok" and
+took 16 s; such subtitle hallucinations are now treated as silence.
+
+## Fine-tuning on conversational speech
+
+`navai-uz` was trained on read speech only. On conversational
+Tashkent-dialect podcasts it scores 73.5% WER, against 17.5% on FLEURS.
+A LoRA pilot (`scripts/finetune_whisper.py`) on 3 shards (12.2 h) of
+`islomov/podcasts_tashkent_dialect_youtube_uzbek_speech_dataset`
+(Apache-2.0, Gemini 2.5 Pro transcripts), half the clips degraded to phone
+audio, 2 epochs, rank 32, lr 1e-4:
+
+| Test set (GPU, forced `uz`, no timestamps) | `navai-uz` | pilot |
+|---|---|---|
+| Podcasts, held-out shard, 100 clips | 73.5% WER / 45.2% CER | **48.8% / 23.0%** |
+| FLEURS read speech, 60 clips | 17.5% / 6.4% | 18.7% / 6.3% |
+
+Held-out loss fell from 2.31 to 0.90 over 105 steps (52 minutes, 2.96 GiB
+peak VRAM). Caveats:
+
+- Test transcripts come from the same labeller (Gemini) as the training
+  ones, and the held-out shard may share podcast channels and speakers with
+  training, so the podcast gain is likely optimistic. Real call recordings
+  are the test that matters.
+- Gemini labels are cased and punctuated with ASCII apostrophes;
+  `normalize_label` rewrites them in the model's own style first (initial
+  loss 7.2 -> 3.9 on raw vs rewritten labels), so training adapts to the
+  audio rather than to a new spelling style.
+- Labels keep numbers as digits while the model writes them as words.
+
 ## Not measured yet
 
-- GPU latency: the dev machine lacks `cublas64_12.dll`; the Docker image
-  installs it through the `gpu` extra. CPU latency (median 11 s per
-  utterance for `large-v3` + `navai`) is not usable for calls.
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.
 - Scenario false triggers: on this non-complaint speech 8 of 60 Uzbek clips
   matched a scenario through short keywords such as `loy`, `pul`, `hid`.
