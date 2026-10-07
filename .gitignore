@@ -21,3 +21,6 @@ data/eval/
 
 # Downloaded and converted STT models.
 models/
+
+# Downloaded training corpora.
+data/train/

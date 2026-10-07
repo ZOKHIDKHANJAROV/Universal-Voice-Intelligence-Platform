@@ -1,3 +1,5 @@
+import os
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +24,31 @@ def _family_score(code: str, probabilities: dict[str, float]) -> float:
     return probabilities.get(code, 0.0) + sum(probabilities.get(r, 0.0) for r in relatives)
 
 
+@lru_cache(maxsize=1)
+def _expose_nvidia_dlls() -> None:
+    """Let CTranslate2 find cuBLAS/cuDNN on Windows.
+
+    On Linux the Dockerfile sets LD_LIBRARY_PATH. On Windows the DLLs come
+    either from pip's NVIDIA wheels (site-packages/nvidia/*/bin) or from a
+    CUDA 12 build of torch (torch/lib); the loader searches neither.
+    """
+    if os.name != "nt":
+        return
+    import importlib.util
+
+    directories: list[Path] = []
+    nvidia = importlib.util.find_spec("nvidia")
+    for base in (nvidia.submodule_search_locations or []) if nvidia else []:
+        directories += sorted(Path(base).glob("*/bin"))
+    torch = importlib.util.find_spec("torch")
+    if torch and torch.origin:
+        directories.append(Path(torch.origin).parent / "lib")
+    for directory in directories:
+        if directory.is_dir():
+            os.add_dll_directory(str(directory))
+            os.environ["PATH"] = f"{directory}{os.pathsep}{os.environ.get('PATH', '')}"
+
+
 def pick_language(probabilities: dict[str, float], allowed: tuple[str, ...]) -> tuple[str, float]:
     """Best allowed language by family score, with that score as its probability."""
     scores = {code: _family_score(code, probabilities) for code in allowed}
@@ -39,6 +66,8 @@ class FasterWhisperSpeechToText(SpeechToText):
         initial_prompt: str | None = None,
         without_timestamps: bool = False,
     ) -> None:
+        if device != "cpu":
+            _expose_nvidia_dlls()
         from faster_whisper import WhisperModel
 
         self._model = WhisperModel(
