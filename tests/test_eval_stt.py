@@ -21,3 +21,8 @@ def test_error_rates_ignore_script_and_punctuation_for_uzbek() -> None:
 def test_error_rates_count_wrong_words() -> None:
     wer, _ = error_rates("pulimni yeb qo'ydi", "pulimni yeb ketdi", "uz")
     assert abs(wer - 1 / 3) < 1e-9
+
+
+def test_kazakh_cyrillic_output_is_compared_as_uzbek_latin() -> None:
+    wer, _ = error_rates("o'z ichiga oladi", "өз ичига олади", "uz")
+    assert wer == 0.0
