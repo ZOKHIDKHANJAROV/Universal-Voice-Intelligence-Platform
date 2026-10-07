@@ -91,17 +91,40 @@ def iter_clips(paths: list[str], max_seconds: float, tokenizer):
         yield from _usable(row, max_seconds, tokenizer)
 
 
-def stream_epoch(paths: list[str], max_seconds: float, tokenizer, buffer_shards: int, rng: random.Random):
+def stream_epoch(
+    patterns: list[str],
+    exclude: set[str],
+    max_seconds: float,
+    tokenizer,
+    buffer_shards: int,
+    rng: random.Random,
+    expect_shards: int = 0,
+):
     """One pass over all shards with bounded memory.
 
     The full corpus does not fit in RAM (25 shards are ~10 GB of compressed
     audio), so shards are visited in random order a few at a time and clips
     are shuffled within that buffer.
+
+    With ``expect_shards`` the glob is re-read before each group, so training
+    can start while the corpus is still downloading: it waits only when every
+    finished shard has been used and more are expected.
     """
-    order = list(paths)
-    rng.shuffle(order)
-    for start in range(0, len(order), buffer_shards):
-        rows = list(_read_rows(order[start : start + buffer_shards]))
+    visited: set[str] = set()
+    while True:
+        # A shard file appears only once its download has finished.
+        matches = {path for pattern in patterns for path in glob.glob(pattern)}
+        ready = sorted(matches - visited - exclude)
+        if not ready:
+            if len(visited) >= expect_shards:
+                return
+            print(f"waiting for shards ({len(visited)}/{expect_shards} used)", flush=True)
+            time.sleep(30)
+            continue
+        rng.shuffle(ready)
+        group = ready[:buffer_shards]
+        visited.update(group)
+        rows = list(_read_rows(group))
         rng.shuffle(rows)
         for row in rows:
             yield from _usable(row, max_seconds, tokenizer)
@@ -171,6 +194,12 @@ def main() -> int:
     parser.add_argument("--eval-every", type=int, default=25, help="optimizer steps")
     parser.add_argument("--max-minutes", type=float, default=0, help="stop after this long (0 = no limit)")
     parser.add_argument("--buffer-shards", type=int, default=2, help="shards held in RAM for shuffling")
+    parser.add_argument(
+        "--expect-shards",
+        type=int,
+        default=0,
+        help="total train shards; train while the rest are still downloading",
+    )
     parser.add_argument("--init-adapter", type=Path, help="continue from a saved adapter")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
@@ -190,17 +219,20 @@ def main() -> int:
     tokenizer.set_prefix_tokens(language=args.language, task="transcribe", predict_timestamps=False)
     feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base)
 
-    train_paths = resolve_paths(args.train)
     eval_paths = resolve_paths(args.eval)
-    if set(train_paths) & set(eval_paths):
-        raise SystemExit("Train and eval shards overlap")
-    train_clips = sum(pq.ParquetFile(path).metadata.num_rows for path in train_paths)
+    exclude = set(eval_paths)  # a broad train glob may also match the held-out shard
+    train_paths = [p for p in resolve_paths(args.train) if p not in exclude]
+    rows_per_shard = [pq.ParquetFile(path).metadata.num_rows for path in train_paths]
+    expect_shards = max(args.expect_shards, len(train_paths))
+    # Shards still downloading are assumed to be as large as the ones on disk.
+    train_clips = round(sum(rows_per_shard) / len(rows_per_shard) * expect_shards)
     eval_clips = []
     for clip in iter_clips(eval_paths, args.max_seconds, tokenizer):
         eval_clips.append(clip)
         if len(eval_clips) >= args.eval_clips:
             break
-    print(f"train {len(train_paths)} shards, {train_clips} clips; eval {len(eval_clips)} clips", flush=True)
+    print(f"train {len(train_paths)}/{expect_shards} shards on disk, ~{train_clips} clips; "
+          f"eval {len(eval_clips)} clips", flush=True)
 
     model = WhisperForConditionalGeneration.from_pretrained(args.base, torch_dtype=torch.float16)
     model.config.use_cache = False
@@ -243,7 +275,9 @@ def main() -> int:
         epoch = 0
         while True:
             pending = []
-            for clip in stream_epoch(train_paths, args.max_seconds, tokenizer, args.buffer_shards, rng):
+            for clip in stream_epoch(
+                args.train, exclude, args.max_seconds, tokenizer, args.buffer_shards, rng, expect_shards
+            ):
                 pending.append(featurize(clip, feature_extractor, tokenizer, args.telephony_prob, train=True))
                 if len(pending) == args.batch_size:
                     yield collate(pending)
