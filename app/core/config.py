@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     stt_initial_prompt: str = (
         "Здравствуйте! Assalomu alaykum! Оператор, колл-центр, техподдержка, тикет, Zokhidkhanjarov."
     )
+    # Optional Uzbek fine-tune (faster-whisper format). Uzbek speech goes to it,
+    # forced to "uz"; STT_MODEL keeps detecting the language and handles Russian.
+    stt_model_uz: str = ""
+    # Fine-tunes trained without prompts continue the prompt instead of
+    # transcribing, so the Uzbek model gets none by default.
+    stt_initial_prompt_uz: str = ""
     stt_supported_languages: tuple[str, ...] = ("uz", "ru", "en")
     # Languages a phone caller is expected to speak; detection is clamped to these.
     stt_realtime_languages: tuple[str, ...] = ("uz", "ru")
