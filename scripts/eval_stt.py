@@ -92,6 +92,11 @@ def main() -> int:
         help='decoder prompt; "" disables it (fine-tunes may continue the prompt instead of transcribing)',
     )
     parser.add_argument("--no-mu-law", action="store_true", help="skip G.711 simulation")
+    parser.add_argument(
+        "--without-timestamps",
+        action="store_true",
+        help="decode --model without timestamps, as production runs Uzbek fine-tunes",
+    )
     parser.add_argument("--output", type=Path, help="write per-clip results as CSV")
     args = parser.parse_args()
 
@@ -113,7 +118,7 @@ def main() -> int:
             without_timestamps=without_timestamps,
         )
 
-    stt = load(args.model, args.initial_prompt)
+    stt = load(args.model, args.initial_prompt, args.without_timestamps)
     if args.model_uz:
         uzbek = load(args.model_uz, settings.stt_initial_prompt_uz, settings.stt_without_timestamps_uz)
         stt = LanguageRoutedSpeechToText(stt, {"uz": uzbek})
