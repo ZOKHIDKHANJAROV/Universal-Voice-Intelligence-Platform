@@ -103,18 +103,20 @@ def main() -> int:
     rows = load_manifest(args.manifest)
     started = time.perf_counter()
 
-    def load(name: str, prompt: str) -> FasterWhisperSpeechToText:
+    def load(name: str, prompt: str, without_timestamps: bool = False) -> FasterWhisperSpeechToText:
         return FasterWhisperSpeechToText(
             name,
             device=args.device,
             compute_type=args.compute_type,
             beam_size=args.beam_size,
             initial_prompt=prompt,
+            without_timestamps=without_timestamps,
         )
 
     stt = load(args.model, args.initial_prompt)
     if args.model_uz:
-        stt = LanguageRoutedSpeechToText(stt, {"uz": load(args.model_uz, settings.stt_initial_prompt_uz)})
+        uzbek = load(args.model_uz, settings.stt_initial_prompt_uz, settings.stt_without_timestamps_uz)
+        stt = LanguageRoutedSpeechToText(stt, {"uz": uzbek})
     print(f"prompt: {args.initial_prompt!r}")
     print(f"model {args.model}{' + uz ' + args.model_uz if args.model_uz else ''} "
           f"on {args.device}/{args.compute_type}: loaded in {time.perf_counter() - started:.1f}s")

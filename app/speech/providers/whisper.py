@@ -37,6 +37,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         compute_type: str = "int8",
         beam_size: int = 1,
         initial_prompt: str | None = None,
+        without_timestamps: bool = False,
     ) -> None:
         from faster_whisper import WhisperModel
 
@@ -47,6 +48,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         )
         self._beam_size = beam_size
         self._initial_prompt = initial_prompt or None
+        self._without_timestamps = without_timestamps
 
     def transcribe(self, audio_path: Path, language: str | None = None) -> TranscriptionResult:
         # Uploaded files may contain long silences, so keep Silero VAD here.
@@ -107,4 +109,5 @@ class FasterWhisperSpeechToText(SpeechToText):
             vad_filter=vad_filter,
             condition_on_previous_text=False,
             initial_prompt=self._initial_prompt,
+            without_timestamps=self._without_timestamps,
         )

@@ -56,3 +56,12 @@ def test_explicit_language_skips_detection() -> None:
     assert router.transcribe("call.wav", language="uz").text == "uz-model:uz"
     assert router.transcribe("call.wav", language="ru").text == "general:ru"
     assert not hasattr(general, "detect_input")
+
+
+def test_missing_local_uzbek_model_is_detected(tmp_path) -> None:
+    from app.speech.service import _missing_local_model
+
+    assert _missing_local_model("/models/no-such-model-ct2")
+    assert _missing_local_model("models/no-such-model-ct2")
+    assert not _missing_local_model(str(tmp_path))  # exists
+    assert not _missing_local_model("navai-uz/whisper-medium-uzbek")  # HF repo id
