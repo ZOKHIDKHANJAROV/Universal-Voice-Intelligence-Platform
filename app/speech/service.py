@@ -35,6 +35,7 @@ def get_stt() -> SpeechToText:
             beam_size=settings.stt_beam_size,
             initial_prompt=initial_prompt,
             without_timestamps=without_timestamps,
+            temperature_fallback=settings.stt_temperature_fallback,
         )
 
     general = load(settings.stt_model, settings.stt_initial_prompt)

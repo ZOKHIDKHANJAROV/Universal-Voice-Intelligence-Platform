@@ -49,6 +49,23 @@ def _expose_nvidia_dlls() -> None:
             os.environ["PATH"] = f"{directory}{os.pathsep}{os.environ.get('PATH', '')}"
 
 
+# Text Whisper produces from silence or noise, learned from subtitle credits.
+# Seen on a misrouted Uzbek call: "Субтитры добавил DimaTorzok".
+_HALLUCINATIONS = (
+    "субтитр",
+    "dimatorzok",
+    "продолжение следует",
+    "спасибо за просмотр",
+    "подписывайтесь на канал",
+    "редактор субтитров",
+)
+
+
+def is_hallucination(text: str) -> bool:
+    lowered = text.casefold()
+    return any(marker in lowered for marker in _HALLUCINATIONS)
+
+
 def pick_language(probabilities: dict[str, float], allowed: tuple[str, ...]) -> tuple[str, float]:
     """Best allowed language by family score, with that score as its probability."""
     scores = {code: _family_score(code, probabilities) for code in allowed}
@@ -65,6 +82,7 @@ class FasterWhisperSpeechToText(SpeechToText):
         beam_size: int = 1,
         initial_prompt: str | None = None,
         without_timestamps: bool = False,
+        temperature_fallback: bool = True,
     ) -> None:
         if device != "cpu":
             _expose_nvidia_dlls()
@@ -78,6 +96,11 @@ class FasterWhisperSpeechToText(SpeechToText):
         self._beam_size = beam_size
         self._initial_prompt = initial_prompt or None
         self._without_timestamps = without_timestamps
+        # Each fallback temperature is a full re-decode: one bad utterance took
+        # 16 s on GPU. Greedy-only keeps call latency bounded.
+        self._temperature = (
+            [0.0, 0.2, 0.4, 0.6, 0.8, 1.0] if temperature_fallback else [0.0]
+        )
 
     def transcribe(self, audio_path: Path, language: str | None = None) -> TranscriptionResult:
         # Uploaded files may contain long silences, so keep Silero VAD here.
@@ -122,6 +145,8 @@ class FasterWhisperSpeechToText(SpeechToText):
             segments, info = self._transcribe(audio, fallback, vad_filter)
 
         text = " ".join(segment.text.strip() for segment in segments).strip()
+        if is_hallucination(text):
+            text = ""
         return TranscriptionResult(
             text=text,
             language=info.language,
@@ -139,4 +164,5 @@ class FasterWhisperSpeechToText(SpeechToText):
             condition_on_previous_text=False,
             initial_prompt=self._initial_prompt,
             without_timestamps=self._without_timestamps,
+            temperature=self._temperature,
         )

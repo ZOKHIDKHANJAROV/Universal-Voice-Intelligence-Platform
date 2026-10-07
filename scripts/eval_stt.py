@@ -116,6 +116,7 @@ def main() -> int:
             beam_size=args.beam_size,
             initial_prompt=prompt,
             without_timestamps=without_timestamps,
+            temperature_fallback=settings.stt_temperature_fallback,
         )
 
     stt = load(args.model, args.initial_prompt, args.without_timestamps)
