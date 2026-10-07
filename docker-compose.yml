@@ -11,6 +11,8 @@ services:
       - voice-audio:/var/lib/univoice/audio
       # Keeps the Whisper model across container rebuilds.
       - whisper-models:/root/.cache/huggingface
+      # Converted Uzbek fine-tune from `make uz-model` (STT_MODEL_UZ).
+      - ./models:/models:ro
     restart: unless-stopped
     gpus: all
 

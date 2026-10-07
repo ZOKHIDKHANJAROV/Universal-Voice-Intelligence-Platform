@@ -26,6 +26,11 @@ gpu = [
     "nvidia-cublas-cu12>=12.4,<13",
     "nvidia-cudnn-cu12>=9.1,<10",
 ]
+# Only for scripts/convert_whisper.py (CPU torch is enough).
+convert = [
+    "torch>=2.3",
+    "transformers>=4.40,<5",
+]
 dev = [
     "httpx>=0.28,<1.0",
     "pytest>=8.4,<9.0",
