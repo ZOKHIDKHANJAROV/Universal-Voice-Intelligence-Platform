@@ -26,6 +26,8 @@ _UZ_CYRILLIC_TO_LATIN = str.maketrans({
     "с": "s", "т": "t", "у": "u", "ф": "f", "х": "x", "ҳ": "h", "ц": "ts",
     "ч": "ch", "ш": "sh", "ъ": "'", "ь": "", "ы": "i", "э": "e", "ю": "yu",
     "я": "ya",
+    # Kazakh letters: Whisper often writes Uzbek speech in Kazakh Cyrillic.
+    "ә": "a", "ө": "o'", "ұ": "u", "ү": "u", "ң": "ng", "і": "i", "һ": "h",
 })
 _NON_WORD = re.compile(r"[^\w']+")
 _FUZZY_MIN_RATIO = 85
