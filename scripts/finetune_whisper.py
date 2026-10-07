@@ -59,54 +59,63 @@ def normalize_label(text: str) -> str:
     return " ".join(text.split())
 
 
-def load_rows(patterns: list[str], max_seconds: float, tokenizer, limit: int = 0) -> list[dict]:
-    import pyarrow.parquet as pq
-    from faster_whisper import decode_audio
-
+def resolve_paths(patterns: list[str]) -> list[str]:
     paths = sorted({p for pattern in patterns for p in glob.glob(pattern)})
     if not paths:
         raise SystemExit(f"No parquet files match {patterns}")
-    rows = []
+    return paths
+
+
+def _read_rows(paths: list[str]):
+    import pyarrow.parquet as pq
+
     for path in paths:
-        for row in pq.read_table(path, columns=["audio", "text"]).to_pylist():
-            text = normalize_label(row["text"] or "")
-            if not text:
-                continue
-            seconds = len(decode_audio(io.BytesIO(row["audio"]["bytes"]), sampling_rate=SAMPLE_RATE)) / SAMPLE_RATE
-            # Whisper sees at most 30 s; longer clips would lose audio but keep text.
-            if not 0.5 <= seconds <= max_seconds:
-                continue
-            if len(tokenizer(text).input_ids) > MAX_LABEL_TOKENS:
-                continue
-            rows.append({"bytes": row["audio"]["bytes"], "text": text, "seconds": seconds})
-            if limit and len(rows) >= limit:
-                return rows
-    return rows
+        yield from pq.read_table(path, columns=["audio", "text"]).to_pylist()
 
 
-class ClipDataset:
-    def __init__(self, rows, feature_extractor, tokenizer, telephony_prob: float, train: bool) -> None:
-        self.rows = rows
-        self.feature_extractor = feature_extractor
-        self.tokenizer = tokenizer
-        self.telephony_prob = telephony_prob
-        self.train = train
+def _usable(row: dict, max_seconds: float, tokenizer):
+    """Decode a parquet row into a training clip, or nothing if unusable."""
+    from faster_whisper import decode_audio
 
-    def __len__(self) -> int:
-        return len(self.rows)
+    text = normalize_label(row["text"] or "")
+    if not text or len(tokenizer(text).input_ids) > MAX_LABEL_TOKENS:
+        return
+    audio = decode_audio(io.BytesIO(row["audio"]["bytes"]), sampling_rate=SAMPLE_RATE)
+    # Whisper sees at most 30 s; longer clips would lose audio but keep text.
+    if 0.5 <= len(audio) / SAMPLE_RATE <= max_seconds:
+        yield {"audio": audio, "text": text}
 
-    def __getitem__(self, index: int) -> dict:
-        from faster_whisper import decode_audio
 
-        row = self.rows[index]
-        audio = decode_audio(io.BytesIO(row["bytes"]), sampling_rate=SAMPLE_RATE)
-        # Evaluation always uses the phone channel; training mixes both.
-        if not self.train or random.random() < self.telephony_prob:
-            audio = resample(telephony(audio), 8000, SAMPLE_RATE)
-        if self.train:
-            audio = np.clip(audio * random.uniform(0.5, 1.5), -1.0, 1.0)
-        features = self.feature_extractor(audio, sampling_rate=SAMPLE_RATE, return_tensors="np").input_features[0]
-        return {"input_features": features, "labels": self.tokenizer(row["text"]).input_ids}
+def iter_clips(paths: list[str], max_seconds: float, tokenizer):
+    for row in _read_rows(paths):
+        yield from _usable(row, max_seconds, tokenizer)
+
+
+def stream_epoch(paths: list[str], max_seconds: float, tokenizer, buffer_shards: int, rng: random.Random):
+    """One pass over all shards with bounded memory.
+
+    The full corpus does not fit in RAM (25 shards are ~10 GB of compressed
+    audio), so shards are visited in random order a few at a time and clips
+    are shuffled within that buffer.
+    """
+    order = list(paths)
+    rng.shuffle(order)
+    for start in range(0, len(order), buffer_shards):
+        rows = list(_read_rows(order[start : start + buffer_shards]))
+        rng.shuffle(rows)
+        for row in rows:
+            yield from _usable(row, max_seconds, tokenizer)
+
+
+def featurize(clip: dict, feature_extractor, tokenizer, telephony_prob: float, train: bool) -> dict:
+    audio = clip["audio"]
+    # Evaluation always uses the phone channel; training mixes both.
+    if not train or random.random() < telephony_prob:
+        audio = resample(telephony(audio), 8000, SAMPLE_RATE)
+    if train:
+        audio = np.clip(audio * random.uniform(0.5, 1.5), -1.0, 1.0)
+    features = feature_extractor(audio, sampling_rate=SAMPLE_RATE, return_tensors="np").input_features[0]
+    return {"input_features": features, "labels": tokenizer(clip["text"]).input_ids}
 
 
 def make_collate(decoder_start_token_id: int):
@@ -126,13 +135,13 @@ def make_collate(decoder_start_token_id: int):
     return collate
 
 
-def evaluate_loss(model, loader, device) -> float:
+def evaluate_loss(model, batches, device) -> float:
     import torch
 
     model.eval()
     total, count = 0.0, 0
     with torch.no_grad(), torch.autocast("cuda", dtype=torch.float16):
-        for batch in loader:
+        for batch in batches:
             out = model(
                 input_features=batch["input_features"].to(device, torch.float16),
                 labels=batch["labels"].to(device),
@@ -161,11 +170,14 @@ def main() -> int:
     parser.add_argument("--eval-clips", type=int, default=120)
     parser.add_argument("--eval-every", type=int, default=25, help="optimizer steps")
     parser.add_argument("--max-minutes", type=float, default=0, help="stop after this long (0 = no limit)")
+    parser.add_argument("--buffer-shards", type=int, default=2, help="shards held in RAM for shuffling")
+    parser.add_argument("--init-adapter", type=Path, help="continue from a saved adapter")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
     import torch
-    from peft import LoraConfig, get_peft_model
+    import pyarrow.parquet as pq
+    from peft import LoraConfig, PeftModel, get_peft_model
     from transformers import WhisperFeatureExtractor, WhisperForConditionalGeneration, WhisperTokenizer
 
     if not torch.cuda.is_available():
@@ -178,12 +190,17 @@ def main() -> int:
     tokenizer.set_prefix_tokens(language=args.language, task="transcribe", predict_timestamps=False)
     feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base)
 
-    started = time.time()
-    train_rows = load_rows(args.train, args.max_seconds, tokenizer)
-    eval_rows = load_rows(args.eval, args.max_seconds, tokenizer, limit=args.eval_clips)
-    hours = sum(r["seconds"] for r in train_rows) / 3600
-    print(f"train {len(train_rows)} clips ({hours:.1f} h), eval {len(eval_rows)} clips, "
-          f"loaded in {time.time() - started:.0f}s", flush=True)
+    train_paths = resolve_paths(args.train)
+    eval_paths = resolve_paths(args.eval)
+    if set(train_paths) & set(eval_paths):
+        raise SystemExit("Train and eval shards overlap")
+    train_clips = sum(pq.ParquetFile(path).metadata.num_rows for path in train_paths)
+    eval_clips = []
+    for clip in iter_clips(eval_paths, args.max_seconds, tokenizer):
+        eval_clips.append(clip)
+        if len(eval_clips) >= args.eval_clips:
+            break
+    print(f"train {len(train_paths)} shards, {train_clips} clips; eval {len(eval_clips)} clips", flush=True)
 
     model = WhisperForConditionalGeneration.from_pretrained(args.base, torch_dtype=torch.float16)
     model.config.use_cache = False
@@ -197,13 +214,16 @@ def main() -> int:
     # With a frozen base, checkpointed blocks need an input that requires grad.
     model.model.encoder.conv1.register_forward_hook(lambda _m, _i, out: out.requires_grad_(True))
 
-    model = get_peft_model(model, LoraConfig(
-        r=args.lora_r,
-        lora_alpha=2 * args.lora_r,
-        lora_dropout=0.05,
-        target_modules=["q_proj", "k_proj", "v_proj", "out_proj", "fc1", "fc2"],
-        bias="none",
-    ))
+    if args.init_adapter:
+        model = PeftModel.from_pretrained(model, args.init_adapter, is_trainable=True)
+    else:
+        model = get_peft_model(model, LoraConfig(
+            r=args.lora_r,
+            lora_alpha=2 * args.lora_r,
+            lora_dropout=0.05,
+            target_modules=["q_proj", "k_proj", "v_proj", "out_proj", "fc1", "fc2"],
+            bias="none",
+        ))
     # Adapters train in fp32 for stable updates; the frozen base stays fp16.
     for param in model.parameters():
         if param.requires_grad:
@@ -212,16 +232,26 @@ def main() -> int:
     model.to(device)
 
     collate = make_collate(model.config.decoder_start_token_id)
-    train_loader = torch.utils.data.DataLoader(
-        ClipDataset(train_rows, feature_extractor, tokenizer, args.telephony_prob, train=True),
-        batch_size=args.batch_size, shuffle=True, collate_fn=collate, drop_last=True,
-    )
-    eval_loader = torch.utils.data.DataLoader(
-        ClipDataset(eval_rows, feature_extractor, tokenizer, 1.0, train=False),
-        batch_size=args.batch_size, collate_fn=collate,
-    )
+    eval_examples = [featurize(c, feature_extractor, tokenizer, 1.0, train=False) for c in eval_clips]
+    eval_batches = [
+        collate(eval_examples[i : i + args.batch_size])
+        for i in range(0, len(eval_examples), args.batch_size)
+    ]
+    rng = random.Random(args.seed)
 
-    total_steps = math.ceil(len(train_loader) * args.epochs / args.grad_accum)
+    def train_batches():
+        epoch = 0
+        while True:
+            pending = []
+            for clip in stream_epoch(train_paths, args.max_seconds, tokenizer, args.buffer_shards, rng):
+                pending.append(featurize(clip, feature_extractor, tokenizer, args.telephony_prob, train=True))
+                if len(pending) == args.batch_size:
+                    yield collate(pending)
+                    pending = []
+            epoch += 1
+            print(f"epoch {epoch} finished", flush=True)
+
+    total_steps = math.ceil(train_clips * args.epochs / (args.batch_size * args.grad_accum))
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=args.lr, weight_decay=0.01)
     scheduler = torch.optim.lr_scheduler.LambdaLR(
@@ -232,7 +262,7 @@ def main() -> int:
     scaler = torch.amp.GradScaler("cuda")
 
     args.output.mkdir(parents=True, exist_ok=True)
-    best = evaluate_loss(model, eval_loader, device)
+    best = evaluate_loss(model, eval_batches, device)
     history = [{"step": 0, "eval_loss": best}]
     print(f"step 0/{total_steps}  eval loss {best:.4f}", flush=True)
     model.save_pretrained(args.output / "adapter")
@@ -240,46 +270,44 @@ def main() -> int:
     step, micro, running = 0, 0, 0.0
     started = time.time()
     model.train()
-    done = False
-    while not done:
-        for batch in train_loader:
-            with torch.autocast("cuda", dtype=torch.float16):
-                loss = model(
-                    input_features=batch["input_features"].to(device, torch.float16),
-                    labels=batch["labels"].to(device),
-                ).loss / args.grad_accum
-            scaler.scale(loss).backward()
-            running += loss.item()
-            micro += 1
-            if micro % args.grad_accum:
-                continue
+    for batch in train_batches():
+        with torch.autocast("cuda", dtype=torch.float16):
+            loss = model(
+                input_features=batch["input_features"].to(device, torch.float16),
+                labels=batch["labels"].to(device),
+            ).loss / args.grad_accum
+        scaler.scale(loss).backward()
+        running += loss.item()
+        micro += 1
+        if micro % args.grad_accum:
+            continue
 
-            scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(trainable, 1.0)
-            scaler.step(optimizer)
-            scaler.update()
-            optimizer.zero_grad(set_to_none=True)
-            scheduler.step()
-            step += 1
+        scaler.unscale_(optimizer)
+        torch.nn.utils.clip_grad_norm_(trainable, 1.0)
+        scaler.step(optimizer)
+        scaler.update()
+        optimizer.zero_grad(set_to_none=True)
+        scheduler.step()
+        step += 1
 
-            elapsed = time.time() - started
-            if step % 5 == 0:
-                print(f"step {step}/{total_steps}  loss {running / 5:.4f}  "
-                      f"{elapsed / step:.1f}s/step  "
-                      f"VRAM peak {torch.cuda.max_memory_allocated() / 2**30:.2f} GiB", flush=True)
-                running = 0.0
-            out_of_time = args.max_minutes and elapsed > args.max_minutes * 60
-            if step % args.eval_every == 0 or step >= total_steps or out_of_time:
-                current = evaluate_loss(model, eval_loader, device)
-                history.append({"step": step, "eval_loss": current})
-                improved = current < best
-                print(f"step {step}  eval loss {current:.4f}{'  (best, saved)' if improved else ''}", flush=True)
-                if improved:
-                    best = current
-                    model.save_pretrained(args.output / "adapter")
-            if step >= total_steps or out_of_time:
-                done = True
-                break
+        elapsed = time.time() - started
+        if step % 5 == 0:
+            print(f"step {step}/{total_steps}  loss {running / 5:.4f}  "
+                  f"{elapsed / step:.1f}s/step  "
+                  f"VRAM peak {torch.cuda.max_memory_allocated() / 2**30:.2f} GiB", flush=True)
+            running = 0.0
+        out_of_time = args.max_minutes and elapsed > args.max_minutes * 60
+        if step % args.eval_every == 0 or step >= total_steps or out_of_time:
+            current = evaluate_loss(model, eval_batches, device)
+            history.append({"step": step, "eval_loss": current})
+            (args.output / "history.json").write_text(json.dumps(history, indent=2))
+            improved = current < best
+            print(f"step {step}  eval loss {current:.4f}{'  (best, saved)' if improved else ''}", flush=True)
+            if improved:
+                best = current
+                model.save_pretrained(args.output / "adapter")
+        if step >= total_steps or out_of_time:
+            break
 
     (args.output / "history.json").write_text(json.dumps(history, indent=2))
     print(f"best eval loss {best:.4f}; merging adapter", flush=True)
