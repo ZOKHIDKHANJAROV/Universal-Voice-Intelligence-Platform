@@ -39,6 +39,8 @@ services:
     volumes:
       - navoiy-models:/models
       - ./infrastructure/navoiy-tts:/opt/tts-config:ro
+      # Code edits apply without rebuilding the 26 GB image.
+      - ./infrastructure/navoiy-tts/server.py:/opt/univoice-tts/server.py:ro
     gpus: all
     healthcheck:
       test:
@@ -55,6 +57,10 @@ services:
     restart: unless-stopped
 
   asterisk:
+    environment:
+      # Where Asterisk streams call audio. Set to host.docker.internal:9019
+      # when the API runs on the host instead of in the api container.
+      UNIVOICE_AUDIOSOCKET: ${UNIVOICE_AUDIOSOCKET:-api:9019}
     build:
       context: .
       dockerfile: infrastructure/asterisk/Dockerfile

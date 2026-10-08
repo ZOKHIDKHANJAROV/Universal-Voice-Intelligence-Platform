@@ -29,10 +29,13 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="re-render existing files")
     parser.add_argument("--dry-run", action="store_true", help="only report what is missing")
     parser.add_argument("--prune", action="store_true", help="delete files no phrase uses")
+    parser.add_argument("--language", help="only phrases in this language, e.g. ru")
     args = parser.parse_args()
 
     cache = get_prompt_cache()
     phrases = all_phrases()
+    if args.language:
+        phrases = [(text, lang) for text, lang in phrases if lang == args.language]
     directory = get_settings().tts_prompt_cache_dir
     print(f"{len(phrases)} phrase(s), cache: {directory}")
 
@@ -54,7 +57,9 @@ def main() -> int:
         print(f"  render  {label} ({time.perf_counter() - started:.1f}s)")
 
     if args.prune and not args.dry_run and directory.exists():
-        used = {cache.path_for(text, language).name for text, language in phrases}
+        # Every phrase counts as used, even with --language: pruning by the
+        # filtered list would delete the other languages' audio.
+        used = {cache.path_for(text, language).name for text, language in all_phrases()}
         for stale in directory.glob("*.wav"):
             if stale.name not in used:
                 stale.unlink()

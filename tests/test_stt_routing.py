@@ -65,3 +65,17 @@ def test_missing_local_uzbek_model_is_detected(tmp_path) -> None:
     assert _missing_local_model("models/no-such-model-ct2")
     assert not _missing_local_model(str(tmp_path))  # exists
     assert not _missing_local_model("navai-uz/whisper-medium-uzbek")  # HF repo id
+
+
+def test_warm_up_decodes_once_per_call_language(monkeypatch) -> None:
+    import app.speech.service as service
+
+    calls = []
+
+    class _Stt:
+        def transcribe_pcm16(self, audio, sample_rate, language=None, allowed_languages=()):
+            calls.append((len(audio), sample_rate, language))
+
+    monkeypatch.setattr(service, "get_stt", lambda: _Stt())
+    service.warm_up()
+    assert calls == [(8000, 8000, "uz"), (8000, 8000, "ru")]

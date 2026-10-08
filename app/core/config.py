@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # it rarely rescues a short phone utterance and can multiply latency.
     stt_temperature_fallback: bool = False
     stt_max_concurrency: int = 1
+    # Load and warm up the STT models when the service starts. Otherwise the
+    # first caller after a restart waits ~12 s while they load.
+    stt_preload: bool = True
     # Optional decoder prompt for STT_MODEL. Empty by default: all measured
     # configurations (docs/stt-evaluation.md) ran without one.
     stt_initial_prompt: str = ""

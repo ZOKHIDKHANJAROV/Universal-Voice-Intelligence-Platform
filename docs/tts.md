@@ -14,18 +14,25 @@ startup. See "Call audio" in the README for the workflow.
 ## Provider per language
 
 `TTS_PROVIDER` is used for every language unless `TTS_PROVIDER_RU` is set.
-CosyVoice2 does not officially list Russian, and Navoiy is fine-tuned on
-Uzbek, so listen to the rendered Russian prompts. If they are poor, render
-Russian with a CPU Piper voice instead:
+**Russian must use Piper.** Navoiy is fine-tuned on Uzbek only: its Russian
+prompts transcribed back with large-v3 gave 70–136% character error rate
+(gibberish), against 0.6–9.4% for the Piper voice below. Uzbek prompts from
+Navoiy transcribe back at 0–29%.
 
 ```env
 TTS_PROVIDER=navoiy-http
 TTS_PROVIDER_RU=piper
 TTS_BINARY=piper
-TTS_MODEL_PATH_RU=/models/piper/ru_RU-irina-medium.onnx
+TTS_MODEL_PATH_RU=/models/piper/ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx
 ```
 
-Since rendering happens offline, this choice costs nothing at call time.
+`pip install -e ".[tts-ru]"` provides the `piper` command and `make piper-ru`
+downloads the voice. Render one language at a time with
+`python -m scripts.render_prompts --language ru`. Since rendering happens
+offline, the voice choice costs nothing at call time.
+
+Russian phrases are written for the Russian voice: the greeting spells
+"Ассалому алейкум" in Cyrillic and numbers as words ("нажмите ноль").
 
 ## Navoiy
 
