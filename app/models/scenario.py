@@ -18,6 +18,8 @@ class Scenario(BaseModel):
     # Words naming the subject (water, money, machine). They raise confidence
     # but never select a scenario on their own: "suv" alone is not a complaint.
     context_keywords: list[str] = Field(default_factory=list)
+    # "transfer": hand the call to an operator instead of answering.
+    action: str | None = None
     steps: list[ScenarioStep]
     enabled: bool = True
 

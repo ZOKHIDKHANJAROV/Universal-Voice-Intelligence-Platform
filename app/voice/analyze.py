@@ -10,6 +10,7 @@ from app.audio.telephony import TELEPHONY_RATE, telephony
 from app.core.config import get_settings
 from app.intent.models import IntentResult
 from app.intent.service import get_intent_service
+from app.services.scenario_service import get_scenario_service
 from app.speech.service import transcribe_pcm16
 from app.tts.prompt_cache import get_prompt_cache
 from app.voice.responses import build_response
@@ -27,6 +28,8 @@ class CallAnalysis(BaseModel):
     # Name of the pre-rendered WAV, or None when it is not rendered and live
     # synthesis is unavailable.
     response_audio: str | None
+    # "transfer" when a live call would now be handed to an operator.
+    action: str | None = None
     warning: str | None = None
     timings_ms: dict[str, float]
 
@@ -50,6 +53,7 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
         intent=None, scenario_id=None, confidence=0.0, source="empty"
     )
     response_text, response_language = build_response(intent.scenario_id, caller_language)
+    scenario = get_scenario_service().get_scenario(intent.scenario_id) if intent.scenario_id else None
     intent_done = time.perf_counter()
 
     cache = get_prompt_cache()
@@ -71,6 +75,7 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
         response_text=response_text,
         response_language=response_language,
         response_audio=audio_name,
+        action=scenario.action if scenario else None,
         warning=warning,
         timings_ms={
             "stt": round((stt_done - started) * 1000),
