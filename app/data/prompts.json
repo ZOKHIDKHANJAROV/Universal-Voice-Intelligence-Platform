@@ -9,5 +9,13 @@
   "operator": {
     "uz": "Operator bilan bog'lanish uchun 0 ni bosing.",
     "ru": "Нажмите ноль для связи с оператором."
+  },
+  "transfer": {
+    "uz": "Operatorga ulayapman, iltimos, kuting.",
+    "ru": "Соединяю с оператором, пожалуйста, подождите."
+  },
+  "operator_unavailable": {
+    "uz": "Hozir barcha operatorlar band. Iltimos, muammoingizni aytib bering, yordam berishga harakat qilaman.",
+    "ru": "Сейчас все операторы заняты. Пожалуйста, опишите проблему, я постараюсь помочь."
   }
 }

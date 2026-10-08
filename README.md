@@ -16,6 +16,10 @@ Universal Voice Intelligence Platform for voice automation and AI-assisted call 
 
 Caller -> Asterisk / SIP -> STT -> Intent / LLM -> Scenario Engine -> TTS -> Caller
 
+Pressing **0**, or asking for an operator, ends the bot's part of the call:
+the dialplan asks the API what to do next (`/internal/calls/{uuid}/next`) and
+dials `UNIVOICE_OPERATOR`; if nobody answers, the caller returns to the bot.
+
 Asterisk streams call audio to the API over AudioSocket (port 9019). The API
 segments speech with webrtcvad, transcribes it with Whisper, matches a scenario,
 and plays the answer back. Answers are fixed scenario texts, so their audio is

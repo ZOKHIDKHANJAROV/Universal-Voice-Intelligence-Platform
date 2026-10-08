@@ -1,6 +1,11 @@
 {
   "complaints": [
     ["Suv chiqmayapti", "uz", "vending_no_water_uz"],
+    ["Operator bilan gaplashmoqchiman", "uz", "operator_request_uz"],
+    ["Iltimos, operatorga ulang", "uz", "operator_request_uz"],
+    ["Jonli odam bilan gaplashsam bo'ladimi", "uz", "operator_request_uz"],
+    ["Соедините с оператором", "ru", "operator_request_ru"],
+    ["Хочу поговорить с живым человеком", "ru", "operator_request_ru"],
     ["Apparatdan suv chiqmayapti", "uz", "vending_no_water_uz"],
     ["Tugmani bosdim, suv chiqmadi", "uz", "vending_no_water_uz"],
     ["suv chiqmavotti aka", "uz", "vending_no_water_uz"],

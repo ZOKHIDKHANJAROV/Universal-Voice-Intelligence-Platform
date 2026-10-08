@@ -14,11 +14,13 @@ $project = "universal-voice-intelligence-platform"
 
 # Asterisk streams call audio to the API on the host, not to an api container.
 $env:UNIVOICE_AUDIOSOCKET = "host.docker.internal:9019"
+$env:UNIVOICE_API = "host.docker.internal:8000"
 docker compose -p $project up -d --no-deps asterisk
 if ($LASTEXITCODE -ne 0) { throw "Could not start Asterisk. Is Docker Desktop running?" }
 
 Write-Host ""
 Write-Host "Asterisk: SIP 127.0.0.1:5060, user 1000, call extension 1000"
+Write-Host "Operator: register a second softphone as 1001 to receive 'press 0' transfers"
 Write-Host "Console:  http://localhost:8000/   (models warm up for ~10 s after start)"
 Write-Host ""
 
