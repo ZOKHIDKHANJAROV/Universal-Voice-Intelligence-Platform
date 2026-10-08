@@ -106,11 +106,35 @@ Caveats:
   audio rather than to a new spelling style.
 - Labels keep numbers as digits while the model writes them as words.
 
+## Scenario false triggers
+
+Better STT made keyword matching fire on ordinary speech: 64 of 380 real
+non-complaint sentences (FLEURS and podcast references plus STT output)
+matched a scenario, mostly through subject words such as `pul` (money),
+`suv` / `вода` (water) or `yomon` (bad), and through two matching bugs:
+`oqib` (flowing) fuzzy-matched `oʻqib` (reading), and `loy` (mud) matched
+`loyiha` (project). Subject words also pulled other complaints into the
+"no water" scenario ("Вода грязная", "Suv loyqa").
+
+Scenarios now separate `keywords` (the problem; at least one must match)
+from `context_keywords` (the subject; they only add confidence), stems are
+explicit (`chiqma*`), Uzbek stems skip first/second person forms
+(`chiqmayapman`, "I am not going out"), short keywords take only short
+endings, and fuzzy matching is limited to words of 7+ letters.
+
+| | before | after |
+|---|---|---|
+| Hand-written complaints routed correctly (`tests/data/intent_cases.json`) | 36/50 | 52/52 |
+| Hand-written non-complaints matched | 13/15 | 0/18 |
+| Real non-complaint sentences matched | 64/380 | 2/380 |
+
+The two remaining real matches use `loyqa` in its literal sense (silty
+ground). The hand-written cases were written together with the keywords;
+the 380 real sentences were not looked at while choosing them.
+
 ## Not measured yet
 
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.
-- Scenario false triggers: on this non-complaint speech 8 of 60 Uzbek clips
-  matched a scenario through short keywords such as `loy`, `pul`, `hid`.
 
 ## Reproduce the fine-tune
 

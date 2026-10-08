@@ -30,7 +30,19 @@ _UZ_CYRILLIC_TO_LATIN = str.maketrans({
     "ә": "a", "ө": "o'", "ұ": "u", "ү": "u", "ң": "ng", "і": "i", "һ": "h",
 })
 _NON_WORD = re.compile(r"[^\w']+")
-_FUZZY_MIN_RATIO = 85
+# Uzbek Cyrillic "е" starts a word as "ye": еб -> yeb, ер -> yer.
+_UZ_INITIAL_YE = re.compile(r"(?<!\w)е")
+# Typo tolerance only for long words: on short ones a single edit is a different
+# word (oqib "flowing" vs o'qib "reading") or a negation (oqyapti / oqmayapti).
+_FUZZY_MIN_LENGTH = 7
+# Complaints describe the machine in the third person (chiqmayapti, ishlamadi).
+# First and second person forms of the same verbs are about the speaker:
+# "chiqmayapman" (I am not going out), "ishlamayman" (I do not work).
+_UZ_PERSONAL_ENDINGS = (
+    "man", "manmi", "miz", "mizmi", "san", "sanmi", "siz", "sizmi",
+    "dim", "dik", "ding", "dingiz", "dingizmi",
+)
+_FUZZY_MIN_RATIO = 90
 
 
 def normalize_text(text: str) -> str:
@@ -40,7 +52,7 @@ def normalize_text(text: str) -> str:
 
 def to_uzbek_latin(text: str) -> str:
     """Normalize and transliterate Uzbek Cyrillic to Latin."""
-    return normalize_text(text).translate(_UZ_CYRILLIC_TO_LATIN)
+    return _UZ_INITIAL_YE.sub("ye", normalize_text(text)).translate(_UZ_CYRILLIC_TO_LATIN)
 
 
 def _common_prefix(a: str, b: str) -> int:
@@ -56,26 +68,39 @@ def _token_matches(keyword: str, token: str) -> bool:
     """Match one keyword word against one spoken word, tolerating inflection.
 
     Uzbek is agglutinative (chiqmayapti / chiqmadi / chiqmayobdi) and Russian
-    changes endings (вода / воду / воды), so exact substrings miss most real
-    phrasings. A shared stem plus a typo-tolerant ratio covers both cheaply.
+    changes endings (вода / воду / воды). Stems are marked explicitly with "*";
+    plain keywords only accept a short ending, so "pul" matches pulim but not
+    an unrelated longer word, and "loy" (mud) does not match loyiha (project).
     """
+    if keyword.endswith("*"):
+        stem = keyword[:-1]
+        if not token.startswith(stem):
+            return False
+        is_uzbek_latin = stem.isascii()
+        return not (is_uzbek_latin and token[len(stem):].endswith(_UZ_PERSONAL_ENDINGS))
+    if token == keyword:
+        return True
     if len(keyword) <= 2:
-        return token == keyword
+        # Particles like "не" must not match "нет".
+        return False
+    extra = len(token) - len(keyword)
+    if len(keyword) <= 3:
+        return token.startswith(keyword) and extra <= 2
+    if len(keyword) <= 5:
+        # вода -> воды / водой, but not водитель.
+        return extra <= 3 and _common_prefix(keyword, token) >= len(keyword) - 1
     if token.startswith(keyword):
         return True
-    prefix = _common_prefix(keyword, token)
-    if len(keyword) <= 5:
-        if prefix >= max(3, len(keyword) - 1):
-            return True
-    elif prefix >= max(5, math.ceil(len(keyword) * 0.55)):
+    if _common_prefix(keyword, token) >= max(5, math.ceil(len(keyword) * 0.55)):
         return True
-    return fuzz.ratio(keyword, token) >= _FUZZY_MIN_RATIO
+    return len(keyword) >= _FUZZY_MIN_LENGTH and fuzz.ratio(keyword, token) >= _FUZZY_MIN_RATIO
 
 
 def keyword_matches(keyword: str, tokens: list[str]) -> bool:
     """Every word of a (possibly multi-word) keyword must match a distinct token."""
     remaining = list(tokens)
-    for word in normalize_text(keyword).split():
+    for raw in keyword.split():
+        word = normalize_text(raw) + ("*" if raw.endswith("*") else "")
         for index, token in enumerate(remaining):
             if _token_matches(word, token):
                 del remaining[index]
@@ -107,10 +132,12 @@ class ScenarioService:
         return None
 
     def resolve(self, text: str, language: str | None = None) -> tuple[Scenario | None, float]:
-        """Pick the scenario with the most matching keywords.
+        """Pick the scenario whose problem keywords match best.
 
-        Scenarios in ``language`` are tried first; the rest only if none of them
-        match, so a Russian caller is not routed to the Uzbek twin of a scenario.
+        A scenario needs at least one problem keyword; context keywords only add
+        confidence and break ties. Scenarios in ``language`` are tried first and
+        the rest only if none match, so a Russian caller is not routed to the
+        Uzbek twin of a scenario.
         """
         normalized = normalize_text(text)
         tokens = normalized.split()
@@ -124,25 +151,30 @@ class ScenarioService:
             groups = [candidates]
 
         for group in groups:
-            best_scenario, best_score = self._best_match(tokens, latin_tokens, group)
-            if best_scenario is not None:
-                confidence = min(1.0, 0.5 + 0.15 * best_score)
-                return best_scenario, round(confidence, 2)
+            match = self._best_match(tokens, latin_tokens, group)
+            if match is not None:
+                scenario, problems, context = match
+                confidence = min(1.0, 0.5 + 0.15 * problems + 0.05 * context)
+                return scenario, round(confidence, 2)
         return None, 0.0
 
     @staticmethod
     def _best_match(
         tokens: list[str], latin_tokens: list[str], scenarios: list[Scenario]
-    ) -> tuple[Scenario | None, int]:
-        best_scenario: Scenario | None = None
-        best_score = 0
+    ) -> tuple[Scenario, int, int] | None:
+        best: tuple[Scenario, int, int] | None = None
+        best_score = 0.0
         for scenario in scenarios:
             words = latin_tokens if scenario.language == "uz" else tokens
-            score = sum(1 for keyword in scenario.keywords if keyword_matches(keyword, words))
+            problems = sum(keyword_matches(k, words) for k in scenario.keywords)
+            if not problems:
+                continue
+            context = sum(keyword_matches(k, words) for k in scenario.context_keywords)
+            score = problems + 0.25 * context
             if score > best_score:
                 best_score = score
-                best_scenario = scenario
-        return best_scenario, best_score
+                best = (scenario, problems, context)
+        return best
 
 
 @lru_cache(maxsize=1)
