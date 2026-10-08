@@ -148,6 +148,12 @@ Needs a CUDA build of torch, `peft` and `pyarrow` (see the script header).
 by `make uz-model`) and writes `models/whisper-medium-uzbek-podcasts-ct2`;
 point `STT_MODEL_UZ` at it.
 
+The result of this run is published:
+[ZOKHID/univoice-stt-uz-ct2](https://huggingface.co/ZOKHID/univoice-stt-uz-ct2)
+for faster-whisper and
+[ZOKHID/univoice-stt-uz](https://huggingface.co/ZOKHID/univoice-stt-uz)
+with transformers weights and the LoRA adapter.
+
 ## Reproduce
 
     pip install -e ".[dev,convert]"
