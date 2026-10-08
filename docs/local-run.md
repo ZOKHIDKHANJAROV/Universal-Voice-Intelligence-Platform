@@ -56,6 +56,12 @@ This starts Asterisk and the API. Then:
 - **Console:** <http://localhost:8000/>. Test speech or text, edit scenarios.
 - **Phone call:** in a softphone (e.g. MicroSIP) add an account with server
   `127.0.0.1`, user `1000`, password `change-me`, UDP, and call `1000`.
+- **Operator:** register a second softphone (or a second account) as `1001`
+  with the same password. Pressing **0** or saying "operator" / "оператор"
+  during a call rings `1001`; if nobody answers within 45 s the caller goes
+  back to the bot, which says all operators are busy and keeps helping.
+  With a provider trunk, point `UNIVOICE_OPERATOR` at a real number, e.g.
+  `PJSIP/998901234567@trunk`.
   For a softphone on another device in the same network, set
   `external_media_address` in `infrastructure/asterisk/pjsip.conf` to the
   laptop's LAN IP and use that IP as the server.

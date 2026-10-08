@@ -257,6 +257,7 @@ async function analyze(blob, name) {
           <dt>Язык</dt><dd>${esc(r.language)} <span class="muted">(${(r.language_probability * 100).toFixed(0)}%)</span></dd>
           <dt>Сценарий</dt><dd>${scenarioLabel(r.intent.scenario_id)} · уверенность ${(r.intent.confidence * 100).toFixed(0)}% · ${esc(r.intent.source)}</dd>
           <dt>Ответ бота</dt><dd>${esc(r.response_text)} <span class="badge">${esc(r.response_language)}</span>
+            ${r.action === "transfer" ? '<span class="badge warn">перевод на оператора</span>' : ""}
             ${r.response_audio ? `<audio controls autoplay src="/api/v1/console/prompts/audio/${esc(r.response_audio)}"></audio>` : ""}</dd>
           <dt>Время</dt><dd>
             <div class="bars"><span style="width:${t.stt / total * 100}%"></span><span style="width:${t.intent / total * 100}%"></span><span style="width:${t.audio / total * 100}%"></span></div>
