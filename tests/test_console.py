@@ -1,4 +1,5 @@
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -36,6 +37,15 @@ def test_console_page_is_served() -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "UniVoice" in response.text
+    assert response.headers["cache-control"] == "no-cache"
+
+
+@pytest.mark.parametrize("page", ["/", "/monitor"])
+def test_page_scripts_have_no_regex_split_across_lines(page) -> None:
+    # A literal newline inside /[...]/ is a syntax error that kills the whole page.
+    script = client.get(page).text.split("<script>", 1)[1]
+    broken = [line for line in script.splitlines() if re.search(r"\(/\[[^\]]*$", line)]
+    assert broken == []
 
 
 def test_analyze_runs_the_call_path(prompt_dir, monkeypatch) -> None:
