@@ -299,8 +299,7 @@ async function resolveText() {
 }
 
 // Scenarios
-const splitWords = (value) => value.split(/[,
-]/).map((w) => w.trim()).filter(Boolean);
+const splitWords = (value) => value.split(/[,\n]/).map((w) => w.trim()).filter(Boolean);
 async function loadScenarios() {
   try {
     const [scenarios, prompts] = await Promise.all([
