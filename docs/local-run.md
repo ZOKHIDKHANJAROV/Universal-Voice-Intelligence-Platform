@@ -24,7 +24,8 @@ make piper-ru            # Russian voice for the bot's Russian answers
 STT_MODEL=large-v3
 STT_DEVICE=cuda
 STT_COMPUTE_TYPE=int8_float16
-STT_MODEL_UZ=ZOKHID/univoice-stt-uz-ct2   # downloads once (~0.74 GB)
+# Downloads once from Hugging Face (~0.74 GB).
+STT_MODEL_UZ=ZOKHID/univoice-stt-uz-ct2
 STT_INITIAL_PROMPT=
 TTS_PROMPT_CACHE_DIR=data/prompts
 TTS_PROVIDER_RU=piper
