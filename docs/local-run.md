@@ -15,7 +15,6 @@ browser ──HTTP──> http://localhost:8000/ (console) ───────
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev,gpu,tts-ru]"
-make uz-model            # or: STT_MODEL_UZ=<hf user>/univoice-stt-uz-ct2
 make piper-ru            # Russian voice for the bot's Russian answers
 ```
 
@@ -25,7 +24,8 @@ make piper-ru            # Russian voice for the bot's Russian answers
 STT_MODEL=large-v3
 STT_DEVICE=cuda
 STT_COMPUTE_TYPE=int8_float16
-STT_MODEL_UZ=models/whisper-medium-uzbek-podcasts-ct2
+# Downloads once from Hugging Face (~0.74 GB).
+STT_MODEL_UZ=ZOKHID/univoice-stt-uz-ct2
 STT_INITIAL_PROMPT=
 TTS_PROMPT_CACHE_DIR=data/prompts
 TTS_PROVIDER_RU=piper
