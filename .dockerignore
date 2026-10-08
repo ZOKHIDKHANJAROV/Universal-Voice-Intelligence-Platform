@@ -1,0 +1,14 @@
+# Keep the build context small: models, data and virtualenvs are mounted
+# into the containers (docker-compose.yml), not baked into images.
+.git
+.claude
+.venv
+venv
+.pytest_cache
+**/__pycache__
+*.egg-info
+.env
+/models
+/data
+/*.wav
+tests
