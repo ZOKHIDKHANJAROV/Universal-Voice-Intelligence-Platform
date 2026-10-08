@@ -26,6 +26,10 @@ gpu = [
     "nvidia-cublas-cu12>=12.4,<13",
     "nvidia-cudnn-cu12>=9.1,<10",
 ]
+# Russian prompt voice (Navoiy is Uzbek-only): TTS_PROVIDER_RU=piper.
+tts-ru = [
+    "piper-tts>=1.2",
+]
 # Only for scripts/convert_whisper.py (CPU torch is enough).
 convert = [
     "torch>=2.3",

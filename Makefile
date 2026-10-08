@@ -1,4 +1,4 @@
-.PHONY: install run test lint docker-up render-prompts uz-model uz-finetune
+.PHONY: install run test lint docker-up render-prompts uz-model uz-finetune piper-ru
 
 install:
 	python -m pip install -e ".[dev]"
@@ -39,3 +39,7 @@ uz-finetune:
 		--eval $(PODCASTS)/train-00003-of-00026.parquet \
 		--epochs 1 --eval-every 50 --output models/ft/podcasts
 	python -m scripts.convert_whisper models/ft/podcasts/merged models/whisper-medium-uzbek-podcasts-ct2
+
+# Russian Piper voice for the bot's Russian phrases (~63 MB, CPU).
+piper-ru:
+	HF_HUB_DISABLE_XET=1 python -c "from huggingface_hub import hf_hub_download as d; [d('rhasspy/piper-voices', f'ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx{s}', local_dir='models/piper') for s in ('', '.json')]"

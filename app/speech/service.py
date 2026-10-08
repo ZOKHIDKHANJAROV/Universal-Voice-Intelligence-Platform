@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 from functools import lru_cache
 from pathlib import Path
 
@@ -59,6 +60,15 @@ def _stt_slots() -> threading.BoundedSemaphore:
     # Concurrent transcriptions each allocate their own activations; on a small
     # GPU that is the difference between queueing briefly and running out of VRAM.
     return threading.BoundedSemaphore(max(1, get_settings().stt_max_concurrency))
+
+
+def warm_up() -> float:
+    """Load the models and run one tiny decode per language; return seconds taken."""
+    started = time.perf_counter()
+    silence = np.zeros(8000, dtype=np.float32)
+    for language in get_settings().stt_realtime_languages:
+        transcribe_pcm16(silence, 8000, language)
+    return time.perf_counter() - started
 
 
 def transcribe(audio_path: Path, language: str | None = None) -> TranscriptionResult:
