@@ -27,27 +27,12 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
 from rapidfuzz.distance import Levenshtein
 
-from app.audio.resample import resample
+from app.audio.telephony import TELEPHONY_RATE, telephony
 from app.core.config import get_settings
 from app.intent.service import get_intent_service
 from app.services.scenario_service import normalize_text, to_uzbek_latin
-
-TELEPHONY_RATE = 8000
-_MU = 255.0
-
-
-def telephony(audio16: np.ndarray, mu_law: bool = True) -> np.ndarray:
-    """Downsample to 8 kHz and round-trip through 8-bit mu-law like G.711."""
-    audio = np.clip(resample(audio16, 16000, TELEPHONY_RATE), -1.0, 1.0)
-    if not mu_law:
-        return audio
-    compressed = np.sign(audio) * np.log1p(_MU * np.abs(audio)) / np.log1p(_MU)
-    quantized = np.round((compressed + 1.0) * 127.5) / 127.5 - 1.0
-    return (np.sign(quantized) * np.expm1(np.abs(quantized) * np.log1p(_MU)) / _MU).astype(np.float32)
-
 
 def comparable(text: str, language: str) -> str:
     return to_uzbek_latin(text) if language == "uz" else normalize_text(text)

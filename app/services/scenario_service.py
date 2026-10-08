@@ -1,12 +1,14 @@
 import json
 import math
+import os
 import re
+import threading
 from functools import lru_cache
 from pathlib import Path
 
 from rapidfuzz import fuzz
 
-from app.models.scenario import Scenario
+from app.models.scenario import Scenario, ScenarioUpdate
 
 # Uzbek Latin uses several look-alike apostrophes (o', o‘, oʻ, o`); STT output
 # and hand-written keywords rarely agree on which one. Whisper also leaks
@@ -96,13 +98,24 @@ def _token_matches(keyword: str, token: str) -> bool:
     return len(keyword) >= _FUZZY_MIN_LENGTH and fuzz.ratio(keyword, token) >= _FUZZY_MIN_RATIO
 
 
+def _bare_matches(bare: str, token: str) -> bool:
+    """Strict match for a keyword with its apostrophe dropped: no stem guessing."""
+    if bare.endswith("*"):
+        return _token_matches(bare, token)
+    return token.startswith(bare) and len(token) - len(bare) <= 2
+
+
 def keyword_matches(keyword: str, tokens: list[str]) -> bool:
     """Every word of a (possibly multi-word) keyword must match a distinct token."""
     remaining = list(tokens)
     for raw in keyword.split():
         word = normalize_text(raw) + ("*" if raw.endswith("*") else "")
+        # Uzbek Latin is often typed without apostrophes (qoydi for qo'ydi), so
+        # a keyword's apostrophe is optional. The reverse is not: "oqib"
+        # (flowing) must not match "o'qib" (reading).
+        bare = word.replace("'", "")
         for index, token in enumerate(remaining):
-            if _token_matches(word, token):
+            if _token_matches(word, token) or (bare != word and _bare_matches(bare, token)):
                 del remaining[index]
                 break
         else:
@@ -116,6 +129,7 @@ class ScenarioService:
             Path(__file__).resolve().parents[1] / "data" / "scenarios.json"
         )
         self._scenarios = self._load()
+        self._lock = threading.Lock()
 
     def _load(self) -> list[Scenario]:
         with self._data_path.open("r", encoding="utf-8") as file:
@@ -124,6 +138,47 @@ class ScenarioService:
 
     def list_scenarios(self) -> list[Scenario]:
         return [scenario for scenario in self._scenarios if scenario.enabled]
+
+    def all_scenarios(self) -> list[Scenario]:
+        return list(self._scenarios)
+
+    def update(self, scenario_id: str, changes: ScenarioUpdate) -> Scenario:
+        """Apply console edits in memory and persist them to the JSON file.
+
+        Everything that resolves intents shares this instance, so edits take
+        effect on the next call without a restart.
+        """
+        with self._lock:
+            index = next(
+                (i for i, s in enumerate(self._scenarios) if s.id == scenario_id), None
+            )
+            if index is None:
+                raise KeyError(scenario_id)
+            scenario = self._scenarios[index]
+            update: dict = {}
+            for field in ("keywords", "context_keywords"):
+                words = getattr(changes, field)
+                if words is not None:
+                    update[field] = [w.strip() for w in words if w.strip()]
+            if changes.enabled is not None:
+                update["enabled"] = changes.enabled
+            if changes.message is not None:
+                if not scenario.steps:
+                    raise ValueError("Scenario has no step to hold a message")
+                first = scenario.steps[0].model_copy(update={"message": changes.message.strip()})
+                update["steps"] = [first, *scenario.steps[1:]]
+            updated = scenario.model_copy(update=update)
+            if updated.enabled and not updated.keywords:
+                raise ValueError("An enabled scenario needs at least one problem keyword")
+            self._scenarios[index] = updated
+            self._save()
+            return updated
+
+    def _save(self) -> None:
+        data = [s.model_dump() for s in self._scenarios]
+        temporary = self._data_path.with_suffix(".tmp")
+        temporary.write_text(_dump(data), encoding="utf-8")
+        os.replace(temporary, self._data_path)
 
     def get_scenario(self, scenario_id: str) -> Scenario | None:
         for scenario in self._scenarios:
@@ -175,6 +230,18 @@ class ScenarioService:
                 best_score = score
                 best = (scenario, problems, context)
         return best
+
+
+def _dump(scenarios: list[dict]) -> str:
+    """JSON with one keyword list per line, as the file is written by hand."""
+    blocks = []
+    for scenario in scenarios:
+        block = json.dumps(scenario, ensure_ascii=False, indent=2)
+        for key in ("keywords", "context_keywords"):
+            expanded = json.dumps(scenario[key], ensure_ascii=False, indent=2).replace("\n", "\n  ")
+            block = block.replace(f'"{key}": {expanded}', f'"{key}": {json.dumps(scenario[key], ensure_ascii=False)}')
+        blocks.append("\n".join("  " + line for line in block.split("\n")))
+    return "[\n" + ",\n".join(blocks) + "\n]\n"
 
 
 @lru_cache(maxsize=1)

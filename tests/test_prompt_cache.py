@@ -1,6 +1,7 @@
 import wave
 
 import numpy as np
+import pytest
 
 import app.tts.prompt_cache as prompt_cache
 from app.audio.resample import pcm16_to_wav
@@ -53,3 +54,19 @@ def test_all_phrases_cover_prompts_and_scenarios() -> None:
     assert prompt_text("not_understood", "ru") in phrases
     assert any(language == "ru" and text.startswith("Приносим") for text, language in phrases)
     assert len(phrases) == len(set(phrases))
+
+
+def test_failed_live_synthesis_is_not_retried_immediately(tmp_path, monkeypatch) -> None:
+    attempts = []
+
+    def unavailable(text: str, language: str) -> bytes:
+        attempts.append(text)
+        raise OSError("TTS service is unavailable")
+
+    monkeypatch.setattr(prompt_cache, "synthesize_bytes", unavailable)
+    cache = prompt_cache.PromptAudioCache(tmp_path)
+    for _ in range(3):
+        with pytest.raises(OSError):
+            cache.get_or_render_pcm8("Salom", "uz")
+    # Each attempt waits for a connection timeout; only the first one is made.
+    assert attempts == ["Salom"]

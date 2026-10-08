@@ -9,6 +9,7 @@ import hashlib
 import logging
 import os
 import threading
+import time
 from functools import lru_cache
 from pathlib import Path
 
@@ -19,6 +20,9 @@ from app.tts.service import synthesize_bytes
 LOGGER = logging.getLogger("univoice.prompts")
 
 TELEPHONY_RATE = 8000
+# After a failed live synthesis, skip further attempts for this long: each one
+# waits for the TTS connection to time out (~2.3 s of silence per call turn).
+LIVE_RENDER_BACKOFF_SECONDS = 60.0
 
 
 class PromptAudioCache:
@@ -26,6 +30,7 @@ class PromptAudioCache:
         self._directory = directory
         self._memory: dict[Path, bytes] = {}
         self._lock = threading.Lock()
+        self._live_render_blocked_until = 0.0
 
     def path_for(self, text: str, language: str) -> Path:
         # Keyed by content, so editing a phrase invalidates its audio automatically.
@@ -62,18 +67,27 @@ class PromptAudioCache:
         cached = self.get_pcm8(text, language)
         if cached is not None:
             return cached
-        LOGGER.warning(
-            "Prompt not pre-rendered, synthesizing live (run scripts/render_prompts.py): %r",
-            text,
-        )
-        self.render(text, language)
+        self._render_live(text, language)
         return self.get_pcm8(text, language) or b""
 
     def get_or_render_path(self, text: str, language: str) -> Path:
         path = self.path_for(text, language)
         if not path.exists():
-            self.render(text, language)
+            self._render_live(text, language)
         return path
+
+    def _render_live(self, text: str, language: str) -> None:
+        if time.monotonic() < self._live_render_blocked_until:
+            raise OSError("TTS was unavailable moments ago; not retrying yet")
+        LOGGER.warning(
+            "Prompt not pre-rendered, synthesizing live (run scripts/render_prompts.py): %r",
+            text,
+        )
+        try:
+            self.render(text, language)
+        except (OSError, ValueError):
+            self._live_render_blocked_until = time.monotonic() + LIVE_RENDER_BACKOFF_SECONDS
+            raise
 
     def preload(self, phrases: list[tuple[str, str]]) -> list[tuple[str, str]]:
         """Load rendered phrases into memory; return the ones still missing."""

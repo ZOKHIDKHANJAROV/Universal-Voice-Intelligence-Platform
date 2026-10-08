@@ -1,6 +1,7 @@
 import numpy as np
 
-from scripts.eval_stt import error_rates, telephony
+from app.audio.telephony import telephony
+from scripts.eval_stt import error_rates
 
 
 def test_telephony_keeps_speech_band_and_halves_rate() -> None:

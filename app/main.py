@@ -2,9 +2,12 @@ import asyncio
 import logging
 import secrets
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import FileResponse
 
+from app.api.routes.console import router as console_router
 from app.api.routes.health import router as health_router
 from app.api.routes.intent import router as intent_router
 from app.api.routes.scenarios import router as scenarios_router
@@ -59,3 +62,12 @@ app.include_router(stt_router, dependencies=protected)
 app.include_router(voice_router, dependencies=protected)
 app.include_router(intent_router, dependencies=protected)
 app.include_router(tts_router, dependencies=protected)
+app.include_router(console_router, dependencies=protected)
+
+CONSOLE_PAGE = Path(__file__).parent / "web" / "index.html"
+
+
+@app.get("/", include_in_schema=False)
+def console() -> FileResponse:
+    # Static page; every action it takes goes through the protected API.
+    return FileResponse(CONSOLE_PAGE, media_type="text/html")
