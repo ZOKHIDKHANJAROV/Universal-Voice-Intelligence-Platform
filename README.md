@@ -107,6 +107,9 @@ Browsers only allow the microphone on `localhost` or over HTTPS.
 
 ## Run locally
 
+On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md)
+(Asterisk in Docker, API on the host, one-command start).
+
     python -m venv .venv
     source .venv/bin/activate        # Windows: .venv\Scripts\activate
     pip install -e ".[dev]"          # add ,gpu for CUDA: ".[dev,gpu]"
