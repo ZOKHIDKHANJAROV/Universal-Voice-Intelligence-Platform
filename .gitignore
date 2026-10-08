@@ -20,4 +20,10 @@ infrastructure/navoiy-tts/reference.wav
 data/eval/
 
 # Downloaded and converted STT models.
-models/
+/models/
+
+# Downloaded training corpora.
+data/train/
+
+# Locally rendered prompt audio (TTS_PROMPT_CACHE_DIR=data/prompts).
+/data/prompts/

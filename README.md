@@ -53,7 +53,9 @@ Russian by default).
 Stock Whisper barely understands Uzbek over the phone (88% word error rate).
 `make uz-model` downloads and converts an Uzbek fine-tune; with
 `STT_MODEL_UZ` set, Uzbek speech goes to it and `STT_MODEL` keeps handling
-Russian. That brings Uzbek to 22% WER with Russian unchanged at 4.5%. See
+Russian. That brings Uzbek to 22% WER with Russian unchanged at 4.5%.
+`make uz-finetune` further adapts it to conversational Tashkent-dialect
+speech (73.5% -> 34.5% WER on podcasts, read speech unchanged). See
 [docs/stt-evaluation.md](docs/stt-evaluation.md) for the measurements and
 how to re-run them on your own recordings.
 
@@ -86,7 +88,27 @@ are named by a hash of their text, so only edited phrases are re-rendered. Use
 that was never rendered is synthesized live on first use, which only works
 while the TTS service is running.
 
+## Web console
+
+Open `http://localhost:8000/` once the API runs. It is a single static page
+(`app/web/index.html`, no build step) for testing and tuning the bot:
+
+- **Речь** — record from the microphone or upload a file; it goes through the
+  call path (8 kHz G.711 simulation, language detection, STT, scenario) and
+  shows the transcript, scenario, confidence, per-stage timings and plays the
+  bot's answer.
+- **Текст** — type a caller phrase and see which scenario fires, live.
+- **Сценарии** — edit problem keywords, context keywords and the answer text;
+  changes apply immediately and are saved to `app/data/scenarios.json`.
+  New answer text needs `make render-prompts`.
+- **Доступ** — the `API_KEY` to send, if one is set.
+
+Browsers only allow the microphone on `localhost` or over HTTPS.
+
 ## Run locally
+
+On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md)
+(Asterisk in Docker, API on the host, one-command start).
 
     python -m venv .venv
     source .venv/bin/activate        # Windows: .venv\Scripts\activate
@@ -115,6 +137,10 @@ Set `API_KEY` to require an `X-API-Key` header on all `/api/v1` routes.
 - POST /api/v1/stt/transcribe
 - POST /api/v1/tts/synthesize
 - POST /api/v1/voice/process
+- PUT /api/v1/scenarios/{scenario_id}
+- POST /api/v1/console/analyze
+- GET /api/v1/console/prompts
+- GET /api/v1/console/system
 
 ## Roadmap
 

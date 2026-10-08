@@ -1,3 +1,5 @@
+import os
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +24,48 @@ def _family_score(code: str, probabilities: dict[str, float]) -> float:
     return probabilities.get(code, 0.0) + sum(probabilities.get(r, 0.0) for r in relatives)
 
 
+@lru_cache(maxsize=1)
+def _expose_nvidia_dlls() -> None:
+    """Let CTranslate2 find cuBLAS/cuDNN on Windows.
+
+    On Linux the Dockerfile sets LD_LIBRARY_PATH. On Windows the DLLs come
+    either from pip's NVIDIA wheels (site-packages/nvidia/*/bin) or from a
+    CUDA 12 build of torch (torch/lib); the loader searches neither.
+    """
+    if os.name != "nt":
+        return
+    import importlib.util
+
+    directories: list[Path] = []
+    nvidia = importlib.util.find_spec("nvidia")
+    for base in (nvidia.submodule_search_locations or []) if nvidia else []:
+        directories += sorted(Path(base).glob("*/bin"))
+    torch = importlib.util.find_spec("torch")
+    if torch and torch.origin:
+        directories.append(Path(torch.origin).parent / "lib")
+    for directory in directories:
+        if directory.is_dir():
+            os.add_dll_directory(str(directory))
+            os.environ["PATH"] = f"{directory}{os.pathsep}{os.environ.get('PATH', '')}"
+
+
+# Text Whisper produces from silence or noise, learned from subtitle credits.
+# Seen on a misrouted Uzbek call: "Субтитры добавил DimaTorzok".
+_HALLUCINATIONS = (
+    "субтитр",
+    "dimatorzok",
+    "продолжение следует",
+    "спасибо за просмотр",
+    "подписывайтесь на канал",
+    "редактор субтитров",
+)
+
+
+def is_hallucination(text: str) -> bool:
+    lowered = text.casefold()
+    return any(marker in lowered for marker in _HALLUCINATIONS)
+
+
 def pick_language(probabilities: dict[str, float], allowed: tuple[str, ...]) -> tuple[str, float]:
     """Best allowed language by family score, with that score as its probability."""
     scores = {code: _family_score(code, probabilities) for code in allowed}
@@ -38,7 +82,10 @@ class FasterWhisperSpeechToText(SpeechToText):
         beam_size: int = 1,
         initial_prompt: str | None = None,
         without_timestamps: bool = False,
+        temperature_fallback: bool = True,
     ) -> None:
+        if device != "cpu":
+            _expose_nvidia_dlls()
         from faster_whisper import WhisperModel
 
         self._model = WhisperModel(
@@ -49,6 +96,11 @@ class FasterWhisperSpeechToText(SpeechToText):
         self._beam_size = beam_size
         self._initial_prompt = initial_prompt or None
         self._without_timestamps = without_timestamps
+        # Each fallback temperature is a full re-decode: one bad utterance took
+        # 16 s on GPU. Greedy-only keeps call latency bounded.
+        self._temperature = (
+            [0.0, 0.2, 0.4, 0.6, 0.8, 1.0] if temperature_fallback else [0.0]
+        )
 
     def transcribe(self, audio_path: Path, language: str | None = None) -> TranscriptionResult:
         # Uploaded files may contain long silences, so keep Silero VAD here.
@@ -93,6 +145,8 @@ class FasterWhisperSpeechToText(SpeechToText):
             segments, info = self._transcribe(audio, fallback, vad_filter)
 
         text = " ".join(segment.text.strip() for segment in segments).strip()
+        if is_hallucination(text):
+            text = ""
         return TranscriptionResult(
             text=text,
             language=info.language,
@@ -110,4 +164,5 @@ class FasterWhisperSpeechToText(SpeechToText):
             condition_on_previous_text=False,
             initial_prompt=self._initial_prompt,
             without_timestamps=self._without_timestamps,
+            temperature=self._temperature,
         )

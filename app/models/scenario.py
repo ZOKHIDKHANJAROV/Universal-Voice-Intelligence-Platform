@@ -12,9 +12,23 @@ class Scenario(BaseModel):
     title: str
     description: str
     language: str = "uz"
+    # Words that state the problem; a scenario needs at least one to match.
+    # A trailing "*" marks a stem: "chiqma*" covers chiqmayapti, chiqmadi, ...
     keywords: list[str] = Field(default_factory=list)
+    # Words naming the subject (water, money, machine). They raise confidence
+    # but never select a scenario on their own: "suv" alone is not a complaint.
+    context_keywords: list[str] = Field(default_factory=list)
     steps: list[ScenarioStep]
     enabled: bool = True
+
+
+class ScenarioUpdate(BaseModel):
+    """Fields the web console may edit; omitted fields stay as they are."""
+
+    keywords: list[str] | None = None
+    context_keywords: list[str] | None = None
+    message: str | None = Field(default=None, min_length=1, max_length=1000)
+    enabled: bool | None = None
 
 
 class ScenarioResolveRequest(BaseModel):

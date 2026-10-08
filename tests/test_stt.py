@@ -29,6 +29,7 @@ def _stt(model: _FakeModel) -> FasterWhisperSpeechToText:
     stt._beam_size = 1
     stt._initial_prompt = None
     stt._without_timestamps = False
+    stt._temperature = [0.0]
     return stt
 
 
@@ -87,3 +88,18 @@ def test_without_timestamps_is_passed_to_whisper() -> None:
     stt._without_timestamps = True
     stt.transcribe_pcm16(np.zeros(8000, dtype=np.float32), 8000, language="uz")
     assert model.calls[0]["without_timestamps"] is True
+
+
+def test_known_hallucinations_become_silence() -> None:
+    model = _FakeModel("ru", [("ru", 0.9)])
+    model.transcribe = lambda audio, **kw: (
+        iter([SimpleNamespace(text=" Субтитры добавил DimaTorzok ")]),
+        SimpleNamespace(language="ru", language_probability=0.9, duration=1.0, all_language_probs=None),
+    )
+    assert _stt(model).transcribe_pcm16(np.zeros(8000, np.float32), 8000).text == ""
+
+
+def test_greedy_only_by_default_in_production() -> None:
+    from app.core.config import get_settings
+
+    assert get_settings().stt_temperature_fallback is False

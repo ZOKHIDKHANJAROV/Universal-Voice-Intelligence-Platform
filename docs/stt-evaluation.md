@@ -46,14 +46,107 @@ Notes:
 | With timestamps the fine-tune dropped the first words ("ishlamayapti" instead of "internet ishlamayapti") | WER 75% instead of 20% on affected clips | `STT_WITHOUT_TIMESTAMPS_UZ=true` |
 | Picking the best of uz/ru chose Russian for Uzbek speech | Uzbek written as Cyrillic transliteration | Family scoring |
 
+## GPU latency
+
+RTX 4060 Laptop, `int8_float16`, `large-v3` + `navai` loaded together,
+greedy decoding only (`STT_TEMPERATURE_FALLBACK=false`):
+
+| Utterance length | Median | Max |
+|---|---|---|
+| under 8 s | 1.2 s | 1.6 s |
+| 8–15 s | 1.5 s | 2.3 s |
+| 15–30 s | 1.8 s | 2.3 s |
+
+Peak VRAM with both models: ~4.1 GB. With temperature fallback on, one
+Uzbek clip misrouted to Russian produced "Субтитры добавил DimaTorzok" and
+took 16 s; such subtitle hallucinations are now treated as silence.
+
+## Fine-tuning on conversational speech
+
+`navai-uz` was trained on read speech only. On conversational
+Tashkent-dialect podcasts it scores 73.5% WER, against 17.5% on FLEURS.
+A LoRA pilot (`scripts/finetune_whisper.py`) on 3 shards (12.2 h) of
+`islomov/podcasts_tashkent_dialect_youtube_uzbek_speech_dataset`
+(Apache-2.0, Gemini 2.5 Pro transcripts), half the clips degraded to phone
+audio, 2 epochs, rank 32, lr 1e-4:
+
+| Test set (GPU, forced `uz`, no timestamps) | `navai-uz` | pilot |
+|---|---|---|
+| Podcasts, held-out shard, 100 clips | 73.5% WER / 45.2% CER | **48.8% / 23.0%** |
+| FLEURS read speech, 60 clips | 17.5% / 6.4% | 18.7% / 6.3% |
+
+Held-out loss fell from 2.31 to 0.90 over 105 steps (52 minutes, 2.96 GiB
+peak VRAM).
+
+The full run used all 25 training shards (~14,000 clips, ~95 h), one epoch,
+same settings, training while the corpus downloaded (`--expect-shards 25`):
+438 steps in 3.2 h on the RTX 4060 Laptop, 2.97 GiB peak VRAM, best held-out
+loss 0.628.
+
+| Test set (GPU, forced `uz`, no timestamps) | `navai-uz` | pilot (12 h) | **full (~95 h)** |
+|---|---|---|---|
+| Podcasts, held-out shard, 100 clips: WER | 73.5% | 48.8% | **34.5%** |
+| Podcasts: CER | 45.2% | 23.0% | **15.8%** |
+| FLEURS read speech, 60 clips: WER | 17.5% | 18.7% | **17.3%** |
+| FLEURS: CER | 6.4% | 6.3% | **5.0%** |
+
+In the production setup (`large-v3` detecting the language and handling
+Russian, the full fine-tune for Uzbek): Uzbek FLEURS 19.6% WER, Russian
+unchanged at 4.5%, median latency 1.4 s (Uzbek) and 1.6 s (Russian).
+
+Caveats:
+
+- Test transcripts come from the same labeller (Gemini) as the training
+  ones, and the held-out shard may share podcast channels and speakers with
+  training, so the podcast gain is likely optimistic. Real call recordings
+  are the test that matters.
+- Gemini labels are cased and punctuated with ASCII apostrophes;
+  `normalize_label` rewrites them in the model's own style first (initial
+  loss 7.2 -> 3.9 on raw vs rewritten labels), so training adapts to the
+  audio rather than to a new spelling style.
+- Labels keep numbers as digits while the model writes them as words.
+
+## Scenario false triggers
+
+Better STT made keyword matching fire on ordinary speech: 64 of 380 real
+non-complaint sentences (FLEURS and podcast references plus STT output)
+matched a scenario, mostly through subject words such as `pul` (money),
+`suv` / `вода` (water) or `yomon` (bad), and through two matching bugs:
+`oqib` (flowing) fuzzy-matched `oʻqib` (reading), and `loy` (mud) matched
+`loyiha` (project). Subject words also pulled other complaints into the
+"no water" scenario ("Вода грязная", "Suv loyqa").
+
+Scenarios now separate `keywords` (the problem; at least one must match)
+from `context_keywords` (the subject; they only add confidence), stems are
+explicit (`chiqma*`), Uzbek stems skip first/second person forms
+(`chiqmayapman`, "I am not going out"), short keywords take only short
+endings, and fuzzy matching is limited to words of 7+ letters.
+
+| | before | after |
+|---|---|---|
+| Hand-written complaints routed correctly (`tests/data/intent_cases.json`) | 36/50 | 52/52 |
+| Hand-written non-complaints matched | 13/15 | 0/18 |
+| Real non-complaint sentences matched | 64/380 | 2/380 |
+
+The two remaining real matches use `loyqa` in its literal sense (silty
+ground). The hand-written cases were written together with the keywords;
+the 380 real sentences were not looked at while choosing them.
+
 ## Not measured yet
 
-- GPU latency: the dev machine lacks `cublas64_12.dll`; the Docker image
-  installs it through the `gpu` extra. CPU latency (median 11 s per
-  utterance for `large-v3` + `navai`) is not usable for calls.
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.
-- Scenario false triggers: on this non-complaint speech 8 of 60 Uzbek clips
-  matched a scenario through short keywords such as `loy`, `pul`, `hid`.
+
+## Reproduce the fine-tune
+
+Needs a CUDA build of torch, `peft` and `pyarrow` (see the script header).
+
+    # 26 shards, ~10.4 GB; shard 3 is held out for evaluation
+    python -c "from huggingface_hub import snapshot_download as s; s('islomov/podcasts_tashkent_dialect_youtube_uzbek_speech_dataset', repo_type='dataset', local_dir='data/train/podcasts_tashkent')"
+    make uz-finetune
+
+`make uz-finetune` trains from `models/_src/whisper-medium-uzbek` (left there
+by `make uz-model`) and writes `models/whisper-medium-uzbek-podcasts-ct2`;
+point `STT_MODEL_UZ` at it.
 
 ## Reproduce
 
