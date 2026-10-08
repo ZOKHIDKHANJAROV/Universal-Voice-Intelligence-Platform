@@ -113,6 +113,21 @@ Open `http://localhost:8000/` once the API runs. It is a single static page
 
 Browsers only allow the microphone on `localhost` or over HTTPS.
 
+## Call monitor
+
+`http://localhost:8000/monitor` shows every call as a chat, live (Server-Sent
+Events): what the caller said (transcript, language and confidence, STT time,
+optional recording), what the bot answered (scenario, confidence, end-to-end
+latency) and system events (greeting, barge-in, key presses, transfer,
+"operators busy", hangup). Console tests appear as calls marked "тест". The
+header shows the last 24 hours: calls, active now, share of answers that hit
+a scenario, transfers and median answer latency.
+
+The log is SQLite (`CALL_LOG_PATH`, default `data/calls.db`), kept for
+`CALL_LOG_RETENTION_DAYS` (30). `CALL_RECORD_AUDIO=true` also keeps each caller
+utterance as 8 kHz WAV for replay; it is off by default because callers must be
+told when they are recorded.
+
 ## Run locally
 
 On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md)

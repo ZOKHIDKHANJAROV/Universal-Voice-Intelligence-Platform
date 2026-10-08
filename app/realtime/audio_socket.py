@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 import webrtcvad
 
 from app.audio.resample import pcm16_to_float
+from app.calls.log import BOT, CALLER, ENDED, SYSTEM, TRANSFERRED, get_call_log
 from app.core.config import get_settings
 from app.intent.service import get_intent_service
 from app.realtime import call_actions
@@ -110,6 +111,12 @@ class AudioSocketServer:
             if session.response_task and not session.response_task.done():
                 session.response_task.cancel()
             self._sessions.pop(session.call_id, None)
+            if session.asterisk_uuid:
+                kind = "handed_over" if session.transferring else "hangup"
+                self._log(session, SYSTEM, kind)
+                get_call_log().end_call(
+                    session.asterisk_uuid, TRANSFERRED if session.transferring else ENDED
+                )
             writer.close()
             await writer.wait_closed()
 
@@ -164,18 +171,24 @@ class AudioSocketServer:
                         call_uuid,
                         " (back from a failed transfer)" if returned else "",
                     )
+                    get_call_log().start_call(call_uuid, "phone")
                     if returned:
                         # No second greeting: apologise and keep helping.
+                        self._log(session, SYSTEM, "returned")
                         session.language = language
                         session.response_task = asyncio.create_task(
                             self._play_prompt(session, "operator_unavailable")
                         )
                     else:
-                        session.response_task = asyncio.create_task(self._play_greeting(session))
+                        self._log(session, SYSTEM, "call_started")
+                        session.response_task = asyncio.create_task(
+                            self._play_prompt(session, "greeting")
+                        )
                 continue
             if message_type == DTMF_TYPE:
                 digit = payload[:1].decode("ascii", "ignore")
                 LOGGER.info("DTMF call_id=%s digit=%s", session.call_id, digit)
+                self._log(session, SYSTEM, "dtmf", digit)
                 if digit == OPERATOR_DIGIT and not session.transferring:
                     if session.response_task and not session.response_task.done():
                         session.response_task.cancel()
@@ -206,6 +219,7 @@ class AudioSocketServer:
                         "barge-in call_id=%s: stopping response playback",
                         session.call_id,
                     )
+                    self._log(session, SYSTEM, "barge_in")
                     # Fall through: preroll holds the interrupting speech, so the
                     # new utterance is captured from its first frame.
 
@@ -239,9 +253,15 @@ class AudioSocketServer:
                                 self._process_utterance(session, utterance)
                             )
 
+    def _log(self, session: AudioSocketSession, role: str, kind: str, text: str | None = None,
+             data: dict | None = None, audio_pcm16: bytes | None = None) -> None:
+        if session.asterisk_uuid:
+            get_call_log().add_event(session.asterisk_uuid, role, kind, text, data, audio_pcm16)
+
     async def _play_prompt(self, session: AudioSocketSession, key: str) -> None:
         try:
             text, language = prompt_text(key, session.language or self.languages[0])
+            self._log(session, BOT, key, text, {"language": language})
             pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
             await self._send_pcm(session, pcm8)
             LOGGER.info("Prompt %s sent call_id=%s lang=%s", key, session.call_id, language)
@@ -249,17 +269,6 @@ class AudioSocketServer:
             raise
         except Exception as e:
             LOGGER.error("Prompt %s failed call_id=%s: %s", key, session.call_id, e)
-
-    async def _play_greeting(self, session: AudioSocketSession) -> None:
-        try:
-            text, language = prompt_text("greeting", self.languages[0])
-            pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
-            await self._send_pcm(session, pcm8)
-            LOGGER.info("Greeting sent for call_id=%s", session.call_id)
-        except asyncio.CancelledError:
-            raise
-        except Exception as e:
-            LOGGER.error("Greeting failed call_id=%s: %s", session.call_id, e)
 
     async def _process_utterance(
         self,
@@ -277,7 +286,14 @@ class AudioSocketServer:
             )
             stt_done = time.perf_counter()
             text = transcription.text.strip()
+            heard = {
+                "detected": transcription.language,
+                "probability": round(transcription.language_probability, 3),
+                "stt_ms": round((stt_done - started) * 1000),
+                "seconds": round(len(pcm16) / 2 / SAMPLE_RATE, 2),
+            }
             if not text:
+                self._log(session, CALLER, "unrecognized", "", heard, pcm16)
                 return
 
             caller_language = (
@@ -294,6 +310,7 @@ class AudioSocketServer:
             )
 
             session.language = caller_language
+            self._log(session, CALLER, "utterance", text, {**heard, "language": caller_language}, pcm16)
             intent = get_intent_service().resolve(text, caller_language)
             scenario = (
                 get_scenario_service().get_scenario(intent.scenario_id) if intent.scenario_id else None
@@ -329,6 +346,17 @@ class AudioSocketServer:
                 self.silence_ms,
             )
 
+            self._log(session, BOT, "answer", response_text, {
+                "language": response_language,
+                "scenario_id": intent.scenario_id,
+                "scenario_title": scenario.title if scenario else None,
+                "confidence": intent.confidence,
+                "source": intent.source,
+                "stt_ms": round((stt_done - started) * 1000),
+                "intent_ms": round((intent_done - stt_done) * 1000),
+                "audio_ms": round((audio_ready - intent_done) * 1000),
+                "total_ms": round((audio_ready - started) * 1000),
+            })
             await self._send_pcm(session, pcm8)
             LOGGER.info(
                 "TTS call_id=%s bytes=%d response=%r",
@@ -347,20 +375,15 @@ class AudioSocketServer:
     async def _transfer_to_operator(self, session: AudioSocketSession) -> None:
         """Tell the caller, then end the AudioSocket so the dialplan dials an operator."""
         session.transferring = True
-        try:
-            text, language = prompt_text("transfer", session.language or self.languages[0])
-            pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
-            await self._send_pcm(session, pcm8)
-        except asyncio.CancelledError:
-            raise
-        except Exception as e:
-            # Hand over anyway: an operator without the announcement beats none.
-            LOGGER.error("Transfer prompt failed call_id=%s: %s", session.call_id, e)
+        # Errors are logged inside; hand over anyway, an operator without the
+        # announcement beats none.
+        await self._play_prompt(session, "transfer")
 
         if session.asterisk_uuid is None:
             LOGGER.error("Cannot transfer call_id=%s: no call UUID from Asterisk", session.call_id)
             return
         call_actions.request(session.asterisk_uuid, call_actions.OPERATOR, session.language)
+        self._log(session, SYSTEM, "transfer")
         LOGGER.info("Transferring call_id=%s to an operator", session.call_id)
         async with session.output_lock:
             # A hangup message ends AudioSocket(); the dialplan continues.

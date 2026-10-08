@@ -73,6 +73,14 @@ class Settings(BaseSettings):
     tts_prompt_cache_dir: Path = Path("/var/lib/univoice/audio/prompts")
     tts_supported_languages: tuple[str, ...] = ("uz", "ru")
 
+    # Call log behind the /monitor page (SQLite, no extra service).
+    call_log_path: Path = Path("data/calls.db")
+    call_log_retention_days: int = 30
+    # Keep each caller utterance as 8 kHz WAV to replay it in the monitor.
+    # Off by default: callers must be told when they are recorded.
+    call_record_audio: bool = False
+    call_audio_dir: Path = Path("data/calls")
+
     # Realtime telephony audio bridge
     realtime_audio_host: str = "0.0.0.0"
     realtime_audio_port: int = 9019
