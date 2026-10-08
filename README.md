@@ -55,7 +55,11 @@ Stock Whisper barely understands Uzbek over the phone (88% word error rate).
 `STT_MODEL_UZ` set, Uzbek speech goes to it and `STT_MODEL` keeps handling
 Russian. That brings Uzbek to 22% WER with Russian unchanged at 4.5%.
 `make uz-finetune` further adapts it to conversational Tashkent-dialect
-speech (73.5% -> 34.5% WER on podcasts, read speech unchanged). See
+speech (73.5% -> 34.5% WER on podcasts, read speech unchanged). That model is
+published as [ZOKHID/univoice-stt-uz-ct2](https://huggingface.co/ZOKHID/univoice-stt-uz-ct2)
+(faster-whisper, the `.env.example` default) and
+[ZOKHID/univoice-stt-uz](https://huggingface.co/ZOKHID/univoice-stt-uz)
+(transformers weights and LoRA adapter). See
 [docs/stt-evaluation.md](docs/stt-evaluation.md) for the measurements and
 how to re-run them on your own recordings.
 
@@ -117,8 +121,7 @@ On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md
 
 ## Run with Docker
 
-    pip install -e ".[convert]" && make uz-model   # once: Uzbek STT model
-    docker compose up --build
+    docker compose up --build        # Uzbek STT model downloads on first start
     make render-prompts              # once, and after editing phrases
 
 ## Test
