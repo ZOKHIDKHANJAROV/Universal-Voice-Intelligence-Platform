@@ -88,12 +88,16 @@ CONSOLE_PAGE = WEB / "index.html"
 MONITOR_PAGE = WEB / "monitor.html"
 
 
+# Browsers must revalidate, or an update keeps showing the old page.
+_NO_CACHE = {"Cache-Control": "no-cache"}
+
+
 @app.get("/", include_in_schema=False)
 def console() -> FileResponse:
     # Static page; every action it takes goes through the protected API.
-    return FileResponse(CONSOLE_PAGE, media_type="text/html")
+    return FileResponse(CONSOLE_PAGE, media_type="text/html", headers=_NO_CACHE)
 
 
 @app.get("/monitor", include_in_schema=False)
 def monitor() -> FileResponse:
-    return FileResponse(MONITOR_PAGE, media_type="text/html")
+    return FileResponse(MONITOR_PAGE, media_type="text/html", headers=_NO_CACHE)
