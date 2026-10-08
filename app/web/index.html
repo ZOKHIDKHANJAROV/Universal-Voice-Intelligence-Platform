@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UniVoice Console</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f0f2f5; --border: #dfe3e8;
+    --text: #1b1f24; --muted: #5f6b7a; --accent: #1f6feb; --accent-text: #ffffff;
+    --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e; --rec: #d1242f;
+    --radius: 10px; --shadow: 0 1px 2px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --surface: #161b22; --surface-2: #1f262e; --border: #30363d;
+      --text: #e6edf3; --muted: #8b98a5; --accent: #4493f8; --accent-text: #0f1216;
+      --ok: #3fb950; --warn: #d29922; --bad: #f85149; --rec: #f85149;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  .top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 0 10px; }
+  h1 { font-size: 18px; margin: 0; font-weight: 650; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+  .chip { font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2);
+    color: var(--muted); border: 1px solid var(--border); white-space: nowrap; }
+  .chip.ok { color: var(--ok); } .chip.warn { color: var(--warn); } .chip.bad { color: var(--bad); }
+  nav { display: flex; gap: 4px; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+    padding: 8px 12px; font: inherit; cursor: pointer; }
+  nav button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  main { padding: 20px 0 40px; }
+  section[hidden] { display: none; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  label { color: var(--muted); font-size: 13px; }
+  input[type=text], input[type=password], select, textarea {
+    font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; width: 100%; }
+  textarea { resize: vertical; min-height: 70px; }
+  textarea.words { min-height: 0; font-family: ui-monospace, monospace; font-size: 13.5px; }
+  select { width: auto; }
+  .btn { font: inherit; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; font-weight: 600; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .rec { width: 64px; height: 64px; border-radius: 50%; border: 0; cursor: pointer;
+    background: var(--rec); color: #fff; font-size: 13px; font-weight: 700; flex: none; }
+  .rec.on { animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--rec) 25%, transparent); } }
+  .muted { color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; }
+  .grid dt { color: var(--muted); } .grid dd { margin: 0; overflow-wrap: anywhere; }
+  .big { font-size: 18px; font-weight: 600; }
+  .badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border); }
+  .badge.ok { color: var(--ok); } .badge.warn { color: var(--warn); } .badge.bad { color: var(--bad); }
+  .bars { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--surface-2); margin: 6px 0; }
+  .bars span:nth-child(1) { background: var(--accent); }
+  .bars span:nth-child(2) { background: var(--ok); }
+  .bars span:nth-child(3) { background: var(--warn); }
+  .legend { font-size: 12.5px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; }
+  .note { padding: 8px 12px; border-radius: 8px; background: var(--surface-2); color: var(--warn); font-size: 13.5px; }
+  .error { color: var(--bad); }
+  .scenario h3 { margin: 0; font-size: 15.5px; }
+  .scenario .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .scenario .head .id { color: var(--muted); font-size: 12.5px; font-family: ui-monospace, monospace; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; margin-bottom: 4px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  audio { width: 100%; margin-top: 6px; }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } .grid dt { margin-top: 6px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <h1>UniVoice — консоль</h1>
+      <div class="chips" id="chips"><span class="chip">загрузка…</span></div>
+    </div>
+    <nav role="tablist">
+      <button role="tab" data-tab="voice" aria-selected="true">Речь</button>
+      <button role="tab" data-tab="text" aria-selected="false">Текст</button>
+      <button role="tab" data-tab="scenarios" aria-selected="false">Сценарии</button>
+      <button role="tab" data-tab="settings" aria-selected="false">Доступ</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="tab-voice">
+    <div class="card">
+      <div class="row">
+        <button class="rec" id="rec" title="Начать / остановить запись">REC</button>
+        <div style="flex:1; min-width:220px">
+          <div class="big" id="rec-status">Нажмите и скажите жалобу</div>
+          <div class="muted">Запись пройдёт тот же путь, что звонок: распознавание → сценарий → ответ бота.</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <label class="btn" for="file">Загрузить файл…</label>
+        <input type="file" id="file" accept="audio/*" hidden>
+        <label><input type="checkbox" id="telephone" checked> как в звонке (8 кГц, G.711)</label>
+        <label>Язык <select id="voice-lang"><option value="">авто</option><option value="uz">uz</option><option value="ru">ru</option></select></label>
+      </div>
+    </div>
+    <div id="voice-result"></div>
+  </section>
+
+  <section id="tab-text" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="text-input">Фраза звонящего</label>
+        <textarea id="text-input" placeholder="Masalan: apparatdan suv chiqmayapti"></textarea>
+      </div>
+      <div class="row">
+        <label>Язык <select id="text-lang"><option value="uz">uz</option><option value="ru">ru</option><option value="">любой</option></select></label>
+        <span class="muted">Результат обновляется по мере ввода.</span>
+      </div>
+    </div>
+    <div id="text-result"></div>
+  </section>
+
+  <section id="tab-scenarios" hidden>
+    <div class="card muted" style="font-size:13.5px">
+      <b>Ключевые слова</b> описывают проблему — сценарий срабатывает, только если совпало хотя бы одно.
+      <b>Контекст</b> (вода, деньги, аппарат) лишь повышает уверенность.
+      <code>*</code> на конце — основа слова: <code>chiqma*</code> покрывает chiqmayapti, chiqmadi.
+      Изменения действуют сразу. Новый текст ответа нужно озвучить: <code>make render-prompts</code>.
+    </div>
+    <div id="scenario-list"><div class="muted">загрузка…</div></div>
+  </section>
+
+  <section id="tab-settings" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="api-key">API-ключ (если в .env задан API_KEY)</label>
+        <input type="password" id="api-key" autocomplete="off">
+        <div class="hint">Хранится только в этом браузере.</div>
+      </div>
+      <button class="btn primary" id="save-key">Сохранить</button>
+      <span id="key-status" class="muted"></span>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const store = {
+  get(key) { try { return localStorage.getItem(key) || ""; } catch { return ""; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch {} },
+};
+
+async function api(path, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  const key = store.get("univoice.apiKey");
+  if (key) headers["X-API-Key"] = key;
+  const response = await fetch(path, { ...options, headers });
+  if (response.status === 401) {
+    selectTab("settings");
+    throw new Error("Нужен API-ключ (вкладка «Доступ»).");
+  }
+  if (!response.ok) {
+    let detail = response.statusText;
+    try { detail = (await response.json()).detail || detail; } catch {}
+    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+  }
+  return response.json();
+}
+
+// Tabs
+function selectTab(name) {
+  document.querySelectorAll("nav button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === name));
+  document.querySelectorAll("main section").forEach((s) => (s.hidden = s.id !== `tab-${name}`));
+  store.set("univoice.tab", name);
+  if (name === "scenarios") loadScenarios();
+}
+document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => selectTab(b.dataset.tab)));
+
+// Status chips
+let scenarioTitles = {};
+async function loadSystem() {
+  try {
+    const s = await api("/api/v1/console/system");
+    const prompts = s.prompts_rendered === s.prompts_total ? "ok" : "warn";
+    $("#chips").innerHTML = [
+      `<span class="chip">STT ${esc(s.stt_model)}${s.stt_model_uz ? " + " + esc(s.stt_model_uz.split("/").pop()) : ""}</span>`,
+      `<span class="chip">${esc(s.stt_device)} · ${esc(s.stt_compute_type)}</span>`,
+      `<span class="chip ${s.stt_loaded ? "ok" : ""}">${s.stt_loaded ? "модели загружены" : "модели загрузятся при первом запросе"}</span>`,
+      `<span class="chip ${prompts}">фразы озвучены ${s.prompts_rendered}/${s.prompts_total}</span>`,
+    ].join("");
+  } catch (e) {
+    $("#chips").innerHTML = `<span class="chip bad">${esc(e.message)}</span>`;
+  }
+}
+
+function scenarioLabel(id) {
+  if (!id) return '<span class="badge warn">не понято → оператор</span>';
+  return `<span class="badge ok">${esc(scenarioTitles[id] || id)}</span> <span class="muted">${esc(id)}</span>`;
+}
+
+// Voice
+let recorder = null, chunks = [];
+$("#rec").addEventListener("click", async () => {
+  if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+  if (!navigator.mediaDevices?.getUserMedia) {
+    $("#rec-status").textContent = "Микрофон доступен только на localhost или по HTTPS.";
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recorder.ondataavailable = (e) => chunks.push(e.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      $("#rec").classList.remove("on"); $("#rec").textContent = "REC";
+      analyze(new Blob(chunks, { type: recorder.mimeType }), "recording.webm");
+    };
+    recorder.start();
+    $("#rec").classList.add("on"); $("#rec").textContent = "STOP";
+    $("#rec-status").textContent = "Идёт запись… нажмите ещё раз, чтобы закончить";
+  } catch (e) {
+    $("#rec-status").textContent = "Нет доступа к микрофону: " + e.message;
+  }
+});
+$("#file").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) analyze(file, file.name);
+  e.target.value = "";
+});
+
+async function analyze(blob, name) {
+  $("#rec-status").textContent = "Распознаю…";
+  $("#voice-result").innerHTML = '<div class="card muted">Обработка… первый запрос загружает модели и может занять до минуты.</div>';
+  const form = new FormData();
+  form.append("audio", blob, name);
+  form.append("telephone", $("#telephone").checked);
+  form.append("language", $("#voice-lang").value);
+  try {
+    const r = await api("/api/v1/console/analyze", { method: "POST", body: form });
+    const t = r.timings_ms, total = t.stt + t.intent + t.audio || 1;
+    $("#voice-result").innerHTML = `
+      <div class="card">
+        <dl class="grid">
+          <dt>Распознано</dt><dd class="big">${r.transcription ? esc(r.transcription) : '<span class="muted">речь не распознана</span>'}</dd>
+          <dt>Язык</dt><dd>${esc(r.language)} <span class="muted">(${(r.language_probability * 100).toFixed(0)}%)</span></dd>
+          <dt>Сценарий</dt><dd>${scenarioLabel(r.intent.scenario_id)} · уверенность ${(r.intent.confidence * 100).toFixed(0)}% · ${esc(r.intent.source)}</dd>
+          <dt>Ответ бота</dt><dd>${esc(r.response_text)} <span class="badge">${esc(r.response_language)}</span>
+            ${r.response_audio ? `<audio controls autoplay src="/api/v1/console/prompts/audio/${esc(r.response_audio)}"></audio>` : ""}</dd>
+          <dt>Время</dt><dd>
+            <div class="bars"><span style="width:${t.stt / total * 100}%"></span><span style="width:${t.intent / total * 100}%"></span><span style="width:${t.audio / total * 100}%"></span></div>
+            <div class="legend"><span><i style="background:var(--accent)"></i>распознавание ${t.stt} мс</span><span><i style="background:var(--ok)"></i>сценарий ${t.intent} мс</span><span><i style="background:var(--warn)"></i>аудио ответа ${t.audio} мс</span></div>
+          </dd>
+        </dl>
+        ${r.warning ? `<div class="note" style="margin-top:10px">${esc(r.warning)}</div>` : ""}
+      </div>`;
+    $("#rec-status").textContent = "Готово. Можно записать ещё.";
+    loadSystem();
+  } catch (e) {
+    $("#voice-result").innerHTML = `<div class="card error">${esc(e.message)}</div>`;
+    $("#rec-status").textContent = "Ошибка";
+  }
+}
+
+// Text
+let textTimer = null;
+function scheduleText() { clearTimeout(textTimer); textTimer = setTimeout(resolveText, 250); }
+$("#text-input").addEventListener("input", scheduleText);
+$("#text-lang").addEventListener("change", scheduleText);
+async function resolveText() {
+  const text = $("#text-input").value.trim();
+  if (!text) { $("#text-result").innerHTML = ""; return; }
+  try {
+    const language = $("#text-lang").value || null;
+    const r = await api("/api/v1/intent/resolve", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, language }),
+    });
+    $("#text-result").innerHTML = `<div class="card"><dl class="grid">
+      <dt>Сценарий</dt><dd>${scenarioLabel(r.scenario_id)}</dd>
+      <dt>Уверенность</dt><dd>${(r.confidence * 100).toFixed(0)}% <span class="muted">(${esc(r.source)})</span></dd>
+    </dl></div>`;
+  } catch (e) {
+    $("#text-result").innerHTML = `<div class="card error">${esc(e.message)}</div>`;
+  }
+}
+
+// Scenarios
+const splitWords = (value) => value.split(/[,
+]/).map((w) => w.trim()).filter(Boolean);
+async function loadScenarios() {
+  try {
+    const [scenarios, prompts] = await Promise.all([
+      api("/api/v1/scenarios?include_disabled=true"),
+      api("/api/v1/console/prompts"),
+    ]);
+    const rendered = new Map(prompts.map((p) => [p.language + "\n" + p.text, p.rendered]));
+    scenarioTitles = Object.fromEntries(scenarios.map((s) => [s.id, s.title]));
+    $("#scenario-list").innerHTML = scenarios.map((s) => {
+      const message = s.steps[0]?.message || "";
+      const isRendered = rendered.get(s.language + "\n" + message);
+      return `<div class="card scenario" data-id="${esc(s.id)}">
+        <div class="head">
+          <h3>${esc(s.title)}</h3><span class="badge">${esc(s.language)}</span>
+          <span class="id">${esc(s.id)}</span>
+          <label style="margin-left:auto"><input type="checkbox" data-f="enabled" ${s.enabled ? "checked" : ""}> включён</label>
+        </div>
+        <div class="field"><label>Ключевые слова (проблема), через запятую</label>
+          <textarea class="words" rows="2" data-f="keywords">${esc(s.keywords.join(", "))}</textarea></div>
+        <div class="field"><label>Контекст, через запятую</label>
+          <textarea class="words" rows="2" data-f="context_keywords">${esc(s.context_keywords.join(", "))}</textarea></div>
+        <div class="field"><label>Ответ бота</label>
+          <textarea data-f="message">${esc(message)}</textarea>
+          <div class="hint">${isRendered ? '<span class="badge ok">озвучен</span>' : '<span class="badge warn">не озвучен — make render-prompts</span>'}</div></div>
+        <div class="row"><button class="btn primary" data-save>Сохранить</button><span class="muted" data-status></span></div>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    $("#scenario-list").innerHTML = `<div class="card error">${esc(e.message)}</div>`;
+  }
+}
+$("#scenario-list").addEventListener("click", async (e) => {
+  if (!e.target.matches("[data-save]")) return;
+  const card = e.target.closest(".scenario");
+  const field = (name) => card.querySelector(`[data-f="${name}"]`);
+  const status = card.querySelector("[data-status]");
+  e.target.disabled = true; status.textContent = "сохраняю…"; status.className = "muted";
+  try {
+    await api(`/api/v1/scenarios/${encodeURIComponent(card.dataset.id)}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        keywords: splitWords(field("keywords").value),
+        context_keywords: splitWords(field("context_keywords").value),
+        message: field("message").value,
+        enabled: field("enabled").checked,
+      }),
+    });
+    await loadScenarios();
+    loadSystem();
+  } catch (err) {
+    status.textContent = err.message; status.className = "error";
+    e.target.disabled = false;
+  }
+});
+
+// Access
+$("#api-key").value = store.get("univoice.apiKey");
+$("#save-key").addEventListener("click", () => {
+  store.set("univoice.apiKey", $("#api-key").value.trim());
+  $("#key-status").textContent = "сохранено";
+  loadSystem();
+});
+
+selectTab(store.get("univoice.tab") || "voice");
+loadSystem();
+api("/api/v1/scenarios").then((list) => { scenarioTitles = Object.fromEntries(list.map((s) => [s.id, s.title])); }).catch(() => {});
+</script>
+</body>
+</html>

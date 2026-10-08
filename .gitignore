@@ -24,3 +24,6 @@ data/eval/
 
 # Downloaded training corpora.
 data/train/
+
+# Locally rendered prompt audio (TTS_PROMPT_CACHE_DIR=data/prompts).
+/data/prompts/

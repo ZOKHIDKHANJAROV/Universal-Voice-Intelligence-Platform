@@ -22,6 +22,15 @@ class Scenario(BaseModel):
     enabled: bool = True
 
 
+class ScenarioUpdate(BaseModel):
+    """Fields the web console may edit; omitted fields stay as they are."""
+
+    keywords: list[str] | None = None
+    context_keywords: list[str] | None = None
+    message: str | None = Field(default=None, min_length=1, max_length=1000)
+    enabled: bool | None = None
+
+
 class ScenarioResolveRequest(BaseModel):
     text: str = Field(min_length=1)
     language: str | None = None

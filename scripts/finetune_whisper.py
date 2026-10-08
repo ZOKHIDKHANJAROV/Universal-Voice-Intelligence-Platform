@@ -35,7 +35,7 @@ from pathlib import Path
 import numpy as np
 
 from app.audio.resample import resample
-from scripts.eval_stt import telephony
+from app.audio.telephony import telephony
 
 SAMPLE_RATE = 16000
 MAX_LABEL_TOKENS = 440  # Whisper decoder holds 448 positions

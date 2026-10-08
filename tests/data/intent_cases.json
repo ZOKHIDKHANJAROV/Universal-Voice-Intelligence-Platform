@@ -23,6 +23,8 @@
     ["Pulimni qaytarib bering", "uz", "vending_payment_uz"],
     ["Pulimni qaytarib bermadi", "uz", "vending_payment_uz"],
     ["Пулимни еб қўйди", "uz", "vending_payment_uz"],
+    ["pulimni yeb qoydi", "uz", "vending_payment_uz"],
+    ["Suv toxtab qoldi", "uz", "vending_no_water_uz"],
     ["Автомат съел мои деньги", "ru", "vending_payment_ru"],
     ["Не вернул сдачу", "ru", "vending_payment_ru"],
     ["Списались деньги с карты", "ru", "vending_payment_ru"],
