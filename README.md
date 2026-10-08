@@ -80,7 +80,8 @@ Example:
       "http://127.0.0.1:8000/api/v1/stt/transcribe?language=uz"
 
 The first transcription initializes/downloads the configured Whisper model. In
-Docker the model is kept in the `whisper-models` volume.
+Docker the model is kept in the `whisper-models` volume, or in the host cache
+when `HF_CACHE_DIR` is set.
 
 ## Call audio (pre-rendered prompts)
 
@@ -113,6 +114,21 @@ Open `http://localhost:8000/` once the API runs. It is a single static page
 
 Browsers only allow the microphone on `localhost` or over HTTPS.
 
+## Call monitor
+
+`http://localhost:8000/monitor` shows every call as a chat, live (Server-Sent
+Events): what the caller said (transcript, language and confidence, STT time,
+optional recording), what the bot answered (scenario, confidence, end-to-end
+latency) and system events (greeting, barge-in, key presses, transfer,
+"operators busy", hangup). Console tests appear as calls marked "тест". The
+header shows the last 24 hours: calls, active now, share of answers that hit
+a scenario, transfers and median answer latency.
+
+The log is SQLite (`CALL_LOG_PATH`, default `data/calls.db`), kept for
+`CALL_LOG_RETENTION_DAYS` (30). `CALL_RECORD_AUDIO=true` also keeps each caller
+utterance as 8 kHz WAV for replay; it is off by default because callers must be
+told when they are recorded.
+
 ## Run locally
 
 On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md)
@@ -127,6 +143,12 @@ On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md
 
     docker compose up --build        # Uzbek STT model downloads on first start
     make render-prompts              # once, and after editing phrases
+
+The `api` container serves the console at <http://localhost:8000/> and the
+call monitor at <http://localhost:8000/monitor>, uses the GPU, and mounts
+`./models` and `./data` so the same `.env` paths work on the host and in the
+container. To reuse host downloads on a slow network (`HF_CACHE_DIR`,
+`CUDA_LIBS_IMAGE`), see [docs/local-run.md](docs/local-run.md#everything-in-docker).
 
 ## Test
 

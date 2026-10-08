@@ -1,18 +1,29 @@
 services:
+  # API, call bridge and web UI: http://localhost:8000/ (console) and /monitor.
   api:
-    build: .
+    build:
+      context: .
+      args:
+        INSTALL_GPU: ${INSTALL_GPU:-1}
+        CUDA_LIBS_IMAGE: ${CUDA_LIBS_IMAGE:-python:3.12-slim}
     container_name: univoice-api
     env_file:
       - .env
+    environment:
+      # Same relative paths as on the host (models/..., data/...) work in
+      # the container; only the Piper binary lives elsewhere.
+      TTS_BINARY: piper
     ports:
       - "8000:8000"
     volumes:
-      # Includes prompts/ with the pre-rendered call audio.
       - voice-audio:/var/lib/univoice/audio
-      # Keeps the Whisper model across container rebuilds.
-      - whisper-models:/root/.cache/huggingface
-      # Converted Uzbek fine-tune from `make uz-model` (STT_MODEL_UZ).
-      - ./models:/models:ro
+      # Whisper models. Point HF_CACHE_DIR at the host cache
+      # (e.g. C:/Users/<you>/.cache/huggingface) to reuse downloaded models.
+      - ${HF_CACHE_DIR:-whisper-models}:/root/.cache/huggingface
+      # Local models: Uzbek fine-tune, Piper voice.
+      - ./models:/app/models:ro
+      # Pre-rendered call audio (data/prompts), call log and recordings for /monitor.
+      - ./data:/app/data
     restart: unless-stopped
     gpus: all
 

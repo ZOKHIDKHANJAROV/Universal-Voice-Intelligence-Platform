@@ -69,6 +69,36 @@ This starts Asterisk and the API. Then:
 Stop with Ctrl+C, then
 `docker compose -p universal-voice-intelligence-platform stop asterisk`.
 
+## Everything in Docker
+
+The API and web UI (console and `/monitor`) also run as the `api` container
+with the GPU, so no `.venv` is needed:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\start-local.ps1 -Docker
+```
+
+The container uses the same `.env`. `./models` and `./data` are mounted at
+`/app/models` and `/app/data`, so relative paths such as
+`models/whisper-medium-uzbek-podcasts-ct2` and `data/prompts` work unchanged,
+and the call log is the same one the host API writes. Add to `.env` to avoid
+large downloads on a slow network:
+
+```env
+# Whisper models already downloaded on the host (~3 GB for large-v3).
+HF_CACHE_DIR=C:/Users/<you>/.cache/huggingface
+HF_HUB_DISABLE_XET=1
+# cuBLAS/cuDNN from the local Navoiy image instead of ~1.2 GB of pip wheels.
+INSTALL_GPU=0
+CUDA_LIBS_IMAGE=universal-voice-intelligence-platform-navoiy-tts
+```
+
+Only one API can listen on port 8000: stop the host one (Ctrl+C) before
+starting the container, and the container
+(`docker compose -p universal-voice-intelligence-platform stop api`) before
+going back to the host. Logs:
+`docker compose -p universal-voice-intelligence-platform logs -f api`.
+
 ## Notes
 
 - `-p universal-voice-intelligence-platform` reuses the images and volumes

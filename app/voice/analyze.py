@@ -2,11 +2,14 @@
 
 import logging
 import time
+import uuid
 from pathlib import Path
 
 from pydantic import BaseModel
 
+from app.audio.resample import float_to_pcm16
 from app.audio.telephony import TELEPHONY_RATE, telephony
+from app.calls.log import BOT, CALLER, get_call_log
 from app.core.config import get_settings
 from app.intent.models import IntentResult
 from app.intent.service import get_intent_service
@@ -67,6 +70,9 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
         warning = "Фраза не озвучена, а TTS-сервис недоступен. Выполните make render-prompts."
     audio_done = time.perf_counter()
 
+    _log_console_turn(result, audio, rate, caller_language, intent, scenario,
+                      response_text, response_language, started, stt_done, intent_done, audio_done)
+
     return CallAnalysis(
         transcription=result.text,
         language=result.language,
@@ -83,3 +89,35 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
             "audio": round((audio_done - intent_done) * 1000),
         },
     )
+
+
+def _log_console_turn(result, audio, rate, caller_language, intent, scenario, response_text,
+                      response_language, started, stt_done, intent_done, audio_done) -> None:
+    """Show console tests in /monitor as one-turn "console" calls."""
+    log = get_call_log()
+    call_id = str(uuid.uuid4())
+    log.start_call(call_id, "console")
+    heard = {
+        "detected": result.language,
+        "probability": round(result.language_probability, 3),
+        "stt_ms": round((stt_done - started) * 1000),
+        "seconds": round(len(audio) / rate, 2),
+    }
+    pcm16 = float_to_pcm16(audio)
+    if result.text:
+        log.add_event(call_id, CALLER, "utterance", result.text,
+                      {**heard, "language": caller_language}, pcm16, rate)
+        log.add_event(call_id, BOT, "answer", response_text, {
+            "language": response_language,
+            "scenario_id": intent.scenario_id,
+            "scenario_title": scenario.title if scenario else None,
+            "confidence": intent.confidence,
+            "source": intent.source,
+            "stt_ms": heard["stt_ms"],
+            "intent_ms": round((intent_done - stt_done) * 1000),
+            "audio_ms": round((audio_done - intent_done) * 1000),
+            "total_ms": round((audio_done - started) * 1000),
+        })
+    else:
+        log.add_event(call_id, CALLER, "unrecognized", "", heard, pcm16, rate)
+    log.end_call(call_id)
