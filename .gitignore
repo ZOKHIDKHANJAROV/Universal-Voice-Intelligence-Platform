@@ -27,3 +27,7 @@ data/train/
 
 # Locally rendered prompt audio (TTS_PROMPT_CACHE_DIR=data/prompts).
 /data/prompts/
+
+# Call log and recorded utterances behind /monitor (callers' voices).
+/data/calls.db*
+/data/calls/
