@@ -61,6 +61,11 @@ services:
       # Where Asterisk streams call audio. Set to host.docker.internal:9019
       # when the API runs on the host instead of in the api container.
       UNIVOICE_AUDIOSOCKET: ${UNIVOICE_AUDIOSOCKET:-api:9019}
+      # Where the dialplan asks what to do after the bot ("operator" or "hangup").
+      UNIVOICE_API: ${UNIVOICE_API:-api:8000}
+      # Who takes "press 0" / "operator" transfers: a SIP endpoint, or
+      # PJSIP/<number>@<trunk> once a provider trunk exists.
+      UNIVOICE_OPERATOR: ${UNIVOICE_OPERATOR:-PJSIP/1001}
     build:
       context: .
       dockerfile: infrastructure/asterisk/Dockerfile

@@ -13,6 +13,8 @@ import webrtcvad
 from app.audio.resample import pcm16_to_float
 from app.core.config import get_settings
 from app.intent.service import get_intent_service
+from app.realtime import call_actions
+from app.services.scenario_service import get_scenario_service
 from app.speech.service import transcribe_pcm16
 from app.tts.prompt_cache import get_prompt_cache
 from app.tts.prompts import prompt_text
@@ -23,6 +25,9 @@ LOGGER = logging.getLogger("univoice.realtime")
 AUDIO_TYPE = 0x10
 UUID_TYPE = 0x01
 HANGUP_TYPE = 0x00
+DTMF_TYPE = 0x03  # payload: one ASCII digit (Asterisk 20+)
+OPERATOR_DIGIT = "0"
+TRANSFER_ACTION = "transfer"
 SAMPLE_RATE = 8000
 FRAME_BYTES = 320  # 20 ms @ 8 kHz, 16-bit mono
 FRAME_MS = 20
@@ -39,6 +44,12 @@ class AudioSocketSession:
     output_lock: asyncio.Lock
     response_task: asyncio.Task | None = None
     last_output: float = field(default_factory=time.monotonic)
+    # Call UUID chosen by the dialplan; the key Asterisk uses to ask what next.
+    asterisk_uuid: str | None = None
+    # Language of the caller's last utterance, for prompts that follow it.
+    language: str | None = None
+    # Set once a handover to an operator has started: the bot stops listening.
+    transferring: bool = False
 
 
 class AudioSocketServer:
@@ -145,14 +156,32 @@ class AudioSocketServer:
             if message_type == UUID_TYPE:
                 if len(payload) == 16:
                     call_uuid = str(uuid.UUID(bytes=payload))
+                    session.asterisk_uuid = call_uuid
+                    returned, language = call_actions.take_operator_unavailable(call_uuid)
                     LOGGER.info(
-                        "AudioSocket UUID call_id=%s asterisk_uuid=%s",
+                        "AudioSocket UUID call_id=%s asterisk_uuid=%s%s",
                         session.call_id,
                         call_uuid,
+                        " (back from a failed transfer)" if returned else "",
                     )
-                    session.response_task = asyncio.create_task(self._play_greeting(session))
+                    if returned:
+                        # No second greeting: apologise and keep helping.
+                        session.language = language
+                        session.response_task = asyncio.create_task(
+                            self._play_prompt(session, "operator_unavailable")
+                        )
+                    else:
+                        session.response_task = asyncio.create_task(self._play_greeting(session))
                 continue
-            if message_type != AUDIO_TYPE:
+            if message_type == DTMF_TYPE:
+                digit = payload[:1].decode("ascii", "ignore")
+                LOGGER.info("DTMF call_id=%s digit=%s", session.call_id, digit)
+                if digit == OPERATOR_DIGIT and not session.transferring:
+                    if session.response_task and not session.response_task.done():
+                        session.response_task.cancel()
+                    session.response_task = asyncio.create_task(self._transfer_to_operator(session))
+                continue
+            if message_type != AUDIO_TYPE or session.transferring:
                 continue
 
             frame_buffer.extend(payload)
@@ -210,6 +239,17 @@ class AudioSocketServer:
                                 self._process_utterance(session, utterance)
                             )
 
+    async def _play_prompt(self, session: AudioSocketSession, key: str) -> None:
+        try:
+            text, language = prompt_text(key, session.language or self.languages[0])
+            pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
+            await self._send_pcm(session, pcm8)
+            LOGGER.info("Prompt %s sent call_id=%s lang=%s", key, session.call_id, language)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            LOGGER.error("Prompt %s failed call_id=%s: %s", key, session.call_id, e)
+
     async def _play_greeting(self, session: AudioSocketSession) -> None:
         try:
             text, language = prompt_text("greeting", self.languages[0])
@@ -253,7 +293,15 @@ class AudioSocketServer:
                 transcription.language_probability,
             )
 
+            session.language = caller_language
             intent = get_intent_service().resolve(text, caller_language)
+            scenario = (
+                get_scenario_service().get_scenario(intent.scenario_id) if intent.scenario_id else None
+            )
+            if scenario is not None and scenario.action == TRANSFER_ACTION:
+                LOGGER.info("Caller asked for an operator call_id=%s", session.call_id)
+                await self._transfer_to_operator(session)
+                return
             response_text, response_language = build_response(intent.scenario_id, caller_language)
             intent_done = time.perf_counter()
             LOGGER.info(
@@ -295,6 +343,29 @@ class AudioSocketServer:
                 "Realtime utterance failed call_id=%s",
                 session.call_id,
             )
+
+    async def _transfer_to_operator(self, session: AudioSocketSession) -> None:
+        """Tell the caller, then end the AudioSocket so the dialplan dials an operator."""
+        session.transferring = True
+        try:
+            text, language = prompt_text("transfer", session.language or self.languages[0])
+            pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
+            await self._send_pcm(session, pcm8)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            # Hand over anyway: an operator without the announcement beats none.
+            LOGGER.error("Transfer prompt failed call_id=%s: %s", session.call_id, e)
+
+        if session.asterisk_uuid is None:
+            LOGGER.error("Cannot transfer call_id=%s: no call UUID from Asterisk", session.call_id)
+            return
+        call_actions.request(session.asterisk_uuid, call_actions.OPERATOR, session.language)
+        LOGGER.info("Transferring call_id=%s to an operator", session.call_id)
+        async with session.output_lock:
+            # A hangup message ends AudioSocket(); the dialplan continues.
+            session.writer.write(bytes((HANGUP_TYPE,)) + struct.pack(">H", 0))
+            await session.writer.drain()
 
     async def _send_pcm(
         self,

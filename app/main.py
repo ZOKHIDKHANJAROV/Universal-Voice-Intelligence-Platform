@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 
+from app.api.routes.calls import router as calls_router
 from app.api.routes.console import router as console_router
 from app.api.routes.health import router as health_router
 from app.api.routes.intent import router as intent_router
@@ -70,6 +71,7 @@ app = FastAPI(
 
 protected = [Depends(verify_api_key)]
 app.include_router(health_router)
+app.include_router(calls_router)
 app.include_router(scenarios_router, dependencies=protected)
 app.include_router(stt_router, dependencies=protected)
 app.include_router(voice_router, dependencies=protected)
