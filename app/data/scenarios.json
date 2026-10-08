@@ -4,9 +4,7 @@
     "title": "Water not dispensing (UZ)",
     "description": "Apparat suv quymayotgan holat.",
     "language": "uz",
-    "keywords": [
-      "suv", "chiqmayapti", "quymayapti", "to'xtab qoldi", "suv bermayapti"
-    ],
+    "keywords": ["chiqma*", "quyma*", "suv berma*", "suv kelma*", "suv to'xtab", "apparat to'xtab", "ishlama*"],
     "steps": [
       {
         "id": "step_1",
@@ -14,16 +12,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["suv", "apparat*", "tugma*"]
   },
   {
     "id": "vending_no_water_ru",
     "title": "Water not dispensing (RU)",
     "description": "Аппарат не наливает воду.",
     "language": "ru",
-    "keywords": [
-      "вода", "не идет", "не наливается", "не льется", "не дает воду", "аппарат не работает"
-    ],
+    "keywords": ["не идет", "не налива*", "не льет*", "не дает воду", "не выда*", "не работает", "воды нет", "нет воды"],
     "steps": [
       {
         "id": "step_1",
@@ -31,16 +28,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["вода", "аппарат*", "автомат*", "кнопк*"]
   },
   {
     "id": "vending_payment_uz",
     "title": "Payment issue (UZ)",
     "description": "Pul yeb qo'yish yoki qaytim bermaslik.",
     "language": "uz",
-    "keywords": [
-      "pul", "yeb qo'ydi", "qaytarib bermadi", "payme", "click", "pulimni", "qaytim", "plastik", "karta"
-    ],
+    "keywords": ["yeb qo'y*", "pulimni yedi", "qaytarib berma*", "qaytarib bering", "qaytim* berma*", "pul yechil*", "to'lov o'tma*", "karta ishlama*"],
     "steps": [
       {
         "id": "step_1",
@@ -48,16 +44,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["pul", "pulimni", "payme", "click", "karta*", "plastik", "to'lov", "qaytim*"]
   },
   {
     "id": "vending_payment_ru",
     "title": "Payment issue (RU)",
     "description": "Съел деньги, проблемы с оплатой.",
     "language": "ru",
-    "keywords": [
-      "деньги", "съел", "не вернул", "сдачу", "пейми", "клик", "оплата", "карту", "зависло"
-    ],
+    "keywords": ["съел", "сожрал", "не вернул", "не выдал сдачу", "сдачу не", "списал*", "не прошл*", "верните деньги"],
     "steps": [
       {
         "id": "step_1",
@@ -65,16 +60,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["деньги", "пейми", "клик", "оплат*", "карт*", "сдач*", "зависл*"]
   },
   {
     "id": "vending_leak_uz",
     "title": "Water leak / Broken (UZ)",
     "description": "Apparatdan suv oqishi, truba yorilishi.",
     "language": "uz",
-    "keywords": [
-      "oqib", "toshdi", "teshik", "suv toshib", "buzilgan", "truba yorildi", "yotibdi"
-    ],
+    "keywords": ["oqib yotibdi", "oqib ketya*", "oqyapti", "toshib", "toshdi", "teshik", "yorildi", "ko'lmak", "sizib", "sizyapti"],
     "steps": [
       {
         "id": "step_1",
@@ -82,16 +76,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["suv", "truba", "buzilgan", "apparat*"]
   },
   {
     "id": "vending_leak_ru",
     "title": "Water leak / Broken (RU)",
     "description": "Протечка, лужа, сломанный аппарат.",
     "language": "ru",
-    "keywords": [
-      "течет", "протекает", "лужа", "сломан", "разбит", "затопило", "трубу прорвало", "хлещет"
-    ],
+    "keywords": ["течет", "протекает", "подтекает", "лужа", "затопило", "прорвало", "хлещет", "капает"],
     "steps": [
       {
         "id": "step_1",
@@ -99,16 +92,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["вода", "сломан*", "разбит*", "труб*", "аппарат*", "автомат*"]
   },
   {
     "id": "vending_taste_uz",
     "title": "Bad taste / dirty water (UZ)",
     "description": "Suv sifati, ta'mi va rangi buzilishi.",
     "language": "uz",
-    "keywords": [
-      "ta'mi", "yomon", "hid", "sassiq", "loy", "rangi", "iflos", "achchiq"
-    ],
+    "keywords": ["ta'mi yomon", "ta'mi g'alati", "sassiq", "hidi yomon", "hid kel*", "badbo'y", "loyqa", "iflos", "achchiq", "sho'r", "rangi o'zgar*"],
     "steps": [
       {
         "id": "step_1",
@@ -116,16 +108,15 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["suv", "ta'mi", "yomon", "hid", "rangi"]
   },
   {
     "id": "vending_taste_ru",
     "title": "Bad taste / dirty water (RU)",
     "description": "Невкусная, грязная вода.",
     "language": "ru",
-    "keywords": [
-      "вкус", "горькая", "запах", "воняет", "грязная", "цвет", "невкусная", "мутная"
-    ],
+    "keywords": ["горьк*", "воняет", "вонь", "грязн*", "невкусн*", "мутн*", "странный вкус", "плохой вкус", "неприятный запах", "странный запах", "тухл*"],
     "steps": [
       {
         "id": "step_1",
@@ -133,6 +124,7 @@
         "next_scenario": null
       }
     ],
-    "enabled": true
+    "enabled": true,
+    "context_keywords": ["вода", "вкус", "запах", "цвет"]
   }
 ]

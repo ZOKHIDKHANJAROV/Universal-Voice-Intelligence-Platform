@@ -20,7 +20,7 @@ infrastructure/navoiy-tts/reference.wav
 data/eval/
 
 # Downloaded and converted STT models.
-models/
+/models/
 
 # Downloaded training corpora.
 data/train/
