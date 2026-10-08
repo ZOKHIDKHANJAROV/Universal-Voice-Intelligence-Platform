@@ -1,3 +1,5 @@
+import os
+import shutil
 import subprocess
 import wave
 from pathlib import Path
@@ -10,7 +12,9 @@ class PiperTextToSpeech(TextToSpeech):
     """CPU-only Piper voices, one ONNX model per language."""
 
     def __init__(self, binary: str = "piper", model_paths: dict[str, str] | None = None) -> None:
-        self._binary = binary
+        # Resolve now: Windows does not launch relative paths like
+        # ".venv/Scripts/piper.exe" given to subprocess.
+        self._binary = shutil.which(binary) or binary
         self._model_paths = {lang: path for lang, path in (model_paths or {}).items() if path}
 
     def synthesize(self, text: str, output_path: Path, language: str = "uz") -> SpeechSynthesisResult:
@@ -21,7 +25,9 @@ class PiperTextToSpeech(TextToSpeech):
         subprocess.run(
             [self._binary, "--model", model_path, "--output_file", str(output_path)],
             input=text,
-            text=True,
+            # Cyrillic must reach Piper as UTF-8; Windows would default to cp1251.
+            encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "utf-8"},
             check=True,
         )
         with wave.open(str(output_path), "rb") as wav_file:

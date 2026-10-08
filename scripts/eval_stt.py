@@ -27,27 +27,12 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
 from rapidfuzz.distance import Levenshtein
 
-from app.audio.resample import resample
+from app.audio.telephony import TELEPHONY_RATE, telephony
 from app.core.config import get_settings
 from app.intent.service import get_intent_service
 from app.services.scenario_service import normalize_text, to_uzbek_latin
-
-TELEPHONY_RATE = 8000
-_MU = 255.0
-
-
-def telephony(audio16: np.ndarray, mu_law: bool = True) -> np.ndarray:
-    """Downsample to 8 kHz and round-trip through 8-bit mu-law like G.711."""
-    audio = np.clip(resample(audio16, 16000, TELEPHONY_RATE), -1.0, 1.0)
-    if not mu_law:
-        return audio
-    compressed = np.sign(audio) * np.log1p(_MU * np.abs(audio)) / np.log1p(_MU)
-    quantized = np.round((compressed + 1.0) * 127.5) / 127.5 - 1.0
-    return (np.sign(quantized) * np.expm1(np.abs(quantized) * np.log1p(_MU)) / _MU).astype(np.float32)
-
 
 def comparable(text: str, language: str) -> str:
     return to_uzbek_latin(text) if language == "uz" else normalize_text(text)
@@ -92,6 +77,11 @@ def main() -> int:
         help='decoder prompt; "" disables it (fine-tunes may continue the prompt instead of transcribing)',
     )
     parser.add_argument("--no-mu-law", action="store_true", help="skip G.711 simulation")
+    parser.add_argument(
+        "--without-timestamps",
+        action="store_true",
+        help="decode --model without timestamps, as production runs Uzbek fine-tunes",
+    )
     parser.add_argument("--output", type=Path, help="write per-clip results as CSV")
     args = parser.parse_args()
 
@@ -111,9 +101,10 @@ def main() -> int:
             beam_size=args.beam_size,
             initial_prompt=prompt,
             without_timestamps=without_timestamps,
+            temperature_fallback=settings.stt_temperature_fallback,
         )
 
-    stt = load(args.model, args.initial_prompt)
+    stt = load(args.model, args.initial_prompt, args.without_timestamps)
     if args.model_uz:
         uzbek = load(args.model_uz, settings.stt_initial_prompt_uz, settings.stt_without_timestamps_uz)
         stt = LanguageRoutedSpeechToText(stt, {"uz": uzbek})
