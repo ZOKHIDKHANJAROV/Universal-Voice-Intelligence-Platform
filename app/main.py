@@ -11,6 +11,8 @@ from app.api.routes.calls import router as calls_router
 from app.api.routes.console import router as console_router
 from app.api.routes.health import router as health_router
 from app.api.routes.intent import router as intent_router
+from app.api.routes.monitor import router as monitor_router
+from app.api.routes.monitor import stream_router as monitor_stream_router
 from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.stt import router as stt_router
 from app.api.routes.voice import router as voice_router
@@ -78,11 +80,20 @@ app.include_router(voice_router, dependencies=protected)
 app.include_router(intent_router, dependencies=protected)
 app.include_router(tts_router, dependencies=protected)
 app.include_router(console_router, dependencies=protected)
+app.include_router(monitor_router, dependencies=protected)
+app.include_router(monitor_stream_router)  # checks ?key= itself
 
-CONSOLE_PAGE = Path(__file__).parent / "web" / "index.html"
+WEB = Path(__file__).parent / "web"
+CONSOLE_PAGE = WEB / "index.html"
+MONITOR_PAGE = WEB / "monitor.html"
 
 
 @app.get("/", include_in_schema=False)
 def console() -> FileResponse:
     # Static page; every action it takes goes through the protected API.
     return FileResponse(CONSOLE_PAGE, media_type="text/html")
+
+
+@app.get("/monitor", include_in_schema=False)
+def monitor() -> FileResponse:
+    return FileResponse(MONITOR_PAGE, media_type="text/html")

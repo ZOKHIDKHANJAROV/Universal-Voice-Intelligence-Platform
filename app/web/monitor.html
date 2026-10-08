@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UniVoice Monitor</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3; --border: #dde1e6;
+    --text: #1b1f24; --muted: #5f6b7a; --accent: #1f6feb; --accent-soft: #e5efff;
+    --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e; --live: #d1242f;
+    --caller: #ffffff; --bot: #e5efff; --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --surface: #161b22; --surface-2: #1f262e; --border: #2f3640;
+      --text: #e6edf3; --muted: #8b98a5; --accent: #4493f8; --accent-soft: #15233a;
+      --ok: #3fb950; --warn: #d29922; --bad: #f85149; --live: #f85149;
+      --caller: #1f262e; --bot: #15233a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column;
+    font: 14.5px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; }
+  .bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 17px; margin: 0; font-weight: 650; }
+  .conn { font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.on { background: var(--ok); } .dot.live { background: var(--live); animation: blink 1.4s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .spacer { flex: 1; }
+  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+  .stat { background: var(--surface-2); border-radius: 10px; padding: 8px 12px; min-width: 0; }
+  .stat b { display: block; font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  /* minmax(0, ...): long one-line previews must not widen the columns. */
+  main { flex: 1; display: grid; grid-template-columns: 340px minmax(0, 1fr); min-height: 0; }
+  aside { border-right: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .filters { display: flex; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .seg { display: inline-flex; background: var(--surface-2); border-radius: 8px; padding: 2px; }
+  .seg button { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .follow { font-size: 13px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+  .list { overflow-y: auto; flex: 1; }
+  .item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--border);
+    background: none; color: inherit; font: inherit; padding: 10px 12px; cursor: pointer; }
+  .item:hover { background: var(--surface-2); }
+  .item[aria-current="true"] { background: var(--accent-soft); }
+  .item .top { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .item .time { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .item .preview { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+  .badge { display: inline-block; font-size: 11.5px; padding: 0 7px; border-radius: 6px; border: 1px solid var(--border);
+    color: var(--muted); white-space: nowrap; line-height: 18px; }
+  .badge.ok { color: var(--ok); border-color: currentColor; } .badge.warn { color: var(--warn); border-color: currentColor; }
+  .badge.live { color: var(--live); border-color: currentColor; } .badge.accent { color: var(--accent); border-color: currentColor; }
+  .dur { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+  section.chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .chat-head { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface);
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .chat-head .title { color: var(--text); font-weight: 600; font-size: 14px; }
+  .messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .empty { margin: auto; color: var(--muted); text-align: center; max-width: 360px; }
+  .msg { max-width: min(640px, 85%); }
+  .msg.caller { align-self: flex-start; } .msg.bot { align-self: flex-end; }
+  .bubble { border-radius: var(--radius); padding: 9px 12px; border: 1px solid var(--border); overflow-wrap: anywhere; }
+  .caller .bubble { background: var(--caller); border-top-left-radius: 4px; }
+  .bot .bubble { background: var(--bot); border-color: transparent; border-top-right-radius: 4px; }
+  .who { font-size: 12px; color: var(--muted); margin-bottom: 3px; display: flex; gap: 6px; align-items: center; }
+  .bot .who { justify-content: flex-end; }
+  .text { font-size: 15px; }
+  .text.none { color: var(--warn); font-style: italic; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; font-size: 12px; color: var(--muted); align-items: center; }
+  .meta .sep::before { content: "·"; }
+  .sys { align-self: center; font-size: 12.5px; color: var(--muted); background: var(--surface-2);
+    border-radius: 999px; padding: 3px 12px; text-align: center; }
+  .sys.warn { color: var(--warn); } .sys.accent { color: var(--accent); }
+  audio { height: 28px; max-width: 240px; }
+  .back { display: none; }
+  @media (max-width: 760px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    main { grid-template-columns: minmax(0, 1fr); }
+    aside { border-right: 0; }
+    main.reading aside { display: none; }
+    main:not(.reading) section.chat { display: none; }
+    .back { display: inline-block; }
+    .msg { max-width: 92%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>UniVoice — мониторинг</h1>
+    <span class="conn"><span class="dot" id="conn-dot"></span><span id="conn-text">подключение…</span></span>
+    <span class="spacer"></span>
+    <a href="/">Консоль →</a>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main id="main">
+  <aside>
+    <div class="filters">
+      <div class="seg" role="group" aria-label="Источник">
+        <button data-filter="all" aria-pressed="true">Все</button>
+        <button data-filter="phone" aria-pressed="false">Звонки</button>
+        <button data-filter="console" aria-pressed="false">Тесты</button>
+      </div>
+      <label class="follow"><input type="checkbox" id="follow" checked> следить за новыми</label>
+    </div>
+    <div class="list" id="list"><div class="empty" style="padding:24px">загрузка…</div></div>
+  </aside>
+  <section class="chat">
+    <div class="chat-head" id="chat-head"><span class="title">Выберите звонок</span></div>
+    <div class="messages" id="messages">
+      <div class="empty">Здесь появится переписка: что сказал звонящий, что распознал бот и что ответил.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const apiKey = (() => { try { return localStorage.getItem("univoice.apiKey") || ""; } catch { return ""; } })();
+const pct = (x) => (x == null ? "—" : Math.round(x * 100) + "%");
+const secs = (ms) => (ms == null ? "—" : (ms / 1000).toFixed(1) + " с");
+const clock = (ts) => new Date(ts * 1000).toLocaleTimeString("ru-RU");
+const dayTime = (ts) => {
+  const d = new Date(ts * 1000), today = new Date();
+  return d.toDateString() === today.toDateString() ? clock(ts) : d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+};
+const duration = (c) => {
+  const s = Math.max(0, Math.round((c.ended_at || Date.now() / 1000) - c.started_at));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+
+async function api(path) {
+  const r = await fetch(path, { headers: apiKey ? { "X-API-Key": apiKey } : {} });
+  if (r.status === 401) throw new Error("Нужен API-ключ: задайте его в консоли на вкладке «Доступ».");
+  if (!r.ok) throw new Error(r.statusText);
+  return r.json();
+}
+
+// ---- state ----
+const calls = new Map();
+let selected = null, filter = "all";
+
+const STATUS = {
+  active: '<span class="badge live">идёт</span>',
+  ended: '<span class="badge">завершён</span>',
+  transferred: '<span class="badge accent">оператор</span>',
+};
+const CHANNEL = { phone: "звонок", console: "тест" };
+
+// ---- stats ----
+let statsTimer = null;
+function scheduleStats() { clearTimeout(statsTimer); statsTimer = setTimeout(loadStats, 600); }
+async function loadStats() {
+  try {
+    const s = await api("/api/v1/monitor/stats");
+    const understood = s.answers ? s.understood / s.answers : null;
+    $("#stats").innerHTML = [
+      [s.calls, "звонков за 24 ч"],
+      [s.active, "идёт сейчас"],
+      [pct(understood), `понято (${s.understood} из ${s.answers})`],
+      [s.transferred, "переведено оператору"],
+      [secs(s.median_latency_ms), "медианная задержка ответа"],
+    ].map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("");
+  } catch (e) {
+    $("#stats").innerHTML = `<div class="stat" style="grid-column:1/-1"><span>${esc(e.message)}</span></div>`;
+  }
+}
+
+// ---- call list ----
+function renderList() {
+  const items = [...calls.values()]
+    .filter((c) => filter === "all" || c.channel === filter)
+    .sort((a, b) => b.started_at - a.started_at);
+  if (!items.length) {
+    $("#list").innerHTML = '<div class="empty" style="padding:24px">Звонков пока нет. Позвоните на 1000 или проверьте фразу в консоли.</div>';
+    return;
+  }
+  $("#list").innerHTML = items.map((c) => `
+    <button class="item" data-id="${esc(c.id)}" aria-current="${c.id === selected}">
+      <div class="top">
+        ${c.status === "active" ? '<span class="dot live"></span>' : ""}
+        <span class="time">${esc(dayTime(c.started_at))}</span>
+        <span class="badge">${esc(CHANNEL[c.channel] || c.channel)}</span>
+        ${c.language ? `<span class="badge">${esc(c.language)}</span>` : ""}
+        ${STATUS[c.status] || ""}
+        <span class="dur" data-dur="${esc(c.id)}">${duration(c)}</span>
+      </div>
+      <div class="preview">${c.last_text ? esc(c.last_text) : '<i>без реплик</i>'}${c.turns ? ` · ${c.turns} репл.` : ""}</div>
+    </button>`).join("");
+}
+$("#list").addEventListener("click", (e) => {
+  const item = e.target.closest(".item");
+  if (item) select(item.dataset.id, true);
+});
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+  filter = b.dataset.filter;
+  document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  renderList();
+}));
+setInterval(() => {
+  for (const el of document.querySelectorAll("[data-dur]")) {
+    const c = calls.get(el.dataset.dur);
+    if (c && c.status === "active") el.textContent = duration(c);
+  }
+  if (selected && calls.get(selected)?.status === "active") renderHead();
+}, 1000);
+
+// ---- chat ----
+const SYSTEM_TEXT = {
+  call_started: ["Звонок начат", ""],
+  returned: ["Операторы не ответили — звонок вернулся к боту", "warn"],
+  barge_in: ["Звонящий перебил бота", ""],
+  dtmf: ["Нажата клавиша", "accent"],
+  transfer: ["Перевод на оператора", "accent"],
+  handed_over: ["Бот передал звонок", "accent"],
+  hangup: ["Звонок завершён", ""],
+};
+const BOT_KIND = { greeting: "приветствие", transfer: "перевод", operator_unavailable: "операторы заняты", answer: "" };
+
+function renderEvent(ev) {
+  const d = ev.data || {};
+  if (ev.role === "system") {
+    const [label, tone] = SYSTEM_TEXT[ev.kind] || [ev.kind, ""];
+    const extra = ev.kind === "dtmf" ? ` «${esc(ev.text)}»` : "";
+    return `<div class="sys ${tone}">${esc(label)}${extra} · ${esc(clock(ev.ts))}</div>`;
+  }
+  if (ev.role === "caller") {
+    const audio = ev.audio ? `<audio controls preload="none" src="/api/v1/monitor/calls/${esc(ev.call_id)}/audio/${ev.id}${apiKey ? "?key=" + encodeURIComponent(apiKey) : ""}"></audio>` : "";
+    const lang = d.language ? `${esc(d.language)} ${pct(d.probability)}` : `${esc(d.detected || "?")} ${pct(d.probability)}`;
+    return `<div class="msg caller">
+      <div class="who">Звонящий · ${esc(clock(ev.ts))}</div>
+      <div class="bubble">
+        <div class="text ${ev.text ? "" : "none"}">${ev.text ? esc(ev.text) : "речь не распознана"}</div>
+        <div class="meta"><span>язык ${lang}</span><span class="sep"></span><span>распознано за ${secs(d.stt_ms)}</span>
+          <span class="sep"></span><span>${d.seconds ?? "?"} с речи</span>${audio}</div>
+      </div></div>`;
+  }
+  const kind = BOT_KIND[ev.kind] ?? ev.kind;
+  let meta = "";
+  if (ev.kind === "answer") {
+    const scenario = d.scenario_id
+      ? `<span class="badge ok">${esc(d.scenario_title || d.scenario_id)}</span>`
+      : '<span class="badge warn">не понято → оператор</span>';
+    const breakdown = `распознавание ${d.stt_ms} мс · сценарий ${d.intent_ms} мс · аудио ${d.audio_ms} мс`;
+    meta = `<div class="meta">${scenario}<span>уверенность ${pct(d.confidence)}</span><span class="sep"></span>
+      <span title="${esc(breakdown)}">ответ через ${secs(d.total_ms)}</span><span class="sep"></span><span>${esc(d.source || "")}</span></div>`;
+  }
+  return `<div class="msg bot">
+    <div class="who">${kind ? `<span class="badge">${esc(kind)}</span>` : ""}Бот${d.language ? ` (${esc(d.language)})` : ""} · ${esc(clock(ev.ts))}</div>
+    <div class="bubble"><div class="text">${esc(ev.text)}</div>${meta}</div></div>`;
+}
+
+function renderHead() {
+  const c = calls.get(selected);
+  if (!c) return;
+  $("#chat-head").innerHTML = `
+    <button class="back badge" id="back">← список</button>
+    <span class="title">${esc(CHANNEL[c.channel] || c.channel)} ${esc(dayTime(c.started_at))}</span>
+    ${STATUS[c.status] || ""}${c.language ? `<span class="badge">${esc(c.language)}</span>` : ""}
+    <span>длительность ${duration(c)}</span><span>· ${c.turns || 0} репл.</span>
+    <span style="margin-left:auto;font-family:ui-monospace,monospace;font-size:11.5px">${esc(c.id.slice(0, 8))}</span>`;
+  $("#back").onclick = () => $("#main").classList.remove("reading");
+}
+
+const nearBottom = () => { const m = $("#messages"); return m.scrollHeight - m.scrollTop - m.clientHeight < 80; };
+const toBottom = () => { const m = $("#messages"); m.scrollTop = m.scrollHeight; };
+
+async function select(id, byUser = false) {
+  selected = id;
+  if (byUser) $("#main").classList.add("reading");
+  renderList();
+  renderHead();
+  $("#messages").innerHTML = '<div class="empty">загрузка…</div>';
+  try {
+    const { call, events } = await api(`/api/v1/monitor/calls/${encodeURIComponent(id)}`);
+    calls.set(call.id, call);
+    if (selected !== id) return;
+    renderHead();
+    $("#messages").innerHTML = events.length ? events.map(renderEvent).join("") : '<div class="empty">Событий пока нет.</div>';
+    toBottom();
+  } catch (e) {
+    $("#messages").innerHTML = `<div class="empty">${esc(e.message)}</div>`;
+  }
+}
+
+// ---- live updates ----
+function connect() {
+  const source = new EventSource("/api/v1/monitor/stream" + (apiKey ? "?key=" + encodeURIComponent(apiKey) : ""));
+  source.onopen = () => { $("#conn-dot").className = "dot on"; $("#conn-text").textContent = "в реальном времени"; };
+  source.onerror = () => { $("#conn-dot").className = "dot"; $("#conn-text").textContent = "переподключение…"; };
+  source.onmessage = (m) => {
+    const msg = JSON.parse(m.data);
+    const call = msg.call;
+    const isNew = call && !calls.has(call.id);
+    if (call) calls.set(call.id, call);
+    if (msg.type === "event" && msg.event.call_id === selected) {
+      const stick = nearBottom();
+      const box = $("#messages");
+      if (box.querySelector(".empty")) box.innerHTML = "";
+      box.insertAdjacentHTML("beforeend", renderEvent(msg.event));
+      if (stick) toBottom();
+      renderHead();
+    }
+    if (isNew && $("#follow").checked && call.status === "active" && (filter === "all" || filter === call.channel)) {
+      select(call.id);
+    } else {
+      renderList();
+    }
+    scheduleStats();
+  };
+}
+
+(async () => {
+  try {
+    for (const c of await api("/api/v1/monitor/calls?limit=100")) calls.set(c.id, c);
+    renderList();
+    const latest = [...calls.values()].sort((a, b) => b.started_at - a.started_at)[0];
+    if (latest && window.innerWidth > 760) select(latest.id);
+  } catch (e) {
+    $("#list").innerHTML = `<div class="empty" style="padding:24px">${esc(e.message)}</div>`;
+  }
+  loadStats();
+  connect();
+})();
+</script>
+</body>
+</html>

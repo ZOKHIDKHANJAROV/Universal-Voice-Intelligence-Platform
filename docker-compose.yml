@@ -13,6 +13,8 @@ services:
       - whisper-models:/root/.cache/huggingface
       # Converted Uzbek fine-tune from `make uz-model` (STT_MODEL_UZ).
       - ./models:/models:ro
+      # Call log and recordings behind /monitor.
+      - call-log:/app/data
     restart: unless-stopped
     gpus: all
 
@@ -90,3 +92,4 @@ volumes:
   voice-audio:
   navoiy-models:
   whisper-models:
+  call-log:
