@@ -85,7 +85,7 @@ caller's phone -> mobile network -> [SIM in the gateway] -> LAN -> Asterisk -> b
 
 1. Reserve the laptop's IP in the router (DHCP reservation), so the gateway
    always finds it.
-2. `copy infrastructuresterisk\local\pjsip_gsm.conf.example infrastructuresterisk\local\pjsip_gsm.conf`,
+2. `copy infrastructure\asterisk\local\pjsip_gsm.conf.example infrastructure\asterisk\local\pjsip_gsm.conf`,
    put the laptop's LAN IP in both `external_*_address` lines and a long random
    password in `[gsm-gateway-auth]`. The file stays out of git.
 3. Let the gateway through Windows Firewall (PowerShell as administrator):
