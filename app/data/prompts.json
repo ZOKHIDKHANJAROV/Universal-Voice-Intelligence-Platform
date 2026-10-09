@@ -1,13 +1,14 @@
 {
   "greeting": {
-    "ru": "Здравствуйте! Ассалому алейкум! Вы позвонили в службу поддержки."
+    "uz": "Assalomu alaykum! Qo'llab-quvvatlash xizmatiga qo'ng'iroq qildingiz.",
+    "ru": "Здравствуйте! Вы позвонили в службу поддержки."
   },
   "not_understood": {
-    "uz": "Kechirasiz, muammoingizni aniqlay olmadim. Operator bilan bog'lanish uchun 0 ni bosing.",
+    "uz": "Kechirasiz, muammoingizni aniqlay olmadim. Operator bilan bog'lanish uchun nolni bosing.",
     "ru": "Извините, не удалось определить проблему. Нажмите ноль для связи с оператором."
   },
   "operator": {
-    "uz": "Operator bilan bog'lanish uchun 0 ni bosing.",
+    "uz": "Operator bilan bog'lanish uchun nolni bosing.",
     "ru": "Нажмите ноль для связи с оператором."
   },
   "transfer": {
