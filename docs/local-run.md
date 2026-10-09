@@ -73,6 +73,45 @@ This starts Asterisk and the API. Then:
 Stop with Ctrl+C, then
 `docker compose -p universal-voice-intelligence-platform stop asterisk`.
 
+## Real calls through a GSM gateway (SIM card)
+
+A GSM gateway (GoIP, Yeastar TG, Dinstar, ...) holds a SIM card and hands its
+calls to Asterisk over SIP on the local network. Calls to the SIM's number
+then reach the bot.
+
+```
+caller's phone -> mobile network -> [SIM in the gateway] -> LAN -> Asterisk -> bot
+```
+
+1. Reserve the laptop's IP in the router (DHCP reservation), so the gateway
+   always finds it.
+2. `copy infrastructuresterisk\local\pjsip_gsm.conf.example infrastructuresterisk\local\pjsip_gsm.conf`,
+   put the laptop's LAN IP in both `external_*_address` lines and a long random
+   password in `[gsm-gateway-auth]`. The file stays out of git.
+3. Let the gateway through Windows Firewall (PowerShell as administrator):
+
+   ```powershell
+   New-NetFirewallRule -DisplayName "UniVoice SIP" -Direction Inbound -Protocol UDP -LocalPort 5060,10000-10100 -Action Allow -Profile Private
+   ```
+
+4. Restart Asterisk:
+   `docker compose -p universal-voice-intelligence-platform restart asterisk`.
+5. In the gateway's web interface (SIP/VoIP settings): server = laptop's LAN
+   IP, port 5060, UDP; user `gsm-gateway` and the password from step 2;
+   codec G.711 A-law first; DTMF RFC2833; incoming GSM calls forwarded to SIP.
+6. Check that the gateway is registered:
+   `docker exec univoice-asterisk asterisk -rx "pjsip show contacts"` lists
+   `gsm-gateway` as `Avail`. Then call the SIM's number from any phone.
+
+Notes:
+
+- Whatever number the gateway sends (the SIM's number, `s`, `1000`), the call
+  goes to the bot (`[univoice-gsm]` in `extensions.conf`).
+- A one-SIM gateway carries one call at a time. Transfers to an operator's
+  mobile through the same gateway (`UNIVOICE_OPERATOR=PJSIP/998901234567@gsm-gateway`)
+  need a second free SIM; with one SIM, use a SIP operator (`1001`).
+- Check with the mobile operator that SIM cards may be used in a gateway.
+
 ## Everything in Docker
 
 The API and web UI (console and `/monitor`) also run as the `api` container

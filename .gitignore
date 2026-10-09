@@ -32,3 +32,5 @@ data/train/
 # Call log and recorded utterances behind /monitor (callers' voices).
 /data/calls.db*
 /data/calls/
+# Asterisk settings with passwords and this machine's address.
+/infrastructure/asterisk/local/*.conf
