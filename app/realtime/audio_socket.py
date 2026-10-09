@@ -36,6 +36,9 @@ FRAME_MS = 20
 # frame is sent whenever nothing else went out for this long.
 KEEPALIVE_SECONDS = 1.0
 # No audio from Asterisk for this long counts as silence (see _read_message).
+# Phones and mobile networks buffer up to ~0.5 s of audio; hanging up right
+# after the last frame cuts the end of the goodbye or "please wait" short.
+HANGUP_DELAY_SECONDS = 0.8
 NO_AUDIO_SECONDS = 0.2
 
 
@@ -313,6 +316,7 @@ class AudioSocketServer:
         await self._send_hangup(session)
 
     async def _send_hangup(self, session: AudioSocketSession) -> None:
+        await asyncio.sleep(HANGUP_DELAY_SECONDS)
         async with session.output_lock:
             # A hangup message ends AudioSocket(); the dialplan continues
             # (operator on a transfer, otherwise it hangs up).
