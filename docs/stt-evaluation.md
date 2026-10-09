@@ -132,6 +132,34 @@ The two remaining real matches use `loyqa` in its literal sense (silty
 ground). The hand-written cases were written together with the keywords;
 the 380 real sentences were not looked at while choosing them.
 
+## Choosing the language on short phrases
+
+Real calls showed Uzbek going to the wrong model: on 1-3 s phrases
+large-v3's language detector answers Indonesian, English or Dutch, and
+Russian then won the uz/ru choice with scores of 0.03-0.3. Large-v3 heard
+"suv chiqmayapti" as nothing or "Черт, что я делаю", while the Uzbek model
+transcribed the same recordings correctly with mean log-probabilities of
+-0.00 to -0.07. On Russian speech and noise its log-probability is -0.5 to
+-1.7, and stock Whisper is the reverse.
+
+Below a detector score of 0.9 the models' own confidence now decides: an
+Uzbek transcription at -0.25 or better wins outright, otherwise both models
+transcribe and the surer one wins; text below -1.0 counts as noise.
+Measured on 150 FLEURS ru, 100 podcast and 100 FLEURS uz clips through the
+simulated phone channel (`STT_LANGUAGE_SURE`, `STT_ACCEPT_LOGPROB`):
+
+| Correct language | detector only | detector + confidence |
+|---|---|---|
+| Uzbek, 2.5 s phrase | 92/200 (46%) | 192/200 (96%) |
+| Russian, 2.5 s phrase | 150/150 | 147/150 (98%) |
+| Uzbek, up to 8 s | 175/200 (88%) | 198/200 (99%) |
+| Russian, up to 8 s | 150/150 | 150/150 |
+
+On the 11 recorded utterances of the first real test calls, all six Uzbek
+phrases are now transcribed correctly (none were before), the Russian ones
+stay Russian, and coughs stay empty. Confident Uzbek skips the large-model
+decode: ~0.5 s instead of ~1 s per phrase.
+
 ## Not measured yet
 
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.
