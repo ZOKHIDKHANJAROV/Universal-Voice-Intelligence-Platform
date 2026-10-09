@@ -34,6 +34,7 @@ class LanguageRoutedSpeechToText(SpeechToText):
         sure_probability: float = 0.9,
         accept_logprob: float = -0.25,
         min_logprob: float = -1.0,
+        alone_min_logprob: float = -0.5,
     ) -> None:
         self._general = general
         self._specialists = specialists
@@ -41,6 +42,11 @@ class LanguageRoutedSpeechToText(SpeechToText):
         self._accept_logprob = accept_logprob
         # Below this the text is a guess at noise ("puf", "siz" from a cough).
         self._min_logprob = min_logprob
+        # When the general model heard no speech at all, a specialist's text
+        # needs this much: the Uzbek fine-tune turns background noise into
+        # "yigʻlab yubordim" at -0.51..-0.66, while 98% of short Uzbek phrases
+        # in the evaluation clear -0.5.
+        self._alone_min_logprob = alone_min_logprob
 
     def _model_for(self, language: str | None) -> SpeechToText:
         return self._specialists.get(language, self._general) if language else self._general
@@ -84,9 +90,16 @@ class LanguageRoutedSpeechToText(SpeechToText):
                 and result.avg_logprob >= self._accept_logprob
             ):
                 break
+        general_heard_speech = any(
+            r.text for candidate, r in zip(order, results) if candidate not in self._specialists
+        )
+        general_asked = len(results) == len(order)
+        floor = self._min_logprob
+        if general_asked and not general_heard_speech:
+            floor = max(floor, self._alone_min_logprob)
         heard = [
             r for r in results
-            if r.text and r.avg_logprob is not None and r.avg_logprob >= self._min_logprob
+            if r.text and r.avg_logprob is not None and r.avg_logprob >= floor
         ]
         if not heard:
             # Nothing believable: report the detector's pick with no text.

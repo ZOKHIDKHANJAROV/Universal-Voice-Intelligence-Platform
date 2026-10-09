@@ -160,6 +160,28 @@ phrases are now transcribed correctly (none were before), the Russian ones
 stay Russian, and coughs stay empty. Confident Uzbek skips the large-model
 decode: ~0.5 s instead of ~1 s per phrase.
 
+### Quiet phones and background noise
+
+Later calls arrived at -39 to -43 dBFS. At that level the detector gave
+Russian only 0.62-0.82, the confidence comparison took over, and the Uzbek
+model's transliteration ("bering chi mening dengim", -0.43) beat Whisper's
+Russian ("Верите мои деньги", -0.45) by a hair. Background music became
+"yigʻlab yubordim" or "musiqa" from the Uzbek model at -0.51 to -0.66 while
+large-v3 heard no speech.
+
+- Real-time audio is normalized to -20 dBFS RMS before recognition (at most
+  +30 dB, no clipping; `STT_NORMALIZE_LOUDNESS`). The same two phrases then
+  score Russian 0.94 and 0.86 and come out as "Верите мои деньги" and
+  "Списалась деньги с карты".
+- When large-v3 hears no speech, an Uzbek transcription needs -0.5 or better.
+- A lone "musiqa" / "музыка" is a non-speech tag, like "Субтитры...".
+
+Replaying all 54 recorded caller utterances: both Russian phrases now Russian,
+all 7 noise clips empty, no Uzbek phrase lost to Russian. On the 350-clip set
+(normal levels) normalization is neutral: short Uzbek 183/200 vs 184/200,
+short Russian 148/150 vs 147/150; the noise rule costs 2-3 short Uzbek
+clips, which come back as "not recognized" instead of a wrong answer.
+
 ## Not measured yet
 
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.

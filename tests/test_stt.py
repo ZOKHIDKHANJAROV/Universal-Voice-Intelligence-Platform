@@ -103,3 +103,11 @@ def test_greedy_only_by_default_in_production() -> None:
     from app.core.config import get_settings
 
     assert get_settings().stt_temperature_fallback is False
+
+
+def test_lone_non_speech_tags_are_hallucinations() -> None:
+    from app.speech.providers.whisper import is_hallucination
+
+    assert is_hallucination("musiqa")
+    assert is_hallucination("Музыка.")
+    assert not is_hallucination("musiqa baland, suv chiqmayapti")

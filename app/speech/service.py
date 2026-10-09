@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
+from app.audio.level import normalize_loudness
 from app.core.config import get_settings
 from app.speech.base import SpeechToText
 from app.speech.models import TranscriptionResult
@@ -85,6 +86,8 @@ def transcribe_pcm16(
     language: str | None = None,
     allowed_languages: tuple[str, ...] = (),
 ) -> TranscriptionResult:
+    if get_settings().stt_normalize_loudness:
+        audio = normalize_loudness(audio)
     with _stt_slots():
         return get_stt().transcribe_pcm16(
             audio,
