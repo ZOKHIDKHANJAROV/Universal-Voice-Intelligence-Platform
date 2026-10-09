@@ -52,6 +52,9 @@ def get_stt() -> SpeechToText:
     return LanguageRoutedSpeechToText(
         general,
         {"uz": load(settings.stt_model_uz, settings.stt_initial_prompt_uz, settings.stt_without_timestamps_uz)},
+        sure_probability=settings.stt_language_sure,
+        accept_logprob=settings.stt_accept_logprob,
+        min_logprob=settings.stt_min_logprob,
     )
 
 

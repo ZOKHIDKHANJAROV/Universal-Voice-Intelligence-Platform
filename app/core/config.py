@@ -36,6 +36,14 @@ class Settings(BaseSettings):
     # Fine-tunes trained on plain text drop the first words when asked for
     # timestamps (75% -> 20% WER on affected clips without them).
     stt_without_timestamps_uz: bool = True
+    # Whisper's language detector barely knows Uzbek. Below this detector score
+    # the models' confidence in their own text picks the language instead.
+    stt_language_sure: float = 0.9
+    # An Uzbek transcription at least this confident (mean log-probability)
+    # wins without asking STT_MODEL; below it both transcribe, the surer wins.
+    stt_accept_logprob: float = -0.25
+    # Text decoded with a lower mean log-probability is treated as noise.
+    stt_min_logprob: float = -1.0
     stt_supported_languages: tuple[str, ...] = ("uz", "ru", "en")
     # Languages a phone caller is expected to speak; detection is clamped to these.
     stt_realtime_languages: tuple[str, ...] = ("uz", "ru")
