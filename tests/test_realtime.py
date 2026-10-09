@@ -30,8 +30,9 @@ def _message(payload: bytes, message_type: int = AUDIO_TYPE) -> bytes:
     return bytes((message_type,)) + struct.pack(">H", len(payload)) + payload
 
 
-async def _run(frames: list[bytes], playing: bool):
+async def _run(frames: list[bytes], playing: bool, barge_in: bool = True):
     server = AudioSocketServer()
+    server.barge_in = barge_in
     utterances: list[bytes] = []
 
     async def capture(_session, pcm: bytes) -> None:
@@ -74,6 +75,17 @@ def test_sustained_speech_interrupts_and_is_captured() -> None:
     assert len(utterances) == 1
     # Every speech frame, including the ones that triggered barge-in, is kept.
     assert utterances[0].count(SPEECH) >= 30
+
+
+def test_without_barge_in_the_bot_finishes_and_speech_is_not_heard() -> None:
+    frames = [SPEECH] * 30 + [SILENCE] * 40
+    cancelled, utterances = asyncio.run(_run(frames, playing=True, barge_in=False))
+    assert not cancelled
+    assert utterances == []
+
+
+def test_barge_in_is_off_by_default() -> None:
+    assert AudioSocketServer().barge_in is False
 
 
 def test_utterance_is_processed_without_playback() -> None:
