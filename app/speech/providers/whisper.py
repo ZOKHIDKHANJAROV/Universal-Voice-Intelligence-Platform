@@ -61,8 +61,15 @@ _HALLUCINATIONS = (
 )
 
 
+# Whole transcripts that are subtitle tags for non-speech, e.g. the Uzbek
+# fine-tune writes "musiqa" for background music.
+_NON_SPEECH_TAGS = {"musiqa", "музыка", "music", "kulgi", "смех", "qarsaklar", "аплодисменты"}
+
+
 def is_hallucination(text: str) -> bool:
     lowered = text.casefold()
+    if lowered.strip(" .,!?[]()*-") in _NON_SPEECH_TAGS:
+        return True
     return any(marker in lowered for marker in _HALLUCINATIONS)
 
 
