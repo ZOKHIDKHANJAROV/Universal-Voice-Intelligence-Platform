@@ -97,6 +97,28 @@ are named by a hash of their text, so only edited phrases are re-rendered. Use
 that was never rendered is synthesized live on first use, which only works
 while the TTS service is running.
 
+## Call flow
+
+1. Greeting in Uzbek (Navoiy voice), then Russian (Piper voice).
+2. The caller describes the problem; the bot answers from the matching
+   scenario, then asks "anything else?". Every prompt and answer plays to the
+   end: speech during it is not heard (`REALTIME_BARGE_IN=true` allows
+   interrupting).
+3. Pressing 0 or asking for an operator transfers the call at any time.
+
+The bot hangs up after a goodbye when:
+
+| Situation | Setting (0 = never) |
+|---|---|
+| Silence after the greeting: asks once more, then goodbye | `REALTIME_NO_INPUT_SECONDS=15` |
+| Silence after an answer and "anything else?" | `REALTIME_FOLLOWUP_SECONDS=8` |
+| The call reaches its length limit | `REALTIME_MAX_CALL_SECONDS=300` |
+
+Asterisk also hangs up when no audio arrives for 30 s (`rtp_timeout` in
+`infrastructure/asterisk/pjsip.conf`), e.g. when a mobile caller loses
+coverage. Phones that send no audio during silence are handled: missing audio
+counts as silence.
+
 ## Web console
 
 Open `http://localhost:8000/` once the API runs. It is a single static page

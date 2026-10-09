@@ -18,5 +18,21 @@
   "operator_unavailable": {
     "uz": "Hozir barcha operatorlar band. Iltimos, muammoingizni aytib bering, yordam berishga harakat qilaman.",
     "ru": "Сейчас все операторы заняты. Пожалуйста, опишите проблему, я постараюсь помочь."
+  },
+  "no_input": {
+    "uz": "Iltimos, muammoingizni aytib bering.",
+    "ru": "Пожалуйста, опишите вашу проблему."
+  },
+  "anything_else": {
+    "uz": "Yana savolingiz bormi?",
+    "ru": "Есть ещё вопросы?"
+  },
+  "goodbye": {
+    "uz": "Qo'ng'irog'ingiz uchun rahmat. Xayr!",
+    "ru": "Спасибо за звонок. До свидания!"
+  },
+  "time_limit": {
+    "uz": "Qo'ng'iroq vaqti tugadi. Rahmat, xayr!",
+    "ru": "Время звонка истекло. Спасибо, до свидания!"
   }
 }

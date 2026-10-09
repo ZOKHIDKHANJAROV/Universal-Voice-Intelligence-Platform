@@ -222,14 +222,20 @@ const SYSTEM_TEXT = {
   transfer: ["Перевод на оператора", "accent"],
   handed_over: ["Бот передал звонок", "accent"],
   hangup: ["Звонок завершён", ""],
+  bot_hangup: ["Бот завершил звонок", ""],
 };
-const BOT_KIND = { greeting: "приветствие", transfer: "перевод", operator_unavailable: "операторы заняты", answer: "" };
+const END_REASON = { done: "разговор окончен", silence: "звонящий молчал", time_limit: "истёк лимит времени" };
+const BOT_KIND = {
+  greeting: "приветствие", transfer: "перевод", operator_unavailable: "операторы заняты", answer: "",
+  no_input: "переспрос", anything_else: "ещё вопросы?", goodbye: "прощание", time_limit: "лимит времени",
+};
 
 function renderEvent(ev) {
   const d = ev.data || {};
   if (ev.role === "system") {
     const [label, tone] = SYSTEM_TEXT[ev.kind] || [ev.kind, ""];
-    const extra = ev.kind === "dtmf" ? ` «${esc(ev.text)}»` : "";
+    const extra = ev.kind === "dtmf" ? ` «${esc(ev.text)}»`
+      : ev.kind === "bot_hangup" ? `: ${esc(END_REASON[ev.text] || ev.text)}` : "";
     return `<div class="sys ${tone}">${esc(label)}${extra} · ${esc(clock(ev.ts))}</div>`;
   }
   if (ev.role === "caller") {
