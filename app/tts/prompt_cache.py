@@ -15,6 +15,7 @@ from pathlib import Path
 
 from app.audio.resample import pcm16_to_wav, wav_to_pcm16
 from app.core.config import get_settings
+from app.tts.pronunciation import spoken_text
 from app.tts.service import synthesize_bytes
 
 LOGGER = logging.getLogger("univoice.prompts")
@@ -33,8 +34,10 @@ class PromptAudioCache:
         self._live_render_blocked_until = 0.0
 
     def path_for(self, text: str, language: str) -> Path:
-        # Keyed by content, so editing a phrase invalidates its audio automatically.
-        digest = hashlib.sha1(f"{language}\n{text}".encode("utf-8")).hexdigest()[:16]
+        # Keyed by what is spoken, so editing a phrase or the pronunciation
+        # lexicon invalidates its audio automatically.
+        spoken = spoken_text(text, language)
+        digest = hashlib.sha1(f"{language}\n{spoken}".encode("utf-8")).hexdigest()[:16]
         return self._directory / f"{language}-{digest}.wav"
 
     def get_pcm8(self, text: str, language: str) -> bytes | None:
@@ -54,7 +57,7 @@ class PromptAudioCache:
         path = self.path_for(text, language)
         if path.exists() and not force:
             return path
-        pcm8 = wav_to_pcm16(synthesize_bytes(text, language), TELEPHONY_RATE)
+        pcm8 = wav_to_pcm16(synthesize_bytes(spoken_text(text, language), language), TELEPHONY_RATE)
         path.parent.mkdir(parents=True, exist_ok=True)
         temporary = path.with_suffix(".tmp")
         temporary.write_bytes(pcm16_to_wav(pcm8, TELEPHONY_RATE))
