@@ -20,7 +20,7 @@ class _FakeModel:
             duration=len(audio) / 16000 if isinstance(audio, np.ndarray) else 1.0,
             all_language_probs=self._probabilities if kwargs["language"] is None else None,
         )
-        return iter([SimpleNamespace(text=f" text in {language} ")]), info
+        return iter([SimpleNamespace(text=f" text in {language} ", avg_logprob=-0.2)]), info
 
 
 def _stt(model: _FakeModel) -> FasterWhisperSpeechToText:
@@ -93,7 +93,7 @@ def test_without_timestamps_is_passed_to_whisper() -> None:
 def test_known_hallucinations_become_silence() -> None:
     model = _FakeModel("ru", [("ru", 0.9)])
     model.transcribe = lambda audio, **kw: (
-        iter([SimpleNamespace(text=" Субтитры добавил DimaTorzok ")]),
+        iter([SimpleNamespace(text=" Субтитры добавил DimaTorzok ", avg_logprob=-0.2)]),
         SimpleNamespace(language="ru", language_probability=0.9, duration=1.0, all_language_probs=None),
     )
     assert _stt(model).transcribe_pcm16(np.zeros(8000, np.float32), 8000).text == ""

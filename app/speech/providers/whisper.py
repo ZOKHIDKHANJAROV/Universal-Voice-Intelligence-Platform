@@ -144,6 +144,7 @@ class FasterWhisperSpeechToText(SpeechToText):
             # A forced language reports 1.0; keep what detection actually thought.
             segments, info = self._transcribe(audio, fallback, vad_filter)
 
+        segments = list(segments)
         text = " ".join(segment.text.strip() for segment in segments).strip()
         if is_hallucination(text):
             text = ""
@@ -152,6 +153,9 @@ class FasterWhisperSpeechToText(SpeechToText):
             language=info.language,
             language_probability=language_probability,
             duration_seconds=float(info.duration),
+            avg_logprob=(
+                float(np.mean([segment.avg_logprob for segment in segments])) if text else None
+            ),
         )
 
     def _transcribe(self, audio, language: str | None, vad_filter: bool):
