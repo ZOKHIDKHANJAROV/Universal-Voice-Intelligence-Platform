@@ -62,6 +62,7 @@ class AudioSocketServer:
         self.silence_ms = settings.realtime_silence_ms
         self.max_utterance_ms = settings.realtime_max_utterance_ms
         self.min_utterance_ms = settings.realtime_min_utterance_ms
+        self.barge_in = settings.realtime_barge_in
         self.barge_in_frames = max(1, settings.realtime_barge_in_frames)
         self.languages = settings.stt_realtime_languages
         self.server: asyncio.AbstractServer | None = None
@@ -206,6 +207,10 @@ class AudioSocketServer:
                 preroll.append(frame)
 
                 if session.response_task and not session.response_task.done():
+                    if not self.barge_in:
+                        # The bot finishes what it says; the caller is heard
+                        # again once it stops (preroll keeps the last 200 ms).
+                        continue
                     # A single VAD hit is usually line noise or our own echo;
                     # require sustained speech before cutting the bot off.
                     barge_in_frames = barge_in_frames + 1 if is_speech else 0

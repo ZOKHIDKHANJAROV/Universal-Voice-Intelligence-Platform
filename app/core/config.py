@@ -96,6 +96,9 @@ class Settings(BaseSettings):
     realtime_silence_ms: int = 700
     realtime_min_utterance_ms: int = 400
     realtime_max_utterance_ms: int = 12000
+    # Let the caller interrupt the bot by talking. Off: every prompt and answer
+    # plays to the end and speech during it is not heard.
+    realtime_barge_in: bool = False
     # Consecutive 20 ms speech frames needed to interrupt playback.
     realtime_barge_in_frames: int = 5
 
