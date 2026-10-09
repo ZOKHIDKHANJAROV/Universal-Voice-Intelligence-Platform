@@ -57,6 +57,8 @@ async def _run(frames: list[bytes], playing: bool, barge_in: bool = True):
 @pytest.fixture(autouse=True)
 def _fake_vad(monkeypatch):
     monkeypatch.setattr(audio_socket.webrtcvad, "Vad", _FakeVad)
+    # Real calls wait for the phone to play out its buffer before hanging up.
+    monkeypatch.setattr(audio_socket, "HANGUP_DELAY_SECONDS", 0)
 
 
 def test_short_noise_does_not_interrupt_playback() -> None:
