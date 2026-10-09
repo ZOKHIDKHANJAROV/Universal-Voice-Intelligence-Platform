@@ -101,6 +101,14 @@ class Settings(BaseSettings):
     realtime_barge_in: bool = False
     # Consecutive 20 ms speech frames needed to interrupt playback.
     realtime_barge_in_frames: int = 5
+    # Silence before the bot asks again "please describe your problem" (once),
+    # and then says goodbye and hangs up. 0 = wait forever.
+    realtime_no_input_seconds: int = 15
+    # Silence after an answer and "anything else?" before the bot says goodbye
+    # and hangs up. 0 = wait forever.
+    realtime_followup_seconds: int = 8
+    # Longest call with the bot; it then says goodbye and hangs up. 0 = no limit.
+    realtime_max_call_seconds: int = 300
 
     model_config = SettingsConfigDict(
         env_file=".env",

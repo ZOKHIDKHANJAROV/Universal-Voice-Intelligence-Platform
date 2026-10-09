@@ -35,6 +35,8 @@ FRAME_MS = 20
 # Asterisk drops an AudioSocket that stays silent for too long, so a silent
 # frame is sent whenever nothing else went out for this long.
 KEEPALIVE_SECONDS = 1.0
+# No audio from Asterisk for this long counts as silence (see _read_message).
+NO_AUDIO_SECONDS = 0.2
 
 
 @dataclass
@@ -51,6 +53,14 @@ class AudioSocketSession:
     language: str | None = None
     # Set once a handover to an operator has started: the bot stops listening.
     transferring: bool = False
+    # Set once the bot has started saying goodbye: it stops listening.
+    ending: bool = False
+    # The caller got a scenario answer: silence now means the conversation is over.
+    answered: bool = False
+    # "Please describe your problem" was already repeated once.
+    reprompted: bool = False
+    # Wall clock start of the call, kept across a return from the operator.
+    started_at: float = field(default_factory=time.time)
 
 
 class AudioSocketServer:
@@ -64,6 +74,10 @@ class AudioSocketServer:
         self.min_utterance_ms = settings.realtime_min_utterance_ms
         self.barge_in = settings.realtime_barge_in
         self.barge_in_frames = max(1, settings.realtime_barge_in_frames)
+        # 0 turns a limit off.
+        self.no_input_ms = settings.realtime_no_input_seconds * 1000
+        self.followup_ms = settings.realtime_followup_seconds * 1000
+        self.max_call_seconds = settings.realtime_max_call_seconds
         self.languages = settings.stt_realtime_languages
         self.server: asyncio.AbstractServer | None = None
         self._sessions: dict[str, AudioSocketSession] = {}
@@ -155,9 +169,11 @@ class AudioSocketServer:
         max_frames = max(1, self.max_utterance_ms // FRAME_MS)
         min_frames = max(1, self.min_utterance_ms // FRAME_MS)
         speech_frames = 0
+        # Consecutive 20 ms frames with neither the bot nor the caller talking.
+        idle_frames = 0
 
         while True:
-            message_type, payload = await self._read_message(session.reader)
+            message_type, payload = await self._read_message(session.reader, NO_AUDIO_SECONDS)
 
             if message_type == HANGUP_TYPE:
                 return
@@ -172,7 +188,11 @@ class AudioSocketServer:
                         call_uuid,
                         " (back from a failed transfer)" if returned else "",
                     )
-                    get_call_log().start_call(call_uuid, "phone")
+                    log = get_call_log()
+                    log.start_call(call_uuid, "phone")
+                    summary = log.summary(call_uuid)
+                    if summary:
+                        session.started_at = summary["started_at"]
                     if returned:
                         # No second greeting: apologise and keep helping.
                         self._log(session, SYSTEM, "returned")
@@ -191,12 +211,12 @@ class AudioSocketServer:
                 digit = payload[:1].decode("ascii", "ignore")
                 LOGGER.info("DTMF call_id=%s digit=%s", session.call_id, digit)
                 self._log(session, SYSTEM, "dtmf", digit)
-                if digit == OPERATOR_DIGIT and not session.transferring:
+                if digit == OPERATOR_DIGIT and not session.transferring and not session.ending:
                     if session.response_task and not session.response_task.done():
                         session.response_task.cancel()
                     session.response_task = asyncio.create_task(self._transfer_to_operator(session))
                 continue
-            if message_type != AUDIO_TYPE or session.transferring:
+            if message_type != AUDIO_TYPE or session.transferring or session.ending:
                 continue
 
             frame_buffer.extend(payload)
@@ -207,6 +227,7 @@ class AudioSocketServer:
                 preroll.append(frame)
 
                 if session.response_task and not session.response_task.done():
+                    idle_frames = 0
                     if not self.barge_in:
                         # The bot finishes what it says; the caller is heard
                         # again once it stops (preroll keeps the last 200 ms).
@@ -228,6 +249,15 @@ class AudioSocketServer:
                     self._log(session, SYSTEM, "barge_in")
                     # Fall through: preroll holds the interrupting speech, so the
                     # new utterance is captured from its first frame.
+
+                idle_frames = 0 if (is_speech or in_speech) else idle_frames + 1
+                step = self._next_step(session, idle_frames * FRAME_MS)
+                if step is not None:
+                    idle_frames = 0
+                    in_speech = False
+                    speech_buffer.clear()
+                    session.response_task = asyncio.create_task(step)
+                    continue
 
                 if is_speech and not in_speech:
                     in_speech = True
@@ -258,6 +288,36 @@ class AudioSocketServer:
                             session.response_task = asyncio.create_task(
                                 self._process_utterance(session, utterance)
                             )
+
+    def _next_step(self, session: AudioSocketSession, idle_ms: int):
+        """What the bot does on its own when the line is quiet, or None."""
+        if self.max_call_seconds and time.time() - session.started_at >= self.max_call_seconds:
+            return self._end_call(session, "time_limit", "time_limit")
+        if session.answered:
+            if self.followup_ms and idle_ms >= self.followup_ms:
+                return self._end_call(session, "goodbye", "done")
+        elif self.no_input_ms and idle_ms >= self.no_input_ms:
+            if not session.reprompted:
+                session.reprompted = True
+                # Before the caller has spoken their language is unknown: ask in each.
+                return self._play_prompt(session, "no_input", every_language=session.language is None)
+            return self._end_call(session, "goodbye", "silence")
+        return None
+
+    async def _end_call(self, session: AudioSocketSession, key: str, reason: str) -> None:
+        """Say goodbye, then hang up."""
+        session.ending = True
+        await self._play_prompt(session, key, every_language=session.language is None)
+        self._log(session, SYSTEM, "bot_hangup", reason)
+        LOGGER.info("Bot ends call_id=%s reason=%s", session.call_id, reason)
+        await self._send_hangup(session)
+
+    async def _send_hangup(self, session: AudioSocketSession) -> None:
+        async with session.output_lock:
+            # A hangup message ends AudioSocket(); the dialplan continues
+            # (operator on a transfer, otherwise it hangs up).
+            session.writer.write(bytes((HANGUP_TYPE,)) + struct.pack(">H", 0))
+            await session.writer.drain()
 
     def _log(self, session: AudioSocketSession, role: str, kind: str, text: str | None = None,
              data: dict | None = None, audio_pcm16: bytes | None = None) -> None:
@@ -310,6 +370,7 @@ class AudioSocketServer:
             if not text:
                 self._log(session, CALLER, "unrecognized", "", heard, pcm16)
                 return
+            session.reprompted = False
 
             caller_language = (
                 transcription.language
@@ -379,6 +440,11 @@ class AudioSocketServer:
                 len(pcm8),
                 response_text,
             )
+            # A real answer: offer more help, then silence ends the call. A
+            # "not understood" keeps waiting for the caller to try again.
+            session.answered = intent.scenario_id is not None
+            if session.answered:
+                await self._play_prompt(session, "anything_else")
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -400,10 +466,7 @@ class AudioSocketServer:
         call_actions.request(session.asterisk_uuid, call_actions.OPERATOR, session.language)
         self._log(session, SYSTEM, "transfer")
         LOGGER.info("Transferring call_id=%s to an operator", session.call_id)
-        async with session.output_lock:
-            # A hangup message ends AudioSocket(); the dialplan continues.
-            session.writer.write(bytes((HANGUP_TYPE,)) + struct.pack(">H", 0))
-            await session.writer.drain()
+        await self._send_hangup(session)
 
     async def _send_pcm(
         self,
@@ -433,8 +496,16 @@ class AudioSocketServer:
     @staticmethod
     async def _read_message(
         reader: asyncio.StreamReader,
+        idle_timeout: float | None = None,
     ) -> tuple[int, bytes]:
-        header = await reader.readexactly(3)
+        try:
+            # Safe to time out: readexactly consumes nothing until all 3 bytes arrived.
+            header = await asyncio.wait_for(reader.readexactly(3), idle_timeout)
+        except asyncio.TimeoutError:
+            # Phones with silence suppression send no audio while nobody talks.
+            # Stand in silence for the gap so utterances still end and the
+            # silence timers still run.
+            return AUDIO_TYPE, b"\x00" * (FRAME_BYTES * round(idle_timeout * 1000 / FRAME_MS))
         message_type = header[0]
         length = struct.unpack(">H", header[1:3])[0]
         payload = await reader.readexactly(length)
