@@ -1,0 +1,49 @@
+; GSM gateway (GoIP, Yeastar TG, Dinstar, ...) with a SIM card.
+; Copy to pjsip_gsm.conf in this folder (it stays out of git), fill in the
+; values, then restart Asterisk:
+;   docker compose -p universal-voice-intelligence-platform restart asterisk
+;
+; In the gateway's web interface (SIP / VoIP settings):
+;   SIP server / registrar:  <LAN IP of this laptop>, port 5060, UDP
+;   user / auth ID:          gsm-gateway
+;   password:                the password below
+;   codec:                   G.711 A-law (PCMA), G.711 u-law as a fallback
+;   DTMF:                    RFC2833 / RFC4733
+;   incoming GSM calls:      forward to SIP (any number, e.g. 1000)
+
+; Address phones and the gateway use to reach Asterisk: the laptop's LAN IP.
+; Phones on the laptop itself (MicroSIP on 127.0.0.1) keep working with it.
+; Reserve this IP for the laptop in the router so it does not change.
+[transport-udp](+)
+external_media_address=192.168.1.10
+external_signaling_address=192.168.1.10
+
+[gsm-gateway]
+type=endpoint
+; Calls from the SIM go to the bot (extensions.conf, [univoice-gsm]).
+context=univoice-gsm
+disallow=all
+; Mobile networks here use G.711 A-law; Asterisk converts for the bot.
+allow=alaw,ulaw
+auth=gsm-gateway-auth
+aors=gsm-gateway
+direct_media=no
+rtp_symmetric=yes
+force_rport=yes
+rewrite_contact=yes
+rtp_timeout=30
+rtp_timeout_hold=300
+
+[gsm-gateway-auth]
+type=auth
+auth_type=userpass
+username=gsm-gateway
+; A long random password, e.g. python -c "import secrets; print(secrets.token_urlsafe(24))"
+password=CHANGE-ME-TO-A-LONG-RANDOM-PASSWORD
+
+[gsm-gateway]
+type=aor
+max_contacts=1
+remove_existing=yes
+; Asterisk pings the gateway; `pjsip show contacts` shows it Avail/Unavail.
+qualify_frequency=30

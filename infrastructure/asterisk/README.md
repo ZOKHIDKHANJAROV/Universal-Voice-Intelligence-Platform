@@ -10,7 +10,10 @@ Local telephony adapter for UniVoice AI.
 - DTMF menu: 1, 2, 0
 - RTP ports 10000-10100
 
-No external SIP provider is configured yet.
+- GSM gateway with a SIM card: `local/pjsip_gsm.conf.example`,
+  see docs/local-run.md
+
+No SIP provider trunk is configured yet.
 
 ## Local test
 

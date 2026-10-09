@@ -92,6 +92,8 @@ services:
       - ./infrastructure/asterisk/extensions.conf:/etc/asterisk/extensions.conf:ro
       - ./infrastructure/asterisk/rtp.conf:/etc/asterisk/rtp.conf:ro
       - ./infrastructure/asterisk/modules.conf:/etc/asterisk/modules.conf:ro
+      # GSM gateway and LAN address (passwords; not in git).
+      - ./infrastructure/asterisk/local:/etc/asterisk/local:ro
       - asterisk-recordings:/var/spool/asterisk/recordings
       - voice-audio:/var/lib/univoice/audio
     restart: unless-stopped
