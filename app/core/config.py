@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     # Whisper's language detector barely knows Uzbek. Below this detector score
     # the models' confidence in their own text picks the language instead.
     stt_language_sure: float = 0.9
+    # Bring quiet phone audio to -20 dBFS before recognition (calls and console).
+    stt_normalize_loudness: bool = True
     # An Uzbek transcription at least this confident (mean log-probability)
     # wins without asking STT_MODEL; below it both transcribe, the surer wins.
     stt_accept_logprob: float = -0.25

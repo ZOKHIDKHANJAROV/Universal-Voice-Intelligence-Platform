@@ -90,6 +90,25 @@ def test_noise_heard_by_no_model_is_not_text() -> None:
     assert result.text == "" and result.language == "ru"
 
 
+def test_noise_the_general_model_does_not_hear_is_not_text() -> None:
+    # Real call: background music; large-v3 heard nothing, the Uzbek model
+    # wrote "yigʻlab yubordim" at -0.63.
+    router, _, _ = _route(("ru", 0.07), general_text="", uz_logprob=-0.63, uz_text="yigʻlab yubordim")
+    assert _phrase(router).text == ""
+
+
+def test_uzbek_the_general_model_does_not_hear_still_counts() -> None:
+    router, _, _ = _route(("ru", 0.1), general_text="", uz_logprob=-0.4, uz_text="suv chiqmayapti")
+    assert _phrase(router).text == "suv chiqmayapti"
+
+
+def test_russian_beats_a_transliterating_uzbek_model() -> None:
+    # Real call after loudness normalization: "Списалась деньги с карты" -0.43
+    # against the Uzbek model's "spessialniy zdeniy skarda" -0.63.
+    router, _, _ = _route(("ru", 0.86), general_logprob=-0.43, uz_logprob=-0.63)
+    assert _phrase(router).text == "general:ru"
+
+
 def test_explicit_language_skips_detection() -> None:
     router, general, uzbek = _route(("ru", 0.95))
     assert router.transcribe("call.wav", language="uz").text == "uz-model:uz"
