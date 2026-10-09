@@ -30,8 +30,9 @@ def _message(payload: bytes, message_type: int = AUDIO_TYPE) -> bytes:
     return bytes((message_type,)) + struct.pack(">H", len(payload)) + payload
 
 
-async def _run(frames: list[bytes], playing: bool):
+async def _run(frames: list[bytes], playing: bool, barge_in: bool = True):
     server = AudioSocketServer()
+    server.barge_in = barge_in
     utterances: list[bytes] = []
 
     async def capture(_session, pcm: bytes) -> None:
@@ -76,6 +77,17 @@ def test_sustained_speech_interrupts_and_is_captured() -> None:
     assert utterances[0].count(SPEECH) >= 30
 
 
+def test_without_barge_in_the_bot_finishes_and_speech_is_not_heard() -> None:
+    frames = [SPEECH] * 30 + [SILENCE] * 40
+    cancelled, utterances = asyncio.run(_run(frames, playing=True, barge_in=False))
+    assert not cancelled
+    assert utterances == []
+
+
+def test_barge_in_is_off_by_default() -> None:
+    assert AudioSocketServer().barge_in is False
+
+
 def test_utterance_is_processed_without_playback() -> None:
     frames = [SILENCE] * 5 + [SPEECH] * 25 + [SILENCE] * 40
     _, utterances = asyncio.run(_run(frames, playing=False))
@@ -83,7 +95,7 @@ def test_utterance_is_processed_without_playback() -> None:
 
 
 def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
-    """Greeting, then a Russian complaint answered from the prompt cache."""
+    """Greeting in Uzbek then Russian, then a Russian complaint answered from the prompt cache."""
     import uuid
 
     import app.tts.prompt_cache as prompt_cache
@@ -126,7 +138,7 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
             return received
 
         writer.write(_message(uuid.uuid4().bytes, audio_socket.UUID_TYPE))
-        assert len(await read_audio(5)) == 5 * FRAME_BYTES  # greeting
+        assert len(await read_audio(10)) == 10 * FRAME_BYTES  # greeting, uz + ru
         await asyncio.sleep(0.05)
 
         for frame in [SPEECH] * 25 + [SILENCE] * 40:
@@ -145,8 +157,96 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
     finally:
         prompt_cache.get_prompt_cache.cache_clear()
 
-    # 25 speech frames (preroll included) plus the 700 ms end-of-speech wait,
+    # 25 speech frames plus the 700 ms end-of-speech wait, and up to 9 frames
+    # of silence from the 200 ms preroll (stood in while no audio arrived),
     # with language detection clamped to Uzbek/Russian.
-    assert heard == [((25 + 35) * 160, ("uz", "ru"))]
-    assert [language for _, language in synthesized] == ["ru", "ru"]
-    assert synthesized[1][0].startswith("Приносим извинения")
+    [(samples, allowed)] = heard
+    assert (25 + 35) * 160 <= samples <= (25 + 35 + 9) * 160
+    assert allowed == ("uz", "ru")
+    assert [language for _, language in synthesized] == ["uz", "ru", "ru", "ru"]
+    assert synthesized[0][0].startswith("Assalomu alaykum")
+    assert synthesized[2][0].startswith("Приносим извинения")
+    assert synthesized[3][0] == "Есть ещё вопросы?"
+
+
+class _Writer:
+    def __init__(self) -> None:
+        self.data = bytearray()
+
+    def write(self, chunk: bytes) -> None:
+        self.data.extend(chunk)
+
+    async def drain(self) -> None:
+        pass
+
+
+async def _quiet_line(frames: list[bytes], answered: bool = False, started_ago: float = 0.0):
+    """Feed frames one by one (letting the bot's tasks run) and record what it says."""
+    import time
+
+    server = AudioSocketServer()
+    server.no_input_ms, server.followup_ms, server.max_call_seconds = 200, 100, 60
+    said: list[str] = []
+
+    async def fake_prompt(_session, key, every_language=False) -> None:
+        said.append(key)
+
+    server._play_prompt = fake_prompt
+    reader = asyncio.StreamReader()
+    writer = _Writer()
+    session = AudioSocketSession("test", reader, writer, asyncio.Lock())
+    session.answered = answered
+    session.started_at = time.time() - started_ago
+
+    async def feed() -> None:
+        for frame in frames:
+            reader.feed_data(_message(frame))
+            await asyncio.sleep(0)
+        reader.feed_data(_message(b"", HANGUP_TYPE))
+
+    feeder = asyncio.create_task(feed())
+    await server._run_session(session)
+    await feeder
+    return said, session, writer
+
+
+HANGUP_FRAME = bytes((HANGUP_TYPE,)) + struct.pack(">H", 0)
+
+
+def test_silent_caller_is_asked_again_then_the_bot_hangs_up() -> None:
+    said, session, writer = asyncio.run(_quiet_line([SILENCE] * 30))
+    assert said == ["no_input", "goodbye"]
+    assert session.ending and bytes(writer.data).endswith(HANGUP_FRAME)
+
+
+def test_speech_restarts_the_silence_timer() -> None:
+    frames = [SILENCE] * 8 + [SPEECH] * 3 + [SILENCE] * 8
+    said, _, writer = asyncio.run(_quiet_line(frames))
+    assert said == [] and not writer.data
+
+
+def test_silence_after_an_answer_ends_the_call_without_asking_again() -> None:
+    said, _, writer = asyncio.run(_quiet_line([SILENCE] * 10, answered=True))
+    assert said == ["goodbye"]
+    assert bytes(writer.data).endswith(HANGUP_FRAME)
+
+
+def test_long_call_ends_at_the_time_limit() -> None:
+    said, _, writer = asyncio.run(_quiet_line([SPEECH] * 3, started_ago=61))
+    assert said == ["time_limit"]
+    assert bytes(writer.data).endswith(HANGUP_FRAME)
+
+
+def test_call_end_defaults() -> None:
+    server = AudioSocketServer()
+    assert (server.no_input_ms, server.followup_ms, server.max_call_seconds) == (15000, 8000, 300)
+
+
+def test_missing_audio_counts_as_silence() -> None:
+    # Phones with silence suppression send nothing while nobody talks.
+    async def read():
+        return await AudioSocketServer._read_message(asyncio.StreamReader(), 0.2)
+
+    kind, payload = asyncio.run(read())
+    assert kind == AUDIO_TYPE
+    assert payload == SILENCE * 10  # 200 ms
