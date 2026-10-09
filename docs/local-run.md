@@ -63,8 +63,12 @@ This starts Asterisk and the API. Then:
   With a provider trunk, point `UNIVOICE_OPERATOR` at a real number, e.g.
   `PJSIP/998901234567@trunk`.
   For a softphone on another device in the same network, set
-  `external_media_address` in `infrastructure/asterisk/pjsip.conf` to the
-  laptop's LAN IP and use that IP as the server.
+  `external_media_address` and `external_signaling_address` in
+  `infrastructure/asterisk/pjsip.conf` to the laptop's LAN IP and use that IP
+  as the server. A wrong signaling address shows up as calls that drop after
+  exactly 32 s: the phone's ACK goes to an address it cannot reach.
+- After restarting Asterisk, re-register the softphone (or wait for it to do
+  so) before calling.
 
 Stop with Ctrl+C, then
 `docker compose -p universal-voice-intelligence-platform stop asterisk`.
