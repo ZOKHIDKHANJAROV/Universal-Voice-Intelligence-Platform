@@ -83,7 +83,7 @@ def test_utterance_is_processed_without_playback() -> None:
 
 
 def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
-    """Greeting, then a Russian complaint answered from the prompt cache."""
+    """Greeting in Uzbek then Russian, then a Russian complaint answered from the prompt cache."""
     import uuid
 
     import app.tts.prompt_cache as prompt_cache
@@ -126,7 +126,7 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
             return received
 
         writer.write(_message(uuid.uuid4().bytes, audio_socket.UUID_TYPE))
-        assert len(await read_audio(5)) == 5 * FRAME_BYTES  # greeting
+        assert len(await read_audio(10)) == 10 * FRAME_BYTES  # greeting, uz + ru
         await asyncio.sleep(0.05)
 
         for frame in [SPEECH] * 25 + [SILENCE] * 40:
@@ -148,5 +148,6 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
     # 25 speech frames (preroll included) plus the 700 ms end-of-speech wait,
     # with language detection clamped to Uzbek/Russian.
     assert heard == [((25 + 35) * 160, ("uz", "ru"))]
-    assert [language for _, language in synthesized] == ["ru", "ru"]
-    assert synthesized[1][0].startswith("Приносим извинения")
+    assert [language for _, language in synthesized] == ["uz", "ru", "ru"]
+    assert synthesized[0][0].startswith("Assalomu alaykum")
+    assert synthesized[2][0].startswith("Приносим извинения")

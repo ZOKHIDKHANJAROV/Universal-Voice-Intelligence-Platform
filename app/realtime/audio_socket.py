@@ -18,7 +18,7 @@ from app.realtime import call_actions
 from app.services.scenario_service import get_scenario_service
 from app.speech.service import transcribe_pcm16
 from app.tts.prompt_cache import get_prompt_cache
-from app.tts.prompts import prompt_text
+from app.tts.prompts import get_prompts, prompt_text
 from app.voice.responses import build_response
 
 LOGGER = logging.getLogger("univoice.realtime")
@@ -182,7 +182,8 @@ class AudioSocketServer:
                     else:
                         self._log(session, SYSTEM, "call_started")
                         session.response_task = asyncio.create_task(
-                            self._play_prompt(session, "greeting")
+                            # Each language in its own voice, Uzbek first.
+                            self._play_prompt(session, "greeting", every_language=True)
                         )
                 continue
             if message_type == DTMF_TYPE:
@@ -258,17 +259,26 @@ class AudioSocketServer:
         if session.asterisk_uuid:
             get_call_log().add_event(session.asterisk_uuid, role, kind, text, data, audio_pcm16)
 
-    async def _play_prompt(self, session: AudioSocketSession, key: str) -> None:
-        try:
-            text, language = prompt_text(key, session.language or self.languages[0])
-            self._log(session, BOT, key, text, {"language": language})
-            pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
-            await self._send_pcm(session, pcm8)
-            LOGGER.info("Prompt %s sent call_id=%s lang=%s", key, session.call_id, language)
-        except asyncio.CancelledError:
-            raise
-        except Exception as e:
-            LOGGER.error("Prompt %s failed call_id=%s: %s", key, session.call_id, e)
+    async def _play_prompt(
+        self, session: AudioSocketSession, key: str, every_language: bool = False
+    ) -> None:
+        """Say a prompt in the caller's language, or (greeting) in each call language in turn."""
+        if every_language:
+            variants = get_prompts()[key]
+            wanted = [language for language in self.languages if language in variants]
+        else:
+            wanted = [session.language or self.languages[0]]
+        for preferred in wanted:
+            try:
+                text, language = prompt_text(key, preferred)
+                self._log(session, BOT, key, text, {"language": language})
+                pcm8 = await asyncio.to_thread(get_prompt_cache().get_or_render_pcm8, text, language)
+                await self._send_pcm(session, pcm8)
+                LOGGER.info("Prompt %s sent call_id=%s lang=%s", key, session.call_id, language)
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                LOGGER.error("Prompt %s failed call_id=%s: %s", key, session.call_id, e)
 
     async def _process_utterance(
         self,
