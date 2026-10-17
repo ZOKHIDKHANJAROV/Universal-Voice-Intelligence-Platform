@@ -223,11 +223,13 @@ const SYSTEM_TEXT = {
   handed_over: ["Бот передал звонок", "accent"],
   hangup: ["Звонок завершён", ""],
   bot_hangup: ["Бот завершил звонок", ""],
+  live_fallback: ["ИИ-ответ не удался, бот ответил записью", "warn"],
 };
 const END_REASON = { done: "разговор окончен", silence: "звонящий молчал", time_limit: "истёк лимит времени" };
 const BOT_KIND = {
   greeting: "приветствие", transfer: "перевод", operator_unavailable: "операторы заняты", answer: "",
   no_input: "переспрос", anything_else: "ещё вопросы?", goodbye: "прощание", time_limit: "лимит времени",
+  thinking: "минутку",
 };
 
 function renderEvent(ev) {
@@ -251,7 +253,12 @@ function renderEvent(ev) {
   }
   const kind = BOT_KIND[ev.kind] ?? ev.kind;
   let meta = "";
-  if (ev.kind === "answer") {
+  if (ev.kind === "answer" && d.source === "rag-llm") {
+    const used = (d.passages || []).length ? `по базе знаний: ${(d.passages || []).join(", ")}` : "в базе знаний ничего не найдено";
+    const breakdown = `распознавание ${d.stt_ms} мс · поиск ${d.rag_ms} мс · ИИ ${d.llm_ms} мс · голос ${d.tts_ms} мс`;
+    meta = `<div class="meta"><span class="badge accent">ИИ-ответ</span><span>${esc(used)}</span><span class="sep"></span>
+      <span title="${esc(breakdown)}">ответ через ${secs(d.total_ms)}</span><span class="sep"></span><span>${esc(d.model || "")}</span></div>`;
+  } else if (ev.kind === "answer") {
     const scenario = d.scenario_id
       ? `<span class="badge ok">${esc(d.scenario_title || d.scenario_id)}</span>`
       : '<span class="badge warn">не понято → оператор</span>';

@@ -1,5 +1,6 @@
 """Run an uploaded recording through the same path as a live call, for the web console."""
 
+import base64
 import logging
 import time
 import uuid
@@ -7,7 +8,9 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from app.audio.resample import float_to_pcm16
+from app.assistant import runtime as assistant
+from app.assistant.answer import generate_answer
+from app.audio.resample import float_to_pcm16, pcm16_to_wav
 from app.audio.telephony import TELEPHONY_RATE, telephony
 from app.calls.log import BOT, CALLER, get_call_log
 from app.core.config import get_settings
@@ -15,6 +18,7 @@ from app.intent.models import IntentResult
 from app.intent.service import get_intent_service
 from app.services.scenario_service import get_scenario_service
 from app.speech.service import transcribe_pcm16
+from app.tts.live import live_pcm8
 from app.tts.prompt_cache import get_prompt_cache
 from app.voice.responses import build_response
 
@@ -35,6 +39,12 @@ class CallAnalysis(BaseModel):
     action: str | None = None
     warning: str | None = None
     timings_ms: dict[str, float]
+    # Answer mode the turn ran in (admin panel) and, for a live answer, its
+    # audio as a data: URL and the knowledge entries it used.
+    mode: str = assistant.MINIMUM
+    live: bool = False
+    response_audio_data: str | None = None
+    passages: list[str] = []
 
 
 def analyze_recording(path: Path, telephone: bool = True, language: str | None = None) -> CallAnalysis:
@@ -59,9 +69,43 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
     scenario = get_scenario_service().get_scenario(intent.scenario_id) if intent.scenario_id else None
     intent_done = time.perf_counter()
 
+    mode = assistant.current().mode
+    warning = None
+    if mode == assistant.MAXIMUM and result.text and not (scenario and scenario.action):
+        try:
+            answer = generate_answer(result.text, caller_language, assistant.current())
+            pcm8 = live_pcm8(answer.text, answer.language)
+        except Exception as exc:  # any failure: answer from the recording, like a call does
+            LOGGER.warning("Console live answer failed: %s", exc)
+            warning = f"ИИ-ответ недоступен ({str(exc)[:160]}), ответ взят из записи."
+        else:
+            audio_done = time.perf_counter()
+            live_intent = IntentResult(intent=None, scenario_id=None, confidence=1.0, source="rag-llm")
+            _log_console_turn(result, audio, rate, caller_language, live_intent, None,
+                              answer.text, answer.language, started, stt_done, intent_done, audio_done)
+            wav = pcm16_to_wav(pcm8, TELEPHONY_RATE)
+            return CallAnalysis(
+                transcription=result.text,
+                language=result.language,
+                language_probability=result.language_probability,
+                intent=live_intent,
+                response_text=answer.text,
+                response_language=answer.language,
+                response_audio=None,
+                response_audio_data="data:audio/wav;base64," + base64.b64encode(wav).decode("ascii"),
+                passages=[p.title for p in answer.passages],
+                mode=mode,
+                live=True,
+                timings_ms={
+                    "stt": round((stt_done - started) * 1000),
+                    "intent": round((intent_done - stt_done) * 1000),
+                    "llm": answer.retrieve_ms + answer.llm_ms,
+                    "audio": round((audio_done - intent_done) * 1000) - answer.retrieve_ms - answer.llm_ms,
+                },
+            )
+
     cache = get_prompt_cache()
     audio_name: str | None = cache.path_for(response_text, response_language).name
-    warning = None
     try:
         cache.get_or_render_path(response_text, response_language)
     except (OSError, ValueError) as exc:
@@ -83,6 +127,7 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
         response_audio=audio_name,
         action=scenario.action if scenario else None,
         warning=warning,
+        mode=mode,
         timings_ms={
             "stt": round((stt_done - started) * 1000),
             "intent": round((intent_done - stt_done) * 1000),
