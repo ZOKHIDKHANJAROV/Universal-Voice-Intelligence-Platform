@@ -85,6 +85,7 @@
     <div class="top">
       <h1>UniVoice — консоль</h1>
       <a href="/monitor" style="color:var(--accent);text-decoration:none;font-size:14px">Мониторинг звонков →</a>
+      <a href="/admin" style="color:var(--accent);text-decoration:none;font-size:14px">Режимы и база знаний →</a>
       <div class="chips" id="chips"><span class="chip">загрузка…</span></div>
     </div>
     <nav role="tablist">
@@ -256,13 +257,16 @@ async function analyze(blob, name) {
         <dl class="grid">
           <dt>Распознано</dt><dd class="big">${r.transcription ? esc(r.transcription) : '<span class="muted">речь не распознана</span>'}</dd>
           <dt>Язык</dt><dd>${esc(r.language)} <span class="muted">(${(r.language_probability * 100).toFixed(0)}%)</span></dd>
-          <dt>Сценарий</dt><dd>${scenarioLabel(r.intent.scenario_id)} · уверенность ${(r.intent.confidence * 100).toFixed(0)}% · ${esc(r.intent.source)}</dd>
+          <dt>${r.live ? "Ответ ИИ" : "Сценарий"}</dt><dd>${r.live
+            ? `<span class="badge">режим «Максимум»</span> ${r.passages.length ? "по базе знаний: " + esc(r.passages.join(", ")) : "в базе знаний ничего не найдено"}`
+            : `${scenarioLabel(r.intent.scenario_id)} · уверенность ${(r.intent.confidence * 100).toFixed(0)}% · ${esc(r.intent.source)}`}</dd>
           <dt>Ответ бота</dt><dd>${esc(r.response_text)} <span class="badge">${esc(r.response_language)}</span>
             ${r.action === "transfer" ? '<span class="badge warn">перевод на оператора</span>' : ""}
-            ${r.response_audio ? `<audio controls autoplay src="/api/v1/console/prompts/audio/${esc(r.response_audio)}"></audio>` : ""}</dd>
+            ${r.response_audio ? `<audio controls autoplay src="/api/v1/console/prompts/audio/${esc(r.response_audio)}"></audio>` : ""}
+            ${r.response_audio_data ? `<audio controls autoplay src="${r.response_audio_data}"></audio>` : ""}</dd>
           <dt>Время</dt><dd>
             <div class="bars"><span style="width:${t.stt / total * 100}%"></span><span style="width:${t.intent / total * 100}%"></span><span style="width:${t.audio / total * 100}%"></span></div>
-            <div class="legend"><span><i style="background:var(--accent)"></i>распознавание ${t.stt} мс</span><span><i style="background:var(--ok)"></i>сценарий ${t.intent} мс</span><span><i style="background:var(--warn)"></i>аудио ответа ${t.audio} мс</span></div>
+            <div class="legend"><span><i style="background:var(--accent)"></i>распознавание ${t.stt} мс</span><span><i style="background:var(--ok)"></i>${r.live ? "поиск + ИИ" : "сценарий"} ${r.live ? t.intent + t.llm : t.intent} мс</span><span><i style="background:var(--warn)"></i>аудио ответа ${t.audio} мс</span></div>
           </dd>
         </dl>
         ${r.warning ? `<div class="note" style="margin-top:10px">${esc(r.warning)}</div>` : ""}

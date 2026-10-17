@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 
 import webrtcvad
 
+from app.assistant import runtime as assistant
+from app.assistant.answer import generate_answer
 from app.audio.resample import pcm16_to_float
 from app.calls.log import BOT, CALLER, ENDED, SYSTEM, TRANSFERRED, get_call_log
 from app.core.config import get_settings
@@ -18,6 +20,7 @@ from app.realtime import call_actions
 from app.services.scenario_service import get_scenario_service
 from app.speech.service import transcribe_pcm16
 from app.tts.prompt_cache import get_prompt_cache
+from app.tts.live import live_pcm8
 from app.tts.prompts import get_prompts, prompt_text
 from app.voice.responses import build_response
 
@@ -64,6 +67,8 @@ class AudioSocketSession:
     reprompted: bool = False
     # Wall clock start of the call, kept across a return from the operator.
     started_at: float = field(default_factory=time.time)
+    # Earlier (question, live answer) pairs, so the LLM can follow up.
+    history: list[tuple[str, str]] = field(default_factory=list)
 
 
 class AudioSocketServer:
@@ -292,6 +297,59 @@ class AudioSocketServer:
                                 self._process_utterance(session, utterance)
                             )
 
+    async def _answer_live(
+        self,
+        session: AudioSocketSession,
+        text: str,
+        language: str,
+        started: float,
+        stt_done: float,
+    ) -> bool:
+        """Maximum mode: knowledge search + LLM + live voice. False means use the pre-recorded path."""
+        settings = assistant.current()
+        filler = (
+            asyncio.create_task(self._play_prompt(session, "thinking")) if settings.filler else None
+        )
+        try:
+            answer = await asyncio.to_thread(
+                generate_answer, text, language, settings, list(session.history)
+            )
+            answered = time.perf_counter()
+            pcm8 = await asyncio.to_thread(live_pcm8, answer.text, answer.language)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            LOGGER.warning("Live answer failed call_id=%s, answering pre-recorded: %s", session.call_id, e)
+            if filler:
+                await filler
+            self._log(session, SYSTEM, "live_fallback", str(e)[:300])
+            return False
+        audio_ready = time.perf_counter()
+        if filler:
+            await filler
+        self._log(session, BOT, "answer", answer.text, {
+            "language": answer.language,
+            "scenario_id": None,
+            "source": "rag-llm",
+            "model": answer.model,
+            "passages": [p.title for p in answer.passages],
+            "stt_ms": round((stt_done - started) * 1000),
+            "rag_ms": answer.retrieve_ms,
+            "llm_ms": answer.llm_ms,
+            "tts_ms": round((audio_ready - answered) * 1000),
+            "total_ms": round((audio_ready - started) * 1000),
+        })
+        LOGGER.info(
+            "Live answer call_id=%s rag=%dms llm=%dms tts=%.0fms text=%r",
+            session.call_id, answer.retrieve_ms, answer.llm_ms,
+            (audio_ready - answered) * 1000, answer.text,
+        )
+        await self._send_pcm(session, pcm8)
+        session.history = (session.history + [(text, answer.text)])[-3:]
+        session.answered = True
+        await self._play_prompt(session, "anything_else")
+        return True
+
     def _next_step(self, session: AudioSocketSession, idle_ms: int):
         """What the bot does on its own when the line is quiet, or None."""
         if self.max_call_seconds and time.time() - session.started_at >= self.max_call_seconds:
@@ -398,6 +456,10 @@ class AudioSocketServer:
             if scenario is not None and scenario.action == TRANSFER_ACTION:
                 LOGGER.info("Caller asked for an operator call_id=%s", session.call_id)
                 await self._transfer_to_operator(session)
+                return
+            if assistant.current().mode == assistant.MAXIMUM and await self._answer_live(
+                session, text, caller_language, started, stt_done
+            ):
                 return
             response_text, response_language = build_response(intent.scenario_id, caller_language)
             intent_done = time.perf_counter()
