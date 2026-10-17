@@ -34,3 +34,6 @@ data/train/
 /data/calls/
 # Asterisk settings with passwords and this machine's address.
 /infrastructure/asterisk/local/*.conf
+# Answer mode and knowledge base edited in /admin on this machine.
+/data/assistant.json
+/data/knowledge.json
