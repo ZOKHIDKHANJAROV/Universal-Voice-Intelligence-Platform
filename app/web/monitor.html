@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UniVoice Monitor</title>
+<title>UniVoice — звонки</title>
 <style>
   :root {
     --bg: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3; --border: #dde1e6;
@@ -58,6 +58,17 @@
   .badge.live { color: var(--live); border-color: currentColor; } .badge.accent { color: var(--accent); border-color: currentColor; }
   .dur { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
   section.chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  /* Shared top navigation (same on every page). */
+  .appnav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 10px 0; }
+  .appnav a { color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; font-size: 14.5px; }
+  .appnav a:hover { background: var(--surface-2); color: var(--text); }
+  .appnav a[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 600; }
+  .appnav .brand { color: var(--text); font-weight: 700; margin-right: 8px; padding-left: 0; }
+  .appnav .brand:hover { background: none; }
+  .appnav-status { margin-left: auto; font-size: 13px; color: var(--muted); display: inline-flex; gap: 10px; flex-wrap: wrap; }
+  .appnav-status b { color: var(--text); font-weight: 600; }
+  .appnav-status .ready { color: var(--ok); } .appnav-status .wait { color: var(--warn); }
+
   .chat-head { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface);
     display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
   .chat-head .title { color: var(--text); font-weight: 600; font-size: 14px; }
@@ -92,11 +103,17 @@
 </head>
 <body>
 <header>
+  <nav class="appnav" aria-label="Разделы">
+    <a class="brand" href="/">UniVoice</a>
+    <a href="/" data-page="/">Проверка бота</a>
+    <a href="/monitor" data-page="/monitor">Звонки</a>
+    <a href="/admin" data-page="/admin">Настройки</a>
+    <span class="appnav-status" id="appnav-status"></span>
+  </nav>
   <div class="bar">
-    <h1>UniVoice — мониторинг</h1>
+    <h1>Звонки</h1>
     <span class="conn"><span class="dot" id="conn-dot"></span><span id="conn-text">подключение…</span></span>
-    <span class="spacer"></span>
-    <a href="/">Консоль →</a>
+    <span class="muted" style="font-size:13px">Каждый звонок — как переписка: что сказал клиент, что бот понял и ответил.</span>
   </div>
   <div class="stats" id="stats"></div>
 </header>
@@ -106,8 +123,8 @@
     <div class="filters">
       <div class="seg" role="group" aria-label="Источник">
         <button data-filter="all" aria-pressed="true">Все</button>
-        <button data-filter="phone" aria-pressed="false">Звонки</button>
-        <button data-filter="console" aria-pressed="false">Тесты</button>
+        <button data-filter="phone" aria-pressed="false">По телефону</button>
+        <button data-filter="console" aria-pressed="false">Проверки</button>
       </div>
       <label class="follow"><input type="checkbox" id="follow" checked> следить за новыми</label>
     </div>
@@ -153,7 +170,9 @@ const STATUS = {
   ended: '<span class="badge">завершён</span>',
   transferred: '<span class="badge accent">оператор</span>',
 };
-const CHANNEL = { phone: "звонок", console: "тест" };
+const CHANNEL = { phone: "по телефону", console: "проверка" };
+const LANG_NAME = { uz: "узбекский", ru: "русский" };
+const langName = (code) => LANG_NAME[code] || code || "?";
 
 // ---- stats ----
 let statsTimer = null;
@@ -163,11 +182,11 @@ async function loadStats() {
     const s = await api("/api/v1/monitor/stats");
     const understood = s.answers ? s.understood / s.answers : null;
     $("#stats").innerHTML = [
-      [s.calls, "звонков за 24 ч"],
+      [s.calls, "звонков за сутки"],
       [s.active, "идёт сейчас"],
-      [pct(understood), `понято (${s.understood} из ${s.answers})`],
-      [s.transferred, "переведено оператору"],
-      [secs(s.median_latency_ms), "медианная задержка ответа"],
+      [pct(understood), `бот понял (${s.understood} из ${s.answers})`],
+      [s.transferred, "переданы оператору"],
+      [secs(s.median_latency_ms), "обычное время ответа"],
     ].map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("");
   } catch (e) {
     $("#stats").innerHTML = `<div class="stat" style="grid-column:1/-1"><span>${esc(e.message)}</span></div>`;
@@ -189,7 +208,7 @@ function renderList() {
         ${c.status === "active" ? '<span class="dot live"></span>' : ""}
         <span class="time">${esc(dayTime(c.started_at))}</span>
         <span class="badge">${esc(CHANNEL[c.channel] || c.channel)}</span>
-        ${c.language ? `<span class="badge">${esc(c.language)}</span>` : ""}
+        ${c.language ? `<span class="badge">${esc(langName(c.language))}</span>` : ""}
         ${STATUS[c.status] || ""}
         <span class="dur" data-dur="${esc(c.id)}">${duration(c)}</span>
       </div>
@@ -223,11 +242,13 @@ const SYSTEM_TEXT = {
   handed_over: ["Бот передал звонок", "accent"],
   hangup: ["Звонок завершён", ""],
   bot_hangup: ["Бот завершил звонок", ""],
+  live_fallback: ["ИИ-ответ не удался, бот ответил записью", "warn"],
 };
 const END_REASON = { done: "разговор окончен", silence: "звонящий молчал", time_limit: "истёк лимит времени" };
 const BOT_KIND = {
   greeting: "приветствие", transfer: "перевод", operator_unavailable: "операторы заняты", answer: "",
   no_input: "переспрос", anything_else: "ещё вопросы?", goodbye: "прощание", time_limit: "лимит времени",
+  thinking: "минутку",
 };
 
 function renderEvent(ev) {
@@ -240,18 +261,23 @@ function renderEvent(ev) {
   }
   if (ev.role === "caller") {
     const audio = ev.audio ? `<audio controls preload="none" src="/api/v1/monitor/calls/${esc(ev.call_id)}/audio/${ev.id}${apiKey ? "?key=" + encodeURIComponent(apiKey) : ""}"></audio>` : "";
-    const lang = d.language ? `${esc(d.language)} ${pct(d.probability)}` : `${esc(d.detected || "?")} ${pct(d.probability)}`;
+    const lang = d.language ? `${esc(langName(d.language))} ${pct(d.probability)}` : `${esc(langName(d.detected))} ${pct(d.probability)}`;
     return `<div class="msg caller">
       <div class="who">Звонящий · ${esc(clock(ev.ts))}</div>
       <div class="bubble">
-        <div class="text ${ev.text ? "" : "none"}">${ev.text ? esc(ev.text) : "речь не распознана"}</div>
+        <div class="text ${ev.text ? "" : "none"}">${ev.text ? esc(ev.text) : "речь не разобрана (шум или слишком тихо)"}</div>
         <div class="meta"><span>язык ${lang}</span><span class="sep"></span><span>распознано за ${secs(d.stt_ms)}</span>
           <span class="sep"></span><span>${d.seconds ?? "?"} с речи</span>${audio}</div>
       </div></div>`;
   }
   const kind = BOT_KIND[ev.kind] ?? ev.kind;
   let meta = "";
-  if (ev.kind === "answer") {
+  if (ev.kind === "answer" && d.source === "rag-llm") {
+    const used = (d.passages || []).length ? `по базе знаний: ${(d.passages || []).join(", ")}` : "в базе знаний ничего не найдено";
+    const breakdown = `распознавание ${d.stt_ms} мс · поиск ${d.rag_ms} мс · ИИ ${d.llm_ms} мс · голос ${d.tts_ms} мс`;
+    meta = `<div class="meta"><span class="badge accent">ИИ-ответ</span><span>${esc(used)}</span><span class="sep"></span>
+      <span title="${esc(breakdown)}">ответ через ${secs(d.total_ms)}</span><span class="sep"></span><span>${esc(d.model || "")}</span></div>`;
+  } else if (ev.kind === "answer") {
     const scenario = d.scenario_id
       ? `<span class="badge ok">${esc(d.scenario_title || d.scenario_id)}</span>`
       : '<span class="badge warn">не понято → оператор</span>';
@@ -260,7 +286,7 @@ function renderEvent(ev) {
       <span title="${esc(breakdown)}">ответ через ${secs(d.total_ms)}</span><span class="sep"></span><span>${esc(d.source || "")}</span></div>`;
   }
   return `<div class="msg bot">
-    <div class="who">${kind ? `<span class="badge">${esc(kind)}</span>` : ""}Бот${d.language ? ` (${esc(d.language)})` : ""} · ${esc(clock(ev.ts))}</div>
+    <div class="who">${kind ? `<span class="badge">${esc(kind)}</span>` : ""}Бот${d.language ? ` (${esc(langName(d.language))})` : ""} · ${esc(clock(ev.ts))}</div>
     <div class="bubble"><div class="text">${esc(ev.text)}</div>${meta}</div></div>`;
 }
 
@@ -270,7 +296,7 @@ function renderHead() {
   $("#chat-head").innerHTML = `
     <button class="back badge" id="back">← список</button>
     <span class="title">${esc(CHANNEL[c.channel] || c.channel)} ${esc(dayTime(c.started_at))}</span>
-    ${STATUS[c.status] || ""}${c.language ? `<span class="badge">${esc(c.language)}</span>` : ""}
+    ${STATUS[c.status] || ""}${c.language ? `<span class="badge">${esc(langName(c.language))}</span>` : ""}
     <span>длительность ${duration(c)}</span><span>· ${c.turns || 0} репл.</span>
     <span style="margin-left:auto;font-family:ui-monospace,monospace;font-size:11.5px">${esc(c.id.slice(0, 8))}</span>`;
   $("#back").onclick = () => $("#main").classList.remove("reading");
@@ -335,6 +361,36 @@ function connect() {
   }
   loadStats();
   connect();
+})();
+
+// ---- shared navigation: current page and a plain-words status ----
+(() => {
+  const path = location.pathname.replace(/\/$/, "") || "/";
+  document.querySelectorAll(".appnav a[data-page]").forEach((a) => {
+    if (a.dataset.page === path) a.setAttribute("aria-current", "page");
+  });
+  const MODE = { minimum: "Минимум", maximum: "Максимум" };
+  async function navStatus() {
+    const headers = {};
+    try { const k = localStorage.getItem("univoice.apiKey"); if (k) headers["X-API-Key"] = k; } catch (e) {}
+    const box = document.getElementById("appnav-status");
+    try {
+      const [mode, system] = await Promise.all([
+        fetch("/api/v1/admin/mode", { headers }).then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/v1/console/system", { headers }).then((r) => (r.ok ? r.json() : null)),
+      ]);
+      const parts = [];
+      if (mode) parts.push(`<span>Режим ответа: <b>${MODE[mode.mode] || mode.mode}</b></span>`);
+      if (system) parts.push(system.stt_loaded
+        ? '<span class="ready">● бот готов</span>'
+        : '<span class="wait">● модели загружаются</span>');
+      box.innerHTML = parts.join("");
+    } catch (e) {
+      box.innerHTML = '<span class="wait">● сервер недоступен</span>';
+    }
+  }
+  navStatus();
+  setInterval(navStatus, 15000);
 })();
 </script>
 </body>

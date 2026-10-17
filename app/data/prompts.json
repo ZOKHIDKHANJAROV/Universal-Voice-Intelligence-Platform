@@ -34,5 +34,9 @@
   "time_limit": {
     "uz": "Qo'ng'iroq vaqti tugadi. Rahmat, xayr!",
     "ru": "Время звонка истекло. Спасибо, до свидания!"
+  },
+  "thinking": {
+    "uz": "Bir daqiqa, tekshirib ko'raman.",
+    "ru": "Секунду, уточняю."
   }
 }

@@ -73,6 +73,29 @@ This starts Asterisk and the API. Then:
 Stop with Ctrl+C, then
 `docker compose -p universal-voice-intelligence-platform stop asterisk`.
 
+## Maximum mode (RAG + LLM + live voice)
+
+1. Install [Ollama](https://ollama.com) for Windows and download the model
+   (2.5 GB):
+
+   ```powershell
+   ollama pull qwen3:4b-instruct
+   ```
+
+   Use the instruct model: plain `qwen3:4b` is the Thinking variant, which
+   reasons out loud for seconds before every answer.
+2. In `.env`: `LLM_BASE_URL=http://host.docker.internal:11434` (the API runs in
+   Docker, Ollama in Windows).
+3. Keep Navoiy running for live Uzbek answers:
+   `docker compose -p universal-voice-intelligence-platform --profile tts up -d navoiy-tts`.
+   Russian uses Piper inside the API container.
+4. Open <http://localhost:8000/admin>, choose "Максимум", check that every
+   item is green, try a question in the test box, and fill the knowledge base.
+
+VRAM on an 8 GB laptop GPU: Whisper ~3 GB and Navoiy ~3.5 GB leave little for
+the LLM, so Ollama runs part of it on the CPU. Switching to minimum mode does
+not free that memory; stop Navoiy for minimum-only use.
+
 ## Real calls through a GSM gateway (SIM card)
 
 A GSM gateway (GoIP, Yeastar TG, Dinstar, ...) holds a SIM card and hands its

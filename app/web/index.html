@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UniVoice Console</title>
+<title>UniVoice — проверка бота</title>
 <style>
   :root {
     --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f0f2f5; --border: #dfe3e8;
@@ -30,10 +30,28 @@
   .chip { font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2);
     color: var(--muted); border: 1px solid var(--border); white-space: nowrap; }
   .chip.ok { color: var(--ok); } .chip.warn { color: var(--warn); } .chip.bad { color: var(--bad); }
-  nav { display: flex; gap: 4px; }
-  nav button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
     padding: 8px 12px; font: inherit; cursor: pointer; }
-  nav button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .intro { padding: 6px 0 4px; }
+  .intro p { margin: 4px 0 0; }
+  .steps { margin: 10px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  .steps li { margin: 2px 0; }
+  details.tech { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  details.tech summary { cursor: pointer; }
+  details.tech .chips { margin: 8px 0 0; }
+  /* Shared top navigation (same on every page). */
+  .appnav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 10px 0; }
+  .appnav a { color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; font-size: 14.5px; }
+  .appnav a:hover { background: var(--surface-2); color: var(--text); }
+  .appnav a[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 600; }
+  .appnav .brand { color: var(--text); font-weight: 700; margin-right: 8px; padding-left: 0; }
+  .appnav .brand:hover { background: none; }
+  .appnav-status { margin-left: auto; font-size: 13px; color: var(--muted); display: inline-flex; gap: 10px; flex-wrap: wrap; }
+  .appnav-status b { color: var(--text); font-weight: 600; }
+  .appnav-status .ready { color: var(--ok); } .appnav-status .wait { color: var(--warn); }
+
   main { padding: 20px 0 40px; }
   section[hidden] { display: none; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -50,8 +68,8 @@
     border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
   .btn.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; font-weight: 600; }
   .btn:disabled { opacity: .5; cursor: default; }
-  .rec { width: 64px; height: 64px; border-radius: 50%; border: 0; cursor: pointer;
-    background: var(--rec); color: #fff; font-size: 13px; font-weight: 700; flex: none; }
+  .rec { min-width: 112px; height: 52px; padding: 0 20px; border-radius: 999px; border: 0; cursor: pointer;
+    background: var(--rec); color: #fff; font: inherit; font-size: 15px; font-weight: 700; flex: none; }
   .rec.on { animation: pulse 1.2s infinite; }
   @keyframes pulse { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--rec) 25%, transparent); } }
   .muted { color: var(--muted); }
@@ -82,17 +100,23 @@
 <body>
 <header>
   <div class="wrap">
-    <div class="top">
-      <h1>UniVoice — консоль</h1>
-      <a href="/monitor" style="color:var(--accent);text-decoration:none;font-size:14px">Мониторинг звонков →</a>
-      <div class="chips" id="chips"><span class="chip">загрузка…</span></div>
-    </div>
-    <nav role="tablist">
-      <button role="tab" data-tab="voice" aria-selected="true">Речь</button>
-      <button role="tab" data-tab="text" aria-selected="false">Текст</button>
-      <button role="tab" data-tab="scenarios" aria-selected="false">Сценарии</button>
-      <button role="tab" data-tab="settings" aria-selected="false">Доступ</button>
+    <nav class="appnav" aria-label="Разделы">
+      <a class="brand" href="/">UniVoice</a>
+      <a href="/" data-page="/">Проверка бота</a>
+      <a href="/monitor" data-page="/monitor">Звонки</a>
+      <a href="/admin" data-page="/admin">Настройки</a>
+      <span class="appnav-status" id="appnav-status"></span>
     </nav>
+    <div class="intro">
+      <h1>Проверка бота</h1>
+      <p class="muted">Проверьте бота без звонка: скажите жалобу голосом или напишите её — увидите, что бот услышал, как понял и что ответит.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="voice" aria-selected="true">Голосом</button>
+      <button role="tab" data-tab="text" aria-selected="false">Текстом</button>
+      <button role="tab" data-tab="scenarios" aria-selected="false">Ответы бота</button>
+      <button role="tab" data-tab="settings" aria-selected="false">Ключ доступа</button>
+    </div>
   </div>
 </header>
 
@@ -100,17 +124,21 @@
   <section id="tab-voice">
     <div class="card">
       <div class="row">
-        <button class="rec" id="rec" title="Начать / остановить запись">REC</button>
+        <button class="rec" id="rec" title="Начать / закончить запись">Говорить</button>
         <div style="flex:1; min-width:220px">
-          <div class="big" id="rec-status">Нажмите и скажите жалобу</div>
-          <div class="muted">Запись пройдёт тот же путь, что звонок: распознавание → сценарий → ответ бота.</div>
+          <div class="big" id="rec-status">Нажмите «Говорить» и скажите жалобу</div>
+          <ol class="steps">
+            <li>Скажите проблему так, как сказал бы клиент: «Suv chiqmayapti» или «Автомат не наливает воду».</li>
+            <li>Нажмите «Стоп» — бот обработает запись так же, как настоящий звонок.</li>
+            <li>Ниже появится, что бот услышал, как понял и его ответ голосом.</li>
+          </ol>
         </div>
       </div>
       <div class="row" style="margin-top:14px">
-        <label class="btn" for="file">Загрузить файл…</label>
+        <label class="btn" for="file">Или загрузите аудиофайл…</label>
         <input type="file" id="file" accept="audio/*" hidden>
-        <label><input type="checkbox" id="telephone" checked> как в звонке (8 кГц, G.711)</label>
-        <label>Язык <select id="voice-lang"><option value="">авто</option><option value="uz">uz</option><option value="ru">ru</option></select></label>
+        <label title="Звук сжимается до качества телефонной линии (8 кГц), как при настоящем звонке"><input type="checkbox" id="telephone" checked> звук как по телефону</label>
+        <label>Язык <select id="voice-lang"><option value="">определить сам</option><option value="uz">узбекский</option><option value="ru">русский</option></select></label>
       </div>
     </div>
     <div id="voice-result"></div>
@@ -119,12 +147,12 @@
   <section id="tab-text" hidden>
     <div class="card">
       <div class="field">
-        <label for="text-input">Фраза звонящего</label>
+        <label for="text-input">Напишите, что мог бы сказать клиент</label>
         <textarea id="text-input" placeholder="Masalan: apparatdan suv chiqmayapti"></textarea>
       </div>
       <div class="row">
-        <label>Язык <select id="text-lang"><option value="uz">uz</option><option value="ru">ru</option><option value="">любой</option></select></label>
-        <span class="muted">Результат обновляется по мере ввода.</span>
+        <label>Язык <select id="text-lang"><option value="uz">узбекский</option><option value="ru">русский</option><option value="">любой</option></select></label>
+        <span class="muted">Бот показывает, как понял фразу, сразу по мере ввода.</span>
       </div>
     </div>
     <div id="text-result"></div>
@@ -132,30 +160,42 @@
 
   <section id="tab-scenarios" hidden>
     <div class="card muted" style="font-size:13.5px">
-      <b>Ключевые слова</b> описывают проблему — сценарий срабатывает, только если совпало хотя бы одно.
-      <b>Контекст</b> (вода, деньги, аппарат) лишь повышает уверенность.
-      <code>*</code> на конце — основа слова: <code>chiqma*</code> покрывает chiqmayapti, chiqmadi.
-      Изменения действуют сразу. Новый текст ответа нужно озвучить: <code>make render-prompts</code>.
+      Здесь настраивается, какие слова бот узнаёт и что отвечает на каждую проблему.
+      <ul style="margin:8px 0 0;padding-left:20px">
+        <li><b>Слова-признаки</b> — бот выберет этот ответ, если услышит хотя бы одно из них.
+          Звёздочка в конце — любое окончание: <code>chiqma*</code> = chiqmayapti, chiqmadi…</li>
+        <li><b>Слова-подсказки</b> (вода, деньги, аппарат) — сами ответ не выбирают, только добавляют уверенности.</li>
+        <li>Изменения слов действуют сразу. Новый текст ответа нужно озвучить (<code>make render-prompts</code>),
+          иначе бот не сможет его произнести.</li>
+      </ul>
     </div>
     <div id="scenario-list"><div class="muted">загрузка…</div></div>
   </section>
 
+
   <section id="tab-settings" hidden>
     <div class="card">
       <div class="field">
-        <label for="api-key">API-ключ (если в .env задан API_KEY)</label>
+        <label for="api-key">API-ключ</label>
         <input type="password" id="api-key" autocomplete="off">
-        <div class="hint">Хранится только в этом браузере.</div>
+        <div class="hint">Нужен, только если на сервере задан ключ (API_KEY в .env). Хранится только в этом браузере.</div>
       </div>
       <button class="btn primary" id="save-key">Сохранить</button>
       <span id="key-status" class="muted"></span>
     </div>
   </section>
+  <details class="tech">
+    <summary>Технические детали</summary>
+    <div class="chips" id="chips"><span class="chip">загрузка…</span></div>
+  </details>
 </main>
 
 <script>
 const $ = (sel) => document.querySelector(sel);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LANG_NAME = { uz: "узбекский", ru: "русский" };
+const langName = (code) => LANG_NAME[code] || code || "—";
+const secs = (ms) => (ms / 1000).toFixed(1).replace(".", ",") + " с";
 
 const store = {
   get(key) { try { return localStorage.getItem(key) || ""; } catch { return ""; } },
@@ -169,7 +209,7 @@ async function api(path, options = {}) {
   const response = await fetch(path, { ...options, headers });
   if (response.status === 401) {
     selectTab("settings");
-    throw new Error("Нужен API-ключ (вкладка «Доступ»).");
+    throw new Error("Нужен API-ключ: введите его на вкладке «Ключ доступа».");
   }
   if (!response.ok) {
     let detail = response.statusText;
@@ -181,12 +221,12 @@ async function api(path, options = {}) {
 
 // Tabs
 function selectTab(name) {
-  document.querySelectorAll("nav button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === name));
+  document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === name));
   document.querySelectorAll("main section").forEach((s) => (s.hidden = s.id !== `tab-${name}`));
   store.set("univoice.tab", name);
   if (name === "scenarios") loadScenarios();
 }
-document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => selectTab(b.dataset.tab)));
+document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => selectTab(b.dataset.tab)));
 
 // Status chips
 let scenarioTitles = {};
@@ -195,7 +235,7 @@ async function loadSystem() {
     const s = await api("/api/v1/console/system");
     const prompts = s.prompts_rendered === s.prompts_total ? "ok" : "warn";
     $("#chips").innerHTML = [
-      `<span class="chip">STT ${esc(s.stt_model)}${s.stt_model_uz ? " + " + esc(s.stt_model_uz.split("/").pop()) : ""}</span>`,
+      `<span class="chip">распознавание: ${esc(s.stt_model)}${s.stt_model_uz ? " + " + esc(s.stt_model_uz.split("/").pop()) : ""}</span>`,
       `<span class="chip">${esc(s.stt_device)} · ${esc(s.stt_compute_type)}</span>`,
       `<span class="chip ${s.stt_loaded ? "ok" : ""}">${s.stt_loaded ? "модели загружены" : "модели загрузятся при первом запросе"}</span>`,
       `<span class="chip ${prompts}">фразы озвучены ${s.prompts_rendered}/${s.prompts_total}</span>`,
@@ -206,8 +246,8 @@ async function loadSystem() {
 }
 
 function scenarioLabel(id) {
-  if (!id) return '<span class="badge warn">не понято → оператор</span>';
-  return `<span class="badge ok">${esc(scenarioTitles[id] || id)}</span> <span class="muted">${esc(id)}</span>`;
+  if (!id) return '<span class="badge warn">не понял — предложит оператора</span>';
+  return `<span class="badge ok" title="${esc(id)}">${esc(scenarioTitles[id] || id)}</span>`;
 }
 
 // Voice
@@ -225,12 +265,12 @@ $("#rec").addEventListener("click", async () => {
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
       stream.getTracks().forEach((t) => t.stop());
-      $("#rec").classList.remove("on"); $("#rec").textContent = "REC";
+      $("#rec").classList.remove("on"); $("#rec").textContent = "Говорить";
       analyze(new Blob(chunks, { type: recorder.mimeType }), "recording.webm");
     };
     recorder.start();
-    $("#rec").classList.add("on"); $("#rec").textContent = "STOP";
-    $("#rec-status").textContent = "Идёт запись… нажмите ещё раз, чтобы закончить";
+    $("#rec").classList.add("on"); $("#rec").textContent = "Стоп";
+    $("#rec-status").textContent = "Идёт запись… говорите, затем нажмите «Стоп»";
   } catch (e) {
     $("#rec-status").textContent = "Нет доступа к микрофону: " + e.message;
   }
@@ -242,8 +282,8 @@ $("#file").addEventListener("change", (e) => {
 });
 
 async function analyze(blob, name) {
-  $("#rec-status").textContent = "Распознаю…";
-  $("#voice-result").innerHTML = '<div class="card muted">Обработка… первый запрос загружает модели и может занять до минуты.</div>';
+  $("#rec-status").textContent = "Бот слушает запись…";
+  $("#voice-result").innerHTML = '<div class="card muted">Обработка… Если бот только что запущен, первый раз это может занять до минуты.</div>';
   const form = new FormData();
   form.append("audio", blob, name);
   form.append("telephone", $("#telephone").checked);
@@ -254,20 +294,23 @@ async function analyze(blob, name) {
     $("#voice-result").innerHTML = `
       <div class="card">
         <dl class="grid">
-          <dt>Распознано</dt><dd class="big">${r.transcription ? esc(r.transcription) : '<span class="muted">речь не распознана</span>'}</dd>
-          <dt>Язык</dt><dd>${esc(r.language)} <span class="muted">(${(r.language_probability * 100).toFixed(0)}%)</span></dd>
-          <dt>Сценарий</dt><dd>${scenarioLabel(r.intent.scenario_id)} · уверенность ${(r.intent.confidence * 100).toFixed(0)}% · ${esc(r.intent.source)}</dd>
-          <dt>Ответ бота</dt><dd>${esc(r.response_text)} <span class="badge">${esc(r.response_language)}</span>
-            ${r.action === "transfer" ? '<span class="badge warn">перевод на оператора</span>' : ""}
-            ${r.response_audio ? `<audio controls autoplay src="/api/v1/console/prompts/audio/${esc(r.response_audio)}"></audio>` : ""}</dd>
-          <dt>Время</dt><dd>
+          <dt>Бот услышал</dt><dd class="big">${r.transcription ? esc(r.transcription) : '<span class="muted">речь не разобрана — попробуйте громче и ближе к микрофону</span>'}</dd>
+          <dt>Язык</dt><dd>${esc(langName(r.language))} <span class="muted">(уверенность ${(r.language_probability * 100).toFixed(0)}%)</span></dd>
+          <dt>Бот понял</dt><dd>${r.live
+            ? `<span class="badge">ответ составил ИИ</span> ${r.passages.length ? "по базе знаний: " + esc(r.passages.join(", ")) : "в базе знаний ничего не нашлось"}`
+            : `${scenarioLabel(r.intent.scenario_id)} <span class="muted">уверенность ${(r.intent.confidence * 100).toFixed(0)}%</span>`}</dd>
+          <dt>Бот ответит</dt><dd>${esc(r.response_text)} <span class="badge">${esc(langName(r.response_language))}</span>
+            ${r.action === "transfer" ? '<span class="badge warn">переведёт на оператора</span>' : ""}
+            ${r.response_audio ? `<audio controls autoplay src="/api/v1/console/prompts/audio/${esc(r.response_audio)}"></audio>` : ""}
+            ${r.response_audio_data ? `<audio controls autoplay src="${r.response_audio_data}"></audio>` : ""}</dd>
+          <dt>Время ответа</dt><dd><b>${secs(t.stt + t.intent + (t.llm || 0) + t.audio)}</b>
             <div class="bars"><span style="width:${t.stt / total * 100}%"></span><span style="width:${t.intent / total * 100}%"></span><span style="width:${t.audio / total * 100}%"></span></div>
-            <div class="legend"><span><i style="background:var(--accent)"></i>распознавание ${t.stt} мс</span><span><i style="background:var(--ok)"></i>сценарий ${t.intent} мс</span><span><i style="background:var(--warn)"></i>аудио ответа ${t.audio} мс</span></div>
+            <div class="legend"><span><i style="background:var(--accent)"></i>распознавание речи ${secs(t.stt)}</span><span><i style="background:var(--ok)"></i>${r.live ? "поиск и ответ ИИ" : "выбор ответа"} ${secs(r.live ? t.intent + t.llm : t.intent)}</span><span><i style="background:var(--warn)"></i>подготовка звука ${secs(t.audio)}</span></div>
           </dd>
         </dl>
         ${r.warning ? `<div class="note" style="margin-top:10px">${esc(r.warning)}</div>` : ""}
       </div>`;
-    $("#rec-status").textContent = "Готово. Можно записать ещё.";
+    $("#rec-status").textContent = "Готово. Можно проверить ещё одну фразу.";
     loadSystem();
   } catch (e) {
     $("#voice-result").innerHTML = `<div class="card error">${esc(e.message)}</div>`;
@@ -290,8 +333,8 @@ async function resolveText() {
       body: JSON.stringify({ text, language }),
     });
     $("#text-result").innerHTML = `<div class="card"><dl class="grid">
-      <dt>Сценарий</dt><dd>${scenarioLabel(r.scenario_id)}</dd>
-      <dt>Уверенность</dt><dd>${(r.confidence * 100).toFixed(0)}% <span class="muted">(${esc(r.source)})</span></dd>
+      <dt>Бот понял</dt><dd>${scenarioLabel(r.scenario_id)}</dd>
+      <dt>Уверенность</dt><dd>${(r.confidence * 100).toFixed(0)}%</dd>
     </dl></div>`;
   } catch (e) {
     $("#text-result").innerHTML = `<div class="card error">${esc(e.message)}</div>`;
@@ -313,17 +356,17 @@ async function loadScenarios() {
       const isRendered = rendered.get(s.language + "\n" + message);
       return `<div class="card scenario" data-id="${esc(s.id)}">
         <div class="head">
-          <h3>${esc(s.title)}</h3><span class="badge">${esc(s.language)}</span>
-          <span class="id">${esc(s.id)}</span>
+          <h3>${esc(s.title)}</h3><span class="badge">${esc(langName(s.language))}</span>
+          ${s.action === "transfer" ? '<span class="badge warn">переводит на оператора</span>' : ""}
           <label style="margin-left:auto"><input type="checkbox" data-f="enabled" ${s.enabled ? "checked" : ""}> включён</label>
         </div>
-        <div class="field"><label>Ключевые слова (проблема), через запятую</label>
+        <div class="field"><label>Слова-признаки проблемы, через запятую</label>
           <textarea class="words" rows="2" data-f="keywords">${esc(s.keywords.join(", "))}</textarea></div>
-        <div class="field"><label>Контекст, через запятую</label>
+        <div class="field"><label>Слова-подсказки, через запятую (необязательно)</label>
           <textarea class="words" rows="2" data-f="context_keywords">${esc(s.context_keywords.join(", "))}</textarea></div>
-        <div class="field"><label>Ответ бота</label>
+        <div class="field"><label>Что ответит бот</label>
           <textarea data-f="message">${esc(message)}</textarea>
-          <div class="hint">${isRendered ? '<span class="badge ok">озвучен</span>' : '<span class="badge warn">не озвучен — make render-prompts</span>'}</div></div>
+          <div class="hint">${isRendered ? '<span class="badge ok">озвучен</span>' : '<span class="badge warn">ещё не озвучен — выполните make render-prompts</span>'}</div></div>
         <div class="row"><button class="btn primary" data-save>Сохранить</button><span class="muted" data-status></span></div>
       </div>`;
     }).join("");
@@ -362,6 +405,37 @@ $("#save-key").addEventListener("click", () => {
   $("#key-status").textContent = "сохранено";
   loadSystem();
 });
+
+
+// ---- shared navigation: current page and a plain-words status ----
+(() => {
+  const path = location.pathname.replace(/\/$/, "") || "/";
+  document.querySelectorAll(".appnav a[data-page]").forEach((a) => {
+    if (a.dataset.page === path) a.setAttribute("aria-current", "page");
+  });
+  const MODE = { minimum: "Минимум", maximum: "Максимум" };
+  async function navStatus() {
+    const headers = {};
+    try { const k = localStorage.getItem("univoice.apiKey"); if (k) headers["X-API-Key"] = k; } catch (e) {}
+    const box = document.getElementById("appnav-status");
+    try {
+      const [mode, system] = await Promise.all([
+        fetch("/api/v1/admin/mode", { headers }).then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/v1/console/system", { headers }).then((r) => (r.ok ? r.json() : null)),
+      ]);
+      const parts = [];
+      if (mode) parts.push(`<span>Режим ответа: <b>${MODE[mode.mode] || mode.mode}</b></span>`);
+      if (system) parts.push(system.stt_loaded
+        ? '<span class="ready">● бот готов</span>'
+        : '<span class="wait">● модели загружаются</span>');
+      box.innerHTML = parts.join("");
+    } catch (e) {
+      box.innerHTML = '<span class="wait">● сервер недоступен</span>';
+    }
+  }
+  navStatus();
+  setInterval(navStatus, 15000);
+})();
 
 selectTab(store.get("univoice.tab") || "voice");
 loadSystem();

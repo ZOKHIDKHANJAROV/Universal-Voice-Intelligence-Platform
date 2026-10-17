@@ -55,7 +55,9 @@ class Settings(BaseSettings):
 
     llm_enabled: bool = False
     llm_base_url: str = "http://ollama:11434"
-    llm_model: str = "qwen3:4b"
+    # Instruct (non-thinking) model: "qwen3:4b" is the Thinking-2507 variant,
+    # which reasons out loud for seconds before answering.
+    llm_model: str = "qwen3:4b-instruct"
     llm_timeout_seconds: int = 30
     # Ollama layers to offload to GPU; 0 keeps the LLM on CPU so it does not
     # compete with Whisper for VRAM. -1 lets Ollama decide.
@@ -90,6 +92,11 @@ class Settings(BaseSettings):
     # Off by default: callers must be told when they are recorded.
     call_record_audio: bool = False
     call_audio_dir: Path = Path("data/calls")
+
+    # Answer mode chosen in the admin panel (minimum / maximum) and its settings.
+    assistant_settings_path: Path = Path("data/assistant.json")
+    # Knowledge base the maximum mode answers from (edited in the admin panel).
+    knowledge_path: Path = Path("data/knowledge.json")
 
     # Realtime telephony audio bridge
     realtime_audio_host: str = "0.0.0.0"
