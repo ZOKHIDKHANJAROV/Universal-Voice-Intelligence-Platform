@@ -119,6 +119,27 @@ Asterisk also hangs up when no audio arrives for 30 s (`rtp_timeout` in
 coverage. Phones that send no audio during silence are handled: missing audio
 counts as silence.
 
+## Answer modes and admin panel
+
+<http://localhost:8000/admin> switches how the bot answers; the change applies
+to the next caller phrase, no restart.
+
+| | Minimum | Maximum |
+|---|---|---|
+| Pipeline | language detection → scenario → pre-recorded answer | language detection → knowledge base search (RAG) → LLM answer → live voice |
+| Answer time | ~1 s | a few seconds; "one moment" plays meanwhile |
+| Needs | Whisper, rendered phrases | also Ollama with the model, Navoiy (uz) and Piper (ru) running |
+
+Maximum mode answers only from the knowledge base (edited in the panel; it
+starts from the scenarios), in the caller's language, in at most two short
+sentences, and offers an operator when the base has no answer. If the LLM is
+down, times out, answers in the wrong language, or the voice fails, the bot
+answers from the recordings as in minimum mode. Requests for an operator
+transfer immediately in both modes. The panel also shows what each mode needs
+and has a test box that answers typed questions.
+
+Setup for maximum mode on one laptop: [docs/local-run.md](docs/local-run.md#maximum-mode-rag--llm--live-voice).
+
 ## Web console
 
 Open `http://localhost:8000/` once the API runs. It is a single static page

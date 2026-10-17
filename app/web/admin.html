@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UniVoice — настройки</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3; --border: #dde1e6;
+    --text: #1b1f24; --muted: #5f6b7a; --accent: #1f6feb; --accent-soft: #e5efff;
+    --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e; --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --surface: #161b22; --surface-2: #1f262e; --border: #2f3640;
+      --text: #e6edf3; --muted: #8b98a5; --accent: #4493f8; --accent-soft: #15233a;
+      --ok: #3fb950; --warn: #d29922; --bad: #f85149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 14.5px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; }
+  .bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 17px; margin: 0; font-weight: 650; }
+  h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
+  .spacer { flex: 1; }
+  main { max-width: 1080px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; min-width: 0; }
+  .muted { color: var(--muted); }
+  .small { font-size: 12.5px; }
+  .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .mode { text-align: left; border: 2px solid var(--border); background: var(--surface); color: inherit; font: inherit;
+    border-radius: var(--radius); padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+  .mode:hover { border-color: var(--accent); }
+  .mode[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .name { font-weight: 650; font-size: 15.5px; display: flex; align-items: center; gap: 8px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 12.5px; }
+  .flow span { background: var(--surface-2); border-radius: 6px; padding: 1px 7px; }
+  .checks { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 3px; font-size: 13px; }
+  .checks li { display: flex; gap: 7px; align-items: baseline; min-width: 0; }
+  .checks .detail { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; transform: translateY(-1px); }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); } .dot.warn { background: var(--warn); }
+  .badge { display: inline-block; font-size: 11.5px; padding: 0 7px; border-radius: 6px; border: 1px solid var(--border);
+    color: var(--muted); white-space: nowrap; line-height: 18px; }
+  .badge.ok { color: var(--ok); border-color: currentColor; } .badge.warn { color: var(--warn); border-color: currentColor; }
+  .badge.accent { color: var(--accent); border-color: currentColor; }
+  .note { margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-size: 13px; }
+  .note.warn { color: var(--warn); }
+  .note.bad { color: var(--bad); }
+  form.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); min-width: 0; }
+  label.inline { flex-direction: row; align-items: center; gap: 6px; color: var(--text); font-size: 13.5px; }
+  input, select, textarea { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 9px; min-width: 0; width: 100%; }
+  label.inline input { width: auto; }
+  textarea { resize: vertical; min-height: 70px; }
+  .wide { grid-column: 1 / -1; }
+  button.btn { font: inherit; font-size: 13.5px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.btn:disabled { opacity: .55; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .saved { font-size: 12.5px; color: var(--ok); }
+  .kb { display: grid; gap: 8px; margin-top: 12px; }
+  .entry { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+  .entry.off { opacity: .55; }
+  .entry .head { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .entry .title { font-weight: 600; margin-right: auto; overflow-wrap: anywhere; }
+  .entry .text { white-space: pre-wrap; font-size: 13px; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere;
+    max-height: 7.5em; overflow: hidden; }
+  .entry form { margin-top: 8px; }
+  .answer { margin-top: 12px; display: grid; gap: 8px; }
+  .bubble { background: var(--accent-soft); border-radius: var(--radius); padding: 10px 12px; overflow-wrap: anywhere; }
+  .passage { font-size: 12.5px; border-left: 3px solid var(--border); padding: 2px 8px; color: var(--muted); overflow-wrap: anywhere; }
+  audio { width: 100%; max-width: 420px; height: 34px; }
+  #key { max-width: 220px; }
+  .bar.page { max-width: 1080px; margin: 0 auto; padding-bottom: 8px; }
+  .bar > .appnav { flex: 1; padding: 0; }
+  /* Shared top navigation (same on every page). */
+  .appnav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 10px 0; }
+  .appnav a { color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; font-size: 14.5px; }
+  .appnav a:hover { background: var(--surface-2); color: var(--text); }
+  .appnav a[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 600; }
+  .appnav .brand { color: var(--text); font-weight: 700; margin-right: 8px; padding-left: 0; }
+  .appnav .brand:hover { background: none; }
+  .appnav-status { margin-left: auto; font-size: 13px; color: var(--muted); display: inline-flex; gap: 10px; flex-wrap: wrap; }
+  .appnav-status b { color: var(--text); font-weight: 600; }
+  .appnav-status .ready { color: var(--ok); } .appnav-status .wait { color: var(--warn); }
+
+  @media (max-width: 720px) {
+    .modes, form.grid { grid-template-columns: minmax(0, 1fr); }
+    main { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar"><nav class="appnav" aria-label="Разделы">
+      <a class="brand" href="/">UniVoice</a>
+      <a href="/" data-page="/">Проверка бота</a>
+      <a href="/monitor" data-page="/monitor">Звонки</a>
+      <a href="/admin" data-page="/admin">Настройки</a>
+      <span class="appnav-status" id="appnav-status"></span>
+    </nav></div>
+  <div class="bar page">
+    <div style="min-width:0">
+      <h1>Настройки бота</h1>
+      <div class="small muted">Как бот отвечает, по какой базе знаний и как проверить его ответ.</div>
+    </div>
+    <span class="spacer"></span>
+    <input id="key" type="password" placeholder="API-ключ (если задан)" aria-label="API-ключ">
+  </div>
+</header>
+<main>
+  <section class="card">
+    <h2>Как бот отвечает</h2>
+    <p class="small muted" style="margin:-4px 0 12px">Нажмите на нужный режим — он включится со следующей фразы звонящего.</p>
+    <div class="modes">
+      <button class="mode" data-mode="minimum" aria-pressed="false">
+        <span class="name">Минимум <span class="badge ok">~1 с</span></span>
+        <span class="flow"><span>автоопределение языка</span>→<span>сценарий</span>→<span>заранее записанный ответ</span></span>
+        <span class="small muted">Быстро и предсказуемо. Отвечает только тем, что есть в сценариях.</span>
+        <ul class="checks" id="checks-minimum"></ul>
+      </button>
+      <button class="mode" data-mode="maximum" aria-pressed="false">
+        <span class="name">Максимум <span class="badge warn">несколько секунд</span></span>
+        <span class="flow"><span>автоопределение языка</span>→<span>поиск по базе знаний (RAG)</span>→<span>ответ ИИ</span>→<span>живой голос</span></span>
+        <span class="small muted">Отвечает своими словами по базе знаний. Если ИИ или голос недоступны, отвечает записью, как в минимуме.</span>
+        <ul class="checks" id="checks-maximum"></ul>
+      </button>
+    </div>
+    <div id="mode-note" class="note" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2>Настройки режима «Максимум»</h2>
+    <p class="small muted" style="margin:-4px 0 12px">Нужны, только если используете «Максимум». Обычно менять ничего не требуется.</p>
+    <form id="settings" class="grid">
+      <label>Сервер LLM (Ollama)<input name="llm_base_url" required></label>
+      <label>Модель<input name="llm_model" list="models" required><datalist id="models"></datalist></label>
+      <label>Таймаут ответа, с<input name="llm_timeout_seconds" type="number" min="2" max="120" step="1"></label>
+      <label>Записей базы знаний на вопрос<input name="top_k" type="number" min="1" max="8"></label>
+      <label>Предложений в ответе, не больше<input name="max_sentences" type="number" min="1" max="5"></label>
+      <label>Слоёв LLM на видеокарте<input name="llm_gpu_layers" type="number" min="0" max="99" placeholder="авто"></label>
+      <p class="small muted wide" style="margin:0">Пусто — Ollama решает сама. 0 — только процессор. Если Whisper и Navoiy заняли видеокарту,
+        уменьшите число: переполненная видеокарта в Windows работает медленнее процессора.</p>
+      <label class="inline"><input name="filler" type="checkbox"> Говорить «Секунду, уточняю», пока готовится ответ</label>
+      <div class="row wide"><button class="btn primary" type="submit">Сохранить</button><span id="settings-saved" class="saved" hidden>Сохранено</span></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Проверка ИИ-ответа</h2>
+    <p class="small muted" style="margin:0 0 10px">Отвечает так, как в режиме «Максимум», независимо от выбранного режима.</p>
+    <form id="test" class="grid">
+      <label class="wide">Вопрос звонящего<textarea name="text" required placeholder="Masalan: apparatga pul tashladim, suv chiqmadi"></textarea></label>
+      <label>Язык<select name="language"><option value="uz">uz</option><option value="ru">ru</option></select></label>
+      <label class="inline"><input name="speak" type="checkbox" checked> Озвучить</label>
+      <div class="row wide"><button class="btn primary" type="submit">Спросить</button></div>
+    </form>
+    <div id="test-result" class="answer" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><h2 style="margin:0;margin-right:auto">База знаний</h2>
+      <button class="btn" id="import">Обновить из сценариев</button>
+      <button class="btn primary" id="add">Добавить запись</button></div>
+    <p class="small muted" style="margin:8px 0 0">По этим записям ИИ отвечает в режиме «Максимум». Пишите факты коротко: что случилось и что делать.
+      Записи из сценариев обновляются кнопкой «Обновить из сценариев».</p>
+    <div id="kb" class="kb"></div>
+  </section>
+</main>
+
+<template id="entry-form">
+  <form class="grid">
+    <label class="wide">Заголовок<input name="title" required maxlength="200"></label>
+    <label>Язык<select name="language"><option value="any">любой</option><option value="uz">uz</option><option value="ru">ru</option></select></label>
+    <label class="inline"><input name="enabled" type="checkbox" checked> Включена</label>
+    <label class="wide">Текст<textarea name="text" required maxlength="4000" rows="5"></textarea></label>
+    <div class="row wide"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" data-cancel>Отмена</button></div>
+  </form>
+</template>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const KEY_STORE = "univoice.apiKey";
+let apiKey = "";
+try { apiKey = localStorage.getItem(KEY_STORE) || ""; } catch (e) {}
+$("#key").value = apiKey;
+$("#key").addEventListener("change", (e) => {
+  apiKey = e.target.value.trim();
+  try { localStorage.setItem(KEY_STORE, apiKey); } catch (err) {}
+  refresh();
+});
+
+async function api(path, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (apiKey) headers["X-API-Key"] = apiKey;
+  if (options.body && !(options.body instanceof FormData)) headers["Content-Type"] = "application/json";
+  const response = await fetch(path, { ...options, headers });
+  if (!response.ok) {
+    let detail = response.statusText;
+    try { detail = (await response.json()).detail || detail; } catch (e) {}
+    throw new Error(response.status === 401 ? "Неверный API-ключ" : detail);
+  }
+  return response.json();
+}
+
+// ---- mode and readiness ----
+let state = { settings: null, status: null };
+
+function check(ok, label, detail, level) {
+  const tone = ok ? "ok" : (level || "bad");
+  return `<li><span class="dot ${tone}"></span><span>${esc(label)}${detail ? ` <span class="detail">${esc(detail)}</span>` : ""}</span></li>`;
+}
+
+function renderChecks() {
+  const st = state.status;
+  if (!st) return;
+  const p = st.prompts;
+  const minimum = [
+    check(st.stt.ready, "Распознавание речи", st.stt.ready ? "модели загружены" : "загрузятся при первом звонке", "warn"),
+    check(p.rendered === p.total, "Записанные фразы", `${p.rendered} из ${p.total}`, "warn"),
+  ];
+  const llm = st.llm;
+  const llmDetail = !llm.reachable ? "сервер недоступен" : llm.model_ready ? state.settings.llm_model : `модель ${state.settings.llm_model} не скачана`;
+  const maximum = [
+    check(st.stt.ready, "Распознавание речи", st.stt.ready ? "модели загружены" : "загрузятся при первом звонке", "warn"),
+    check(llm.reachable && llm.model_ready, "ИИ (LLM)", llmDetail),
+    check(st.knowledge.enabled > 0, "База знаний", `${st.knowledge.enabled} включённых записей`),
+    ...Object.entries(st.tts_live).map(([lang, t]) => check(t.ready, `Живой голос ${lang}`, `${t.provider}: ${t.detail}`)),
+  ];
+  $("#checks-minimum").innerHTML = minimum.join("");
+  $("#checks-maximum").innerHTML = maximum.join("");
+
+  const note = $("#mode-note");
+  const maxReady = llm.reachable && llm.model_ready && Object.values(st.tts_live).every((t) => t.ready) && st.knowledge.enabled > 0;
+  if (state.settings.mode === "maximum" && !maxReady) {
+    note.hidden = false;
+    note.className = "note warn";
+    note.textContent = "Режим «Максимум» включён, но не всё готово (красные пункты). Пока это так, бот отвечает записями, как в минимуме.";
+  } else {
+    note.hidden = true;
+  }
+  $("#models").innerHTML = (llm.models || []).map((m) => `<option value="${esc(m)}">`).join("");
+}
+
+function renderMode() {
+  document.querySelectorAll(".mode").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.settings.mode)));
+  const form = $("#settings");
+  for (const name of ["llm_base_url", "llm_model", "llm_timeout_seconds", "top_k", "max_sentences", "llm_gpu_layers"]) {
+    if (document.activeElement !== form.elements[name]) form.elements[name].value = state.settings[name] ?? "";
+  }
+  form.elements.filler.checked = state.settings.filler;
+}
+
+async function refresh() {
+  try {
+    const [settings, status] = await Promise.all([api("/api/v1/admin/mode"), api("/api/v1/admin/status")]);
+    state = { settings, status };
+    renderMode();
+    renderChecks();
+    loadKnowledge();
+  } catch (e) {
+    const note = $("#mode-note");
+    note.hidden = false;
+    note.className = "note bad";
+    note.textContent = `Не удалось загрузить состояние: ${e.message}`;
+  }
+}
+
+document.querySelectorAll(".mode").forEach((button) => button.addEventListener("click", async () => {
+  try {
+    state.settings = await api("/api/v1/admin/mode", { method: "PUT", body: JSON.stringify({ mode: button.dataset.mode }) });
+    renderMode();
+    renderChecks();
+  } catch (e) { alert(`Режим не изменён: ${e.message}`); }
+}));
+
+$("#settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const f = event.target.elements;
+  const body = {
+    llm_base_url: f.llm_base_url.value.trim(),
+    llm_model: f.llm_model.value.trim(),
+    llm_timeout_seconds: Number(f.llm_timeout_seconds.value),
+    top_k: Number(f.top_k.value),
+    max_sentences: Number(f.max_sentences.value),
+    filler: f.filler.checked,
+    llm_gpu_layers: f.llm_gpu_layers.value === "" ? -1 : Number(f.llm_gpu_layers.value),
+  };
+  try {
+    state.settings = await api("/api/v1/admin/mode", { method: "PUT", body: JSON.stringify(body) });
+    $("#settings-saved").hidden = false;
+    setTimeout(() => { $("#settings-saved").hidden = true; }, 2000);
+    refresh();
+  } catch (e) { alert(`Не сохранено: ${e.message}`); }
+});
+
+// ---- test box ----
+$("#test").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const f = event.target.elements;
+  const out = $("#test-result");
+  const button = event.target.querySelector("button[type=submit]");
+  button.disabled = true;
+  out.hidden = false;
+  out.innerHTML = '<div class="muted small">ИИ думает…</div>';
+  try {
+    const r = await api("/api/v1/admin/test", { method: "POST", body: JSON.stringify({
+      text: f.text.value, language: f.language.value, speak: f.speak.checked }) });
+    const t = r.timings_ms;
+    const timing = [`поиск ${t.rag} мс`, `ИИ ${t.llm} мс`, t.tts != null ? `голос ${t.tts} мс` : null, `всего ${t.total} мс`].filter(Boolean).join(" · ");
+    out.innerHTML = `
+      <div class="bubble">${esc(r.answer)}</div>
+      ${r.audio ? `<audio controls autoplay src="${r.audio}"></audio>` : ""}
+      ${r.warning ? `<div class="note warn">${esc(r.warning)}</div>` : ""}
+      <div class="small muted">${esc(r.model)} · ${esc(timing)}</div>
+      <div class="small muted">Найдено в базе знаний:</div>
+      ${r.passages.length ? r.passages.map((p) => `<div class="passage"><b>${esc(p.title)}</b> · ${p.score}<br>${esc(p.text.slice(0, 220))}</div>`).join("") : '<div class="passage">ничего — ИИ должен предложить оператора</div>'}`;
+  } catch (e) {
+    out.innerHTML = `<div class="note bad">${esc(e.message)}</div>`;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+// ---- knowledge base ----
+const LANG = { any: "любой", uz: "uz", ru: "ru" };
+let entries = [];
+
+async function loadKnowledge() {
+  try {
+    entries = await api("/api/v1/admin/knowledge");
+    renderKnowledge();
+  } catch (e) {
+    $("#kb").innerHTML = `<div class="note bad">${esc(e.message)}</div>`;
+  }
+}
+
+function renderKnowledge() {
+  const kb = $("#kb");
+  if (kb.querySelector("form")) return;  // do not wipe an open editor
+  kb.innerHTML = entries.length ? entries.map((e) => `
+    <div class="entry ${e.enabled ? "" : "off"}" data-id="${esc(e.id)}">
+      <div class="head">
+        <span class="title">${esc(e.title)}</span>
+        <span class="badge">${esc(LANG[e.language] || e.language)}</span>
+        ${e.source.startsWith("scenario:") ? '<span class="badge accent">сценарий</span>' : ""}
+        ${e.enabled ? "" : '<span class="badge warn">выключена</span>'}
+        <button class="btn" data-edit>Изменить</button>
+        <button class="btn" data-delete>Удалить</button>
+      </div>
+      <div class="text">${esc(e.text)}</div>
+    </div>`).join("") : '<div class="muted">База знаний пуста.</div>';
+}
+
+function openEditor(container, entry) {
+  const form = $("#entry-form").content.firstElementChild.cloneNode(true);
+  if (entry) {
+    form.elements.title.value = entry.title;
+    form.elements.language.value = entry.language;
+    form.elements.text.value = entry.text;
+    form.elements.enabled.checked = entry.enabled;
+  }
+  form.querySelector("[data-cancel]").addEventListener("click", () => { form.remove(); renderKnowledge(); });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const f = form.elements;
+    const body = JSON.stringify({ title: f.title.value.trim(), language: f.language.value, text: f.text.value.trim(), enabled: f.enabled.checked });
+    try {
+      if (entry) await api(`/api/v1/admin/knowledge/${encodeURIComponent(entry.id)}`, { method: "PUT", body });
+      else await api("/api/v1/admin/knowledge", { method: "POST", body });
+      form.remove();
+      await loadKnowledge();
+      refresh();
+    } catch (e) { alert(`Не сохранено: ${e.message}`); }
+  });
+  container.appendChild(form);
+  form.elements.title.focus();
+}
+
+$("#add").addEventListener("click", () => {
+  const kb = $("#kb");
+  if (kb.querySelector("form")) return;
+  const holder = document.createElement("div");
+  holder.className = "entry";
+  kb.prepend(holder);
+  openEditor(holder, null);
+});
+
+$("#kb").addEventListener("click", async (event) => {
+  const card = event.target.closest(".entry");
+  if (!card || !card.dataset.id) return;
+  const entry = entries.find((e) => e.id === card.dataset.id);
+  if (event.target.matches("[data-edit]")) {
+    if ($("#kb").querySelector("form")) return;
+    openEditor(card, entry);
+  } else if (event.target.matches("[data-delete]")) {
+    if (!confirm(`Удалить запись «${entry.title}»?`)) return;
+    try { await api(`/api/v1/admin/knowledge/${encodeURIComponent(entry.id)}`, { method: "DELETE" }); await loadKnowledge(); refresh(); }
+    catch (e) { alert(`Не удалено: ${e.message}`); }
+  }
+});
+
+$("#import").addEventListener("click", async () => {
+  try {
+    const r = await api("/api/v1/admin/knowledge/import-scenarios", { method: "POST" });
+    await loadKnowledge();
+    refresh();
+    alert(`Обновлено записей из сценариев: ${r.imported}`);
+  } catch (e) { alert(`Ошибка: ${e.message}`); }
+});
+
+refresh();
+setInterval(refresh, 10000);
+
+// ---- shared navigation: current page and a plain-words status ----
+(() => {
+  const path = location.pathname.replace(/\/$/, "") || "/";
+  document.querySelectorAll(".appnav a[data-page]").forEach((a) => {
+    if (a.dataset.page === path) a.setAttribute("aria-current", "page");
+  });
+  const MODE = { minimum: "Минимум", maximum: "Максимум" };
+  async function navStatus() {
+    const headers = {};
+    try { const k = localStorage.getItem("univoice.apiKey"); if (k) headers["X-API-Key"] = k; } catch (e) {}
+    const box = document.getElementById("appnav-status");
+    try {
+      const [mode, system] = await Promise.all([
+        fetch("/api/v1/admin/mode", { headers }).then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/v1/console/system", { headers }).then((r) => (r.ok ? r.json() : null)),
+      ]);
+      const parts = [];
+      if (mode) parts.push(`<span>Режим ответа: <b>${MODE[mode.mode] || mode.mode}</b></span>`);
+      if (system) parts.push(system.stt_loaded
+        ? '<span class="ready">● бот готов</span>'
+        : '<span class="wait">● модели загружаются</span>');
+      box.innerHTML = parts.join("");
+    } catch (e) {
+      box.innerHTML = '<span class="wait">● сервер недоступен</span>';
+    }
+  }
+  navStatus();
+  setInterval(navStatus, 15000);
+})();
+</script>
+</body>
+</html>

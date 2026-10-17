@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 
+from app.api.routes.admin import router as admin_router
 from app.api.routes.calls import router as calls_router
 from app.api.routes.console import router as console_router
 from app.api.routes.health import router as health_router
@@ -17,6 +18,7 @@ from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.stt import router as stt_router
 from app.api.routes.voice import router as voice_router
 from app.api.routes.tts import router as tts_router
+from app.assistant import runtime as assistant
 from app.core.config import get_settings
 from app.realtime.audio_socket import AudioSocketServer
 from app.speech.service import warm_up
@@ -46,6 +48,8 @@ async def lifespan(_app: FastAPI):
             len(missing),
         )
     await realtime_server.start()
+    if assistant.current().mode == assistant.MAXIMUM:
+        assistant.warm_up_in_background(assistant.current())
     warm_up_task = asyncio.create_task(_warm_up()) if settings.stt_preload else None
     try:
         yield
@@ -81,11 +85,13 @@ app.include_router(intent_router, dependencies=protected)
 app.include_router(tts_router, dependencies=protected)
 app.include_router(console_router, dependencies=protected)
 app.include_router(monitor_router, dependencies=protected)
+app.include_router(admin_router, dependencies=protected)
 app.include_router(monitor_stream_router)  # checks ?key= itself
 
 WEB = Path(__file__).parent / "web"
 CONSOLE_PAGE = WEB / "index.html"
 MONITOR_PAGE = WEB / "monitor.html"
+ADMIN_PAGE = WEB / "admin.html"
 
 
 # Browsers must revalidate, or an update keeps showing the old page.
@@ -101,3 +107,8 @@ def console() -> FileResponse:
 @app.get("/monitor", include_in_schema=False)
 def monitor() -> FileResponse:
     return FileResponse(MONITOR_PAGE, media_type="text/html", headers=_NO_CACHE)
+
+
+@app.get("/admin", include_in_schema=False)
+def admin() -> FileResponse:
+    return FileResponse(ADMIN_PAGE, media_type="text/html", headers=_NO_CACHE)
