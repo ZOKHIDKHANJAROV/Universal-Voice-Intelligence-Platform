@@ -1,7 +1,9 @@
 import numpy as np
+import pytest
 
 from app.speech.models import TranscriptionResult
 from app.speech.providers.routed import LanguageRoutedSpeechToText
+from conftest import metric
 
 
 class _Model:
@@ -137,3 +139,16 @@ def test_warm_up_decodes_once_per_call_language(monkeypatch) -> None:
     monkeypatch.setattr(service, "get_stt", lambda: _Stt())
     service.warm_up()
     assert calls == [(8000, 8000, "uz"), (8000, 8000, "ru")]
+
+
+@pytest.mark.parametrize(("detected", "general_logprob", "uz_logprob", "general_text", "route", "language"), [
+    (("uz", 0.93), -0.1, -0.1, None, "detector", "uz"),
+    (("ru", 0.13), -0.44, -0.07, None, "specialist", "uz"),
+    (("ru", 0.13), -0.83, -0.4, None, "compared", "uz"),
+    (("ru", 0.06), -0.1, -1.14, "", "no_speech", "ru"),
+])
+def test_routing_decisions_are_counted(detected, general_logprob, uz_logprob, general_text, route, language) -> None:
+    router, _, _ = _route(detected, general_logprob, uz_logprob, general_text)
+    before = metric("univoice_stt_route_total", route=route, language=language)
+    _phrase(router)
+    assert metric("univoice_stt_route_total", route=route, language=language) == before + 1

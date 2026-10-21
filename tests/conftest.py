@@ -1,11 +1,17 @@
 import os
 
 import pytest
+from prometheus_client import REGISTRY
 
 import app.assistant.knowledge as knowledge
 import app.assistant.runtime as assistant_runtime
 import app.calls.log as call_log
 from app.core.config import get_settings
+
+
+def metric(name: str, **labels: str) -> float:
+    """Current value of a Prometheus sample (0 when the series does not exist yet)."""
+    return REGISTRY.get_sample_value(name, labels) or 0.0
 
 
 @pytest.fixture(autouse=True)

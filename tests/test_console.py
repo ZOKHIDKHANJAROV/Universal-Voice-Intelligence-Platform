@@ -15,6 +15,7 @@ from app.core.config import get_settings
 from app.main import app
 from app.services.scenario_service import ScenarioService
 from app.speech.models import TranscriptionResult
+from conftest import metric
 
 client = TestClient(app)
 DATA = Path(__file__).resolve().parents[1] / "app" / "data" / "scenarios.json"
@@ -58,6 +59,9 @@ def test_analyze_runs_the_call_path(prompt_dir, monkeypatch) -> None:
 
     monkeypatch.setattr(analyze_module, "transcribe_pcm16", fake_stt)
     monkeypatch.setattr(prompt_cache, "synthesize_bytes", lambda text, lang: _wav(0.2))
+    calls = metric("univoice_calls_total", source="console")
+    hits = metric("univoice_scenario_hits_total", scenario="vending_no_water_uz")
+    timed = metric("univoice_stage_seconds_count", stage="end_to_end", source="console")
 
     response = client.post(
         "/api/v1/console/analyze",
@@ -71,6 +75,9 @@ def test_analyze_runs_the_call_path(prompt_dir, monkeypatch) -> None:
     assert body["intent"]["scenario_id"] == "vending_no_water_uz"
     assert body["response_language"] == "uz"
     assert set(body["timings_ms"]) == {"stt", "intent", "audio"}
+    assert metric("univoice_calls_total", source="console") == calls + 1
+    assert metric("univoice_scenario_hits_total", scenario="vending_no_water_uz") == hits + 1
+    assert metric("univoice_stage_seconds_count", stage="end_to_end", source="console") == timed + 1
 
     audio = client.get(f"/api/v1/console/prompts/audio/{body['response_audio']}")
     assert audio.status_code == 200

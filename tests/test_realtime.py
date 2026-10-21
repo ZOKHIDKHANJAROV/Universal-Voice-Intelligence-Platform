@@ -125,6 +125,20 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(audio_socket, "transcribe_pcm16", fake_stt)
     prompt_cache.get_prompt_cache.cache_clear()
 
+    from conftest import metric
+
+    counters = {
+        "calls": ("univoice_calls_total", {"source": "phone"}),
+        "answers": ("univoice_answers_total", {"source": "phone", "outcome": "scenario"}),
+        "vad": ("univoice_stage_seconds_count", {"stage": "vad", "source": "phone"}),
+        "stt": ("univoice_stage_seconds_count", {"stage": "stt", "source": "phone"}),
+        "end_to_end": ("univoice_stage_seconds_count", {"stage": "end_to_end", "source": "phone"}),
+        "language": ("univoice_stt_language_total", {"source": "phone", "language": "ru"}),
+        "hangups": ("univoice_call_ends_total", {"reason": "caller_hangup"}),
+    }
+    before = {key: metric(name, **labels) for key, (name, labels) in counters.items()}
+    active_before = metric("univoice_active_calls")
+
     async def scenario() -> None:
         server = AudioSocketServer()
         server.host, server.port = "127.0.0.1", 0
@@ -148,6 +162,7 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
         await writer.drain()
         response = await read_audio(5)
         assert len(response) == 5 * FRAME_BYTES
+        assert metric("univoice_active_calls") == active_before + 1
 
         writer.write(_message(b"", HANGUP_TYPE))
         await writer.drain()
@@ -169,6 +184,11 @@ def test_call_end_to_end_over_tcp(tmp_path, monkeypatch) -> None:
     assert synthesized[0][0].startswith("Assalomu alaykum")
     assert synthesized[2][0].startswith("Приносим извинения")
     assert synthesized[3][0] == "Есть ещё вопросы?"
+
+    # One call, one answered turn, every stage timed, and the call is over.
+    after = {key: metric(name, **labels) for key, (name, labels) in counters.items()}
+    assert {key: after[key] - before[key] for key in counters} == dict.fromkeys(counters, 1)
+    assert metric("univoice_active_calls") == active_before
 
 
 class _Writer:

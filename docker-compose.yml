@@ -126,9 +126,61 @@ services:
       - voice-audio:/var/lib/univoice/audio
     restart: unless-stopped
 
+  # Metrics and dashboards: `docker compose --profile monitoring up -d`.
+  # Prometheus http://localhost:9090 (alerts), Grafana http://localhost:3000.
+  prometheus:
+    profiles: ["monitoring"]
+    image: prom/prometheus:v3.5.0
+    container_name: univoice-prometheus
+    environment:
+      # Where /metrics is. host.docker.internal:8000 when the API runs on the
+      # host (scripts/start-local.ps1) instead of in the api container.
+      METRICS_TARGET: ${METRICS_TARGET:-api:8000}
+      # Sent as a Bearer token; /metrics needs it when API_KEY is set.
+      API_KEY: ${API_KEY:-}
+    # Prometheus does not read environment variables in its config, so they
+    # are written to the files prometheus.yml points at.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        printf '%s' "$$API_KEY" > /prometheus/api_key &&
+        printf '[{"targets": ["%s"]}]' "$$METRICS_TARGET" > /prometheus/targets.json &&
+        exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml
+        --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=30d
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    profiles: ["monitoring"]
+    image: grafana/grafana:12.1.0
+    container_name: univoice-grafana
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/univoice.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
 volumes:
   postgres-data:
   asterisk-recordings:
   voice-audio:
   navoiy-models:
   whisper-models:
+  prometheus-data:
+  grafana-data:
