@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" aria-label="Uzbek word error rate by STT setup">
+<style>svg{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--grid:#e4e3df;--s0:#2a78d6;--s1:#eb6834;--s2:#1baf7a;}@media (prefers-color-scheme: dark){svg{--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--grid:#3a3936;--s0:#3987e5;--s1:#d95926;--s2:#199e70;}}text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;fill:var(--ink2);font-size:12px}.title{fill:var(--ink);font-size:15px;font-weight:600}.value{fill:var(--ink);font-size:11px}.grid{stroke:var(--grid);stroke-width:1}</style>
+<rect width="720" height="300" fill="var(--bg)" rx="8"/>
+<text class="title" x="16" y="26">Uzbek word error rate by STT setup</text>
+<text x="16" y="46">FLEURS uz, 60 clips through the simulated phone channel. Lower is better.</text>
+<line class="grid" x1="200.0" x2="200.0" y1="62" y2="270"/>
+<text x="200.0" y="288" text-anchor="middle">0%</text>
+<line class="grid" x1="284.3636363636364" x2="284.3636363636364" y1="62" y2="270"/>
+<text x="284.3636363636364" y="288" text-anchor="middle">20%</text>
+<line class="grid" x1="368.72727272727275" x2="368.72727272727275" y1="62" y2="270"/>
+<text x="368.72727272727275" y="288" text-anchor="middle">40%</text>
+<line class="grid" x1="453.09090909090907" x2="453.09090909090907" y1="62" y2="270"/>
+<text x="453.09090909090907" y="288" text-anchor="middle">60%</text>
+<line class="grid" x1="537.4545454545455" x2="537.4545454545455" y1="62" y2="270"/>
+<text x="537.4545454545455" y="288" text-anchor="middle">80%</text>
+<line class="grid" x1="621.8181818181818" x2="621.8181818181818" y1="62" y2="270"/>
+<text x="621.8181818181818" y="288" text-anchor="middle">100%</text>
+<path d="M200,72 h446.08 a4.0,4.0 0 0 1 4.0,4.0 v14.0 a4.0,4.0 0 0 1 -4.0,4.0 h-446.08 z" fill="var(--ink2)" opacity="0.45"/>
+<text x="192" y="87.0" text-anchor="end">small alone</text>
+<text class="value" x="656.0799999999999" y="87.0">106.7%</text>
+<path d="M200,106 h365.93454545454546 a4.0,4.0 0 0 1 4.0,4.0 v14.0 a4.0,4.0 0 0 1 -4.0,4.0 h-365.93454545454546 z" fill="var(--ink2)" opacity="0.45"/>
+<text x="192" y="121.0" text-anchor="end">large-v3 alone</text>
+<text class="value" x="575.9345454545455" y="121.0">87.7%</text>
+<path d="M200,140 h109.04727272727274 a4.0,4.0 0 0 1 4.0,4.0 v14.0 a4.0,4.0 0 0 1 -4.0,4.0 h-109.04727272727274 z" fill="var(--ink2)" opacity="0.45"/>
+<text x="192" y="155.0" text-anchor="end">small + navai-uz</text>
+<text class="value" x="319.04727272727274" y="155.0">26.8%</text>
+<path d="M200,174 h102.72 a4.0,4.0 0 0 1 4.0,4.0 v14.0 a4.0,4.0 0 0 1 -4.0,4.0 h-102.72 z" fill="var(--ink2)" opacity="0.45"/>
+<text x="192" y="189.0" text-anchor="end">callcenter medium, forced uz</text>
+<text class="value" x="312.72" y="189.0">25.3%</text>
+<path d="M200,208 h98.08 a4.0,4.0 0 0 1 4.0,4.0 v14.0 a4.0,4.0 0 0 1 -4.0,4.0 h-98.08 z" fill="var(--ink2)" opacity="0.45"/>
+<text x="192" y="223.0" text-anchor="end">navai-uz alone, forced uz</text>
+<text class="value" x="308.08" y="223.0">24.2%</text>
+<path d="M200,242 h88.80000000000001 a4.0,4.0 0 0 1 4.0,4.0 v14.0 a4.0,4.0 0 0 1 -4.0,4.0 h-88.80000000000001 z" fill="var(--s0)"/>
+<text x="192" y="257.0" text-anchor="end" style="font-weight:600;fill:var(--ink)">large-v3 + navai-uz</text>
+<text class="value" x="298.8" y="257.0">22%</text>
+</svg>

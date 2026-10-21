@@ -67,6 +67,83 @@ published as [ZOKHID/univoice-stt-uz-ct2](https://huggingface.co/ZOKHID/univoice
 [docs/stt-evaluation.md](docs/stt-evaluation.md) for the measurements and
 how to re-run them on your own recordings.
 
+### Uzbek model training
+
+**Starting point.** [navai-uz/whisper-medium-uzbek](https://huggingface.co/navai-uz/whisper-medium-uzbek),
+a Whisper medium already fine-tuned on read Uzbek speech. It knows written
+Uzbek well but loses track of relaxed, conversational speech: 73.5% WER on
+Tashkent-dialect podcasts, compared with 17.5% on read speech.
+
+**Training data.** [islomov/podcasts_tashkent_dialect_youtube_uzbek_speech_dataset](https://huggingface.co/datasets/islomov/podcasts_tashkent_dialect_youtube_uzbek_speech_dataset)
+(Apache-2.0): conversational Tashkent-dialect speech from YouTube podcasts,
+transcribed by Gemini 2.5 Pro. 25 of 26 shards (~14,000 clips, ~95 h) go to
+training. Shard 3 is held out for testing.
+
+**Method** (`scripts/finetune_whisper.py`):
+
+- The base model stays frozen in fp16; only LoRA adapters train. Rank 32,
+  alpha 64, dropout 0.05, applied to the attention q/k/v/out and fc1/fc2
+  layers of both encoder and decoder. That is 34.6 M trainable parameters.
+  The adapter is merged into the model after training.
+- Half the clips are degraded the way a phone call degrades them (8 kHz plus
+  G.711 mu-law), so the model learns the line callers actually use. Random
+  gain and SpecAugment are also applied.
+- Gemini transcripts are rewritten in the base model's own style first
+  (lowercase, no punctuation, oʻ/gʻ). The update then goes to the audio
+  instead of a new spelling style: on 30 clips the starting loss drops from
+  7.2 to 3.9.
+- Training labels carry `<|notimestamps|>`, which matches how the model runs
+  on calls.
+
+| Setting | Pilot | Full run |
+|---|---|---|
+| Data | 3 shards, 12.2 h | 25 shards, ~95 h |
+| Epochs / steps | 2 / 105 | 1 / 438 |
+| Optimizer | AdamW, lr 1e-4, linear decay, effective batch 32 | same |
+| Time on an RTX 4060 Laptop (8 GB) | 52 min | 3.2 h |
+| Peak VRAM | 2.96 GiB | 2.97 GiB |
+| Held-out loss | 2.31 → 0.90 | best 0.628 |
+
+**Results.** Each test clip is first passed through a simulated phone line
+(8 kHz, G.711), Uzbek is forced, and decoding is greedy with no timestamps:
+
+| Test set | navai-uz (base) | Pilot, 12 h | **Full run, ~95 h** |
+|---|---|---|---|
+| Podcasts, held-out shard, 100 clips: WER / CER | 73.5% / 45.2% | 48.8% / 23.0% | **34.5% / 15.8%** |
+| FLEURS read speech, 60 clips: WER / CER | 17.5% / 6.4% | 18.7% / 6.3% | **17.3% / 5.0%** |
+
+![Error rate before and after fine-tuning](docs/images/stt-finetune.svg)
+
+On conversational speech, word errors fell to less than half of the base
+model's. On read speech, which this run never trained on, accuracy did not
+drop, and character errors also went down.
+
+**In the bot.** `large-v3` detects the language and transcribes Russian; the
+fine-tune transcribes Uzbek. Measured on FLEURS through the simulated phone
+line: Uzbek 19.6% WER, Russian 4.5% (unchanged), median latency 1.4 s for
+Uzbek and 1.6 s for Russian. The chart compares this pairing with the
+alternatives (measured with the read-speech model, before the podcast
+fine-tune):
+
+![Uzbek word error rate by STT setup](docs/images/stt-setups.svg)
+
+On 1-3 s phrases, Whisper's language detector often picks Indonesian or
+English instead of Uzbek, so the router also compares the confidence of both
+models. Short Uzbek phrases going to the right model went from 46% to 96%:
+
+![Clips routed to the right language model](docs/images/stt-language.svg)
+
+**Caveats.** The podcast test labels come from the same labeller (Gemini) as
+the training labels, and the held-out shard may share channels and speakers
+with training, so the podcast gain is probably optimistic. The test sets are
+small (100 and 60 clips), so differences of 1-2 points are noise. The model
+has not yet been measured on real call-centre recordings.
+
+Reproduce: download the dataset and run `make uz-finetune` (details in
+[docs/stt-evaluation.md](docs/stt-evaluation.md#reproduce-the-fine-tune)).
+The charts come from `python -m scripts.plot_stt_results`, using the numbers
+from that document.
+
 The STT API accepts an audio file and returns transcription text, detected language, language probability, and duration.
 
 ### Endpoint
