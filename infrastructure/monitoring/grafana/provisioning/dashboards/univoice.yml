@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: UniVoice
+    type: file
+    # Edit the JSON in git; changes made in the Grafana UI are not saved back.
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards

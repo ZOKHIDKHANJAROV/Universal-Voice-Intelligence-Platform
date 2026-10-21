@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     log_level: str = "INFO"
+    # "json": one JSON object per line with the call UUID (production, log
+    # collectors); "text": plain lines for reading in a terminal.
+    log_format: str = "json"
     # When set, every /api/v1 route requires the X-API-Key header.
     api_key: str = ""
 

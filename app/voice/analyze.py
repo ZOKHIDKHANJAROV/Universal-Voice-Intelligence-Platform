@@ -13,7 +13,9 @@ from app.assistant.answer import generate_answer
 from app.audio.resample import float_to_pcm16, pcm16_to_wav
 from app.audio.telephony import TELEPHONY_RATE, telephony
 from app.calls.log import BOT, CALLER, get_call_log
+from app.core import metrics as m
 from app.core.config import get_settings
+from app.core.logs import bind_call
 from app.intent.models import IntentResult
 from app.intent.service import get_intent_service
 from app.services.scenario_service import get_scenario_service
@@ -51,6 +53,10 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
     from faster_whisper import decode_audio
 
     settings = get_settings()
+    # Console tests show in /monitor and the logs as one-turn "console" calls.
+    call_id = str(uuid.uuid4())
+    bind_call(call_id, call_id)
+    m.CALLS.labels(m.CONSOLE).inc()
     audio = decode_audio(str(path), sampling_rate=16000)
     rate = 16000
     if telephone:
@@ -59,6 +65,10 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
     started = time.perf_counter()
     result = transcribe_pcm16(audio, rate, language, settings.stt_realtime_languages)
     stt_done = time.perf_counter()
+    m.observe("stt", m.CONSOLE, stt_done - started)
+    m.STT_LANGUAGE.labels(m.CONSOLE, result.language).inc()
+    if not result.text:
+        m.UNHEARD.labels(m.CONSOLE).inc()
 
     realtime = settings.stt_realtime_languages
     caller_language = result.language if result.language in realtime else realtime[0]
@@ -76,12 +86,20 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
             answer = generate_answer(result.text, caller_language, assistant.current())
             pcm8 = live_pcm8(answer.text, answer.language)
         except Exception as exc:  # any failure: answer from the recording, like a call does
+            m.LLM_ANSWERS.labels(m.CONSOLE, "fallback").inc()
             LOGGER.warning("Console live answer failed: %s", exc)
             warning = f"ИИ-ответ недоступен ({str(exc)[:160]}), ответ взят из записи."
         else:
             audio_done = time.perf_counter()
+            m.LLM_ANSWERS.labels(m.CONSOLE, "ok").inc()
+            m.count_answer(m.CONSOLE, "llm")
+            m.observe("intent", m.CONSOLE, intent_done - stt_done)
+            m.observe("rag", m.CONSOLE, answer.retrieve_ms / 1000)
+            m.observe("llm", m.CONSOLE, answer.llm_ms / 1000)
+            m.observe("tts", m.CONSOLE, audio_done - intent_done - (answer.retrieve_ms + answer.llm_ms) / 1000)
+            m.observe("end_to_end", m.CONSOLE, audio_done - started)
             live_intent = IntentResult(intent=None, scenario_id=None, confidence=1.0, source="rag-llm")
-            _log_console_turn(result, audio, rate, caller_language, live_intent, None,
+            _log_console_turn(call_id, result, audio, rate, caller_language, live_intent, None,
                               answer.text, answer.language, started, stt_done, intent_done, audio_done)
             wav = pcm16_to_wav(pcm8, TELEPHONY_RATE)
             return CallAnalysis(
@@ -113,8 +131,13 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
         audio_name = None
         warning = "Фраза не озвучена, а TTS-сервис недоступен. Выполните make render-prompts."
     audio_done = time.perf_counter()
+    m.observe("intent", m.CONSOLE, intent_done - stt_done)
+    m.observe("tts", m.CONSOLE, audio_done - intent_done)
+    if result.text:
+        m.observe("end_to_end", m.CONSOLE, audio_done - started)
+        m.count_answer(m.CONSOLE, "scenario" if intent.scenario_id else "not_recognized", intent.scenario_id)
 
-    _log_console_turn(result, audio, rate, caller_language, intent, scenario,
+    _log_console_turn(call_id, result, audio, rate, caller_language, intent, scenario,
                       response_text, response_language, started, stt_done, intent_done, audio_done)
 
     return CallAnalysis(
@@ -136,11 +159,10 @@ def analyze_recording(path: Path, telephone: bool = True, language: str | None =
     )
 
 
-def _log_console_turn(result, audio, rate, caller_language, intent, scenario, response_text,
+def _log_console_turn(call_id, result, audio, rate, caller_language, intent, scenario, response_text,
                       response_language, started, stt_done, intent_done, audio_done) -> None:
     """Show console tests in /monitor as one-turn "console" calls."""
     log = get_call_log()
-    call_id = str(uuid.uuid4())
     log.start_call(call_id, "console")
     heard = {
         "detected": result.language,

@@ -1,0 +1,87 @@
+# Alert rules for UniVoice (Prometheus UI: Alerts; Grafana shows them too).
+# No Alertmanager is bundled: to get messages (Telegram, e-mail), add one and
+# point Prometheus at it. Thresholds are starting points; tune them to the line.
+groups:
+  - name: univoice
+    rules:
+      - alert: UniVoiceDown
+        expr: up{job="univoice"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: The UniVoice API does not answer /metrics
+          description: Calls cannot reach the bot. Check the api container and its logs.
+
+      - alert: UniVoiceCallsNotAnswered
+        # Callers keep calling, but no turn got an answer (not even "not understood").
+        expr: |
+          sum(increase(univoice_calls_total{source="phone"}[30m])) >= 3
+          and
+          sum(increase(univoice_answers_total{source="phone"}[30m])) == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: Phone calls arrive but the bot answers none of them
+          description: >-
+            {{ $value }} calls in 30 minutes without a single answer. Check STT
+            (models loaded, GPU), the call audio from Asterisk and the error logs.
+
+      - alert: UniVoiceSlowAnswers
+        # Caller stops talking -> reply ready, including the ~0.7 s end-of-speech wait.
+        expr: |
+          histogram_quantile(0.9,
+            sum by (le) (rate(univoice_stage_seconds_bucket{stage="end_to_end",source="phone"}[10m]))
+          ) > 3.5
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Slow answers: p90 {{ $value | humanizeDuration }} from end of speech to reply"
+          description: >-
+            See the "p90 per stage" panel for the slow stage (STT usually: GPU
+            busy or out of memory, or STT_MAX_CONCURRENCY too low for the load).
+
+      - alert: UniVoiceErrors
+        # Failed turns, prompts and sessions against all answered turns.
+        expr: |
+          sum(increase(univoice_errors_total[15m])) >= 3
+          and
+          sum(increase(univoice_errors_total[15m]))
+            / clamp_min(sum(increase(univoice_answers_total{source="phone"}[15m])) + sum(increase(univoice_errors_total[15m])), 1)
+          > 0.1
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: More than 10% of call steps fail
+          description: Search the JSON logs for level=ERROR; every line carries the call_uuid.
+
+      - alert: UniVoiceHttpErrors
+        expr: |
+          sum(rate(univoice_http_requests_total{status=~"5.."}[10m]))
+            / clamp_min(sum(rate(univoice_http_requests_total[10m])), 1e-9)
+          > 0.05
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: More than 5% of API requests fail with 5xx
+
+      - alert: UniVoiceLlmFallbacks
+        # Maximum mode only: answers fall back to the pre-recorded scenario text.
+        expr: |
+          sum(increase(univoice_llm_answers_total{result="fallback"}[15m])) >= 3
+          and
+          sum(increase(univoice_llm_answers_total{result="fallback"}[15m]))
+            / sum(increase(univoice_llm_answers_total[15m]))
+          > 0.5
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: Most maximum-mode answers fall back to the pre-recorded ones
+          description: Ollama or the live TTS is failing or too slow (LLM_TIMEOUT_SECONDS).
+
+      - alert: UniVoiceGpuMemoryFull
+        expr: max(univoice_gpu_memory_used_bytes / univoice_gpu_memory_total_bytes) > 0.95
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "GPU memory {{ $value | humanizePercentage }} full"
+          description: Whisper may run out of memory; stop navoiy-tts or move the LLM to CPU (LLM_NUM_GPU=0).
