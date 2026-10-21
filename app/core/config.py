@@ -85,7 +85,9 @@ class Settings(BaseSettings):
     tts_prompt_cache_dir: Path = Path("/var/lib/univoice/audio/prompts")
     tts_supported_languages: tuple[str, ...] = ("uz", "ru")
 
-    # Call log behind the /monitor page (SQLite, no extra service).
+    # Call log behind the /monitor page. Empty DATABASE_URL = SQLite at
+    # call_log_path (no extra service); postgresql://user:pass@host/db = PostgreSQL.
+    database_url: str = ""
     call_log_path: Path = Path("data/calls.db")
     call_log_retention_days: int = 30
     # Keep each caller utterance as 8 kHz WAV to replay it in the monitor.

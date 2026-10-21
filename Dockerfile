@@ -13,8 +13,9 @@ RUN mkdir -p /cuda \
 
 FROM python:3.12-slim
 ARG INSTALL_GPU=1
-# Piper voices the Russian phrases that are not pre-rendered yet.
-ARG EXTRAS=tts-ru
+# Piper voices the Russian phrases that are not pre-rendered yet; psycopg
+# lets the call log use PostgreSQL (DATABASE_URL).
+ARG EXTRAS=tts-ru,postgres
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 \
     LD_LIBRARY_PATH=/usr/local/lib/python3.12/site-packages/nvidia/cublas/lib:/usr/local/lib/python3.12/site-packages/nvidia/cudnn/lib:/opt/cuda/lib

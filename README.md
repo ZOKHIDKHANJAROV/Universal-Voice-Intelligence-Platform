@@ -244,10 +244,28 @@ latency) and system events (greeting, barge-in, key presses, transfer,
 header shows the last 24 hours: calls, active now, share of answers that hit
 a scenario, transfers and median answer latency.
 
-The log is SQLite (`CALL_LOG_PATH`, default `data/calls.db`), kept for
-`CALL_LOG_RETENTION_DAYS` (30). `CALL_RECORD_AUDIO=true` also keeps each caller
-utterance as 8 kHz WAV for replay; it is off by default because callers must be
+The log is kept for `CALL_LOG_RETENTION_DAYS` (30). `CALL_RECORD_AUDIO=true`
+also keeps each caller utterance as 8 kHz WAV for replay (in `CALL_AUDIO_DIR`,
+on disk with either database); it is off by default because callers must be
 told when they are recorded.
+
+Where the log lives is set by `DATABASE_URL`:
+
+- **SQLite** (default, `DATABASE_URL` empty): one file, `CALL_LOG_PATH`
+  (`data/calls.db`). Nothing to install or run; right for a single laptop.
+- **PostgreSQL**: for a shared server, backups or reports from other tools.
+
+  1. Start the database: `docker compose --profile postgres up -d postgres`
+     (user, password and database `univoice`; change them with
+     `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` in `.env`).
+  2. API on the host: `pip install -e ".[postgres]"` and set
+     `DATABASE_URL=postgresql://univoice:univoice@localhost:5432/univoice`.
+     API in docker compose: the image already has the driver; use host
+     `postgres` instead of `localhost` and start with `--profile postgres`.
+  3. Restart the API. Tables are created on first use.
+
+  Switching starts an empty log: old calls stay in `data/calls.db` and are
+  not copied. To go back, empty `DATABASE_URL`.
 
 ## Run locally
 
@@ -273,6 +291,12 @@ container. To reuse host downloads on a slow network (`HF_CACHE_DIR`,
 ## Test
 
     pytest
+
+The call-log tests also run against PostgreSQL when `TEST_DATABASE_URL` points
+at a database they may wipe (they are skipped otherwise):
+
+    docker compose --profile postgres up -d postgres
+    TEST_DATABASE_URL=postgresql://univoice:univoice@localhost:5432/univoice pytest tests/test_monitor.py
 
 ## API
 
