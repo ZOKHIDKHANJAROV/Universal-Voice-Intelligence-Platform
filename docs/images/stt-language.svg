@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" role="img" aria-label="Clips routed to the right language model">
+<style>svg{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--grid:#e4e3df;--s0:#2a78d6;--s1:#eb6834;--s2:#1baf7a;}@media (prefers-color-scheme: dark){svg{--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--grid:#3a3936;--s0:#3987e5;--s1:#d95926;--s2:#199e70;}}text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;fill:var(--ink2);font-size:12px}.title{fill:var(--ink);font-size:15px;font-weight:600}.value{fill:var(--ink);font-size:11px}.grid{stroke:var(--grid);stroke-width:1}</style>
+<rect width="720" height="360" fill="var(--bg)" rx="8"/>
+<text class="title" x="16" y="26">Clips routed to the right language model</text>
+<text x="16" y="46">150 FLEURS ru, 100 podcast and 100 FLEURS uz clips, phone channel. Higher is better.</text>
+<rect x="16" y="61" width="10" height="10" rx="2" fill="var(--s0)"/><text x="31" y="70">detector only</text><rect x="132" y="61" width="10" height="10" rx="2" fill="var(--s1)"/><text x="147" y="70">detector + confidence</text>
+<line class="grid" x1="48" x2="704" y1="320.0" y2="320.0"/>
+<text x="42" y="324.0" text-anchor="end">0%</text>
+<line class="grid" x1="48" x2="704" y1="273.2" y2="273.2"/>
+<text x="42" y="277.2" text-anchor="end">20%</text>
+<line class="grid" x1="48" x2="704" y1="226.39999999999998" y2="226.39999999999998"/>
+<text x="42" y="230.39999999999998" text-anchor="end">40%</text>
+<line class="grid" x1="48" x2="704" y1="179.6" y2="179.6"/>
+<text x="42" y="183.6" text-anchor="end">60%</text>
+<line class="grid" x1="48" x2="704" y1="132.79999999999998" y2="132.79999999999998"/>
+<text x="42" y="136.79999999999998" text-anchor="end">80%</text>
+<line class="grid" x1="48" x2="704" y1="86.0" y2="86.0"/>
+<text x="42" y="90.0" text-anchor="end">100%</text>
+<path d="M93.0,320.0 v-103.64 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v103.64 z" fill="var(--s0)"/>
+<text class="value" x="111.0" y="207.36" text-anchor="middle">46</text>
+<path d="M131.0,320.0 v-220.64 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v220.64 z" fill="var(--s1)"/>
+<text class="value" x="149.0" y="90.36000000000001" text-anchor="middle">96</text>
+<text x="130.0" y="340" text-anchor="middle">Uzbek, 2.5 s</text>
+<path d="M257.0,320.0 v-230.0 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v230.0 z" fill="var(--s0)"/>
+<text class="value" x="275.0" y="81.0" text-anchor="middle">100</text>
+<path d="M295.0,320.0 v-225.32 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v225.32 z" fill="var(--s1)"/>
+<text class="value" x="313.0" y="85.68" text-anchor="middle">98</text>
+<text x="294.0" y="340" text-anchor="middle">Russian, 2.5 s</text>
+<path d="M421.0,320.0 v-201.92 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v201.92 z" fill="var(--s0)"/>
+<text class="value" x="439.0" y="109.08000000000001" text-anchor="middle">88</text>
+<path d="M459.0,320.0 v-227.66 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v227.66 z" fill="var(--s1)"/>
+<text class="value" x="477.0" y="83.34" text-anchor="middle">99</text>
+<text x="458.0" y="340" text-anchor="middle">Uzbek, up to 8 s</text>
+<path d="M585.0,320.0 v-230.0 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v230.0 z" fill="var(--s0)"/>
+<text class="value" x="603.0" y="81.0" text-anchor="middle">100</text>
+<path d="M623.0,320.0 v-230.0 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v230.0 z" fill="var(--s1)"/>
+<text class="value" x="641.0" y="81.0" text-anchor="middle">100</text>
+<text x="622.0" y="340" text-anchor="middle">Russian, up to 8 s</text>
+</svg>

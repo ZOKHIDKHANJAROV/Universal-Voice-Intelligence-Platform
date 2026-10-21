@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" role="img" aria-label="Fine-tuning on conversational Uzbek">
+<style>svg{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--grid:#e4e3df;--s0:#2a78d6;--s1:#eb6834;--s2:#1baf7a;}@media (prefers-color-scheme: dark){svg{--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--grid:#3a3936;--s0:#3987e5;--s1:#d95926;--s2:#199e70;}}text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;fill:var(--ink2);font-size:12px}.title{fill:var(--ink);font-size:15px;font-weight:600}.value{fill:var(--ink);font-size:11px}.grid{stroke:var(--grid);stroke-width:1}</style>
+<rect width="720" height="360" fill="var(--bg)" rx="8"/>
+<text class="title" x="16" y="26">Fine-tuning on conversational Uzbek</text>
+<text x="16" y="46">Error rate, lower is better. 8 kHz G.711 phone audio, forced uz, greedy.</text>
+<rect x="16" y="61" width="10" height="10" rx="2" fill="var(--s0)"/><text x="31" y="70">navai-uz (base)</text><rect x="146" y="61" width="10" height="10" rx="2" fill="var(--s1)"/><text x="161" y="70">pilot, 12 h</text><rect x="248" y="61" width="10" height="10" rx="2" fill="var(--s2)"/><text x="263" y="70">full run, ~95 h</text>
+<line class="grid" x1="48" x2="704" y1="320.0" y2="320.0"/>
+<text x="42" y="324.0" text-anchor="end">0%</text>
+<line class="grid" x1="48" x2="704" y1="261.5" y2="261.5"/>
+<text x="42" y="265.5" text-anchor="end">20%</text>
+<line class="grid" x1="48" x2="704" y1="203.0" y2="203.0"/>
+<text x="42" y="207.0" text-anchor="end">40%</text>
+<line class="grid" x1="48" x2="704" y1="144.5" y2="144.5"/>
+<text x="42" y="148.5" text-anchor="end">60%</text>
+<line class="grid" x1="48" x2="704" y1="86.0" y2="86.0"/>
+<text x="42" y="90.0" text-anchor="end">80%</text>
+<path d="M74.0,320.0 v-210.98749999999998 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v210.98749999999998 z" fill="var(--s0)"/>
+<text class="value" x="92.0" y="100.01250000000002" text-anchor="middle">73.5</text>
+<path d="M112.0,320.0 v-138.74 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v138.74 z" fill="var(--s1)"/>
+<text class="value" x="130.0" y="172.26" text-anchor="middle">48.8</text>
+<path d="M150.0,320.0 v-96.91250000000001 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v96.91250000000001 z" fill="var(--s2)"/>
+<text class="value" x="168.0" y="214.08749999999998" text-anchor="middle">34.5</text>
+<text x="130.0" y="340" text-anchor="middle">Podcasts WER</text>
+<path d="M238.0,320.0 v-128.21 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v128.21 z" fill="var(--s0)"/>
+<text class="value" x="256.0" y="182.79" text-anchor="middle">45.2</text>
+<path d="M276.0,320.0 v-63.27499999999999 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v63.27499999999999 z" fill="var(--s1)"/>
+<text class="value" x="294.0" y="247.72500000000002" text-anchor="middle">23</text>
+<path d="M314.0,320.0 v-42.215 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v42.215 z" fill="var(--s2)"/>
+<text class="value" x="332.0" y="268.78499999999997" text-anchor="middle">15.8</text>
+<text x="294.0" y="340" text-anchor="middle">Podcasts CER</text>
+<path d="M402.0,320.0 v-47.1875 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v47.1875 z" fill="var(--s0)"/>
+<text class="value" x="420.0" y="263.8125" text-anchor="middle">17.5</text>
+<path d="M440.0,320.0 v-50.6975 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v50.6975 z" fill="var(--s1)"/>
+<text class="value" x="458.0" y="260.3025" text-anchor="middle">18.7</text>
+<path d="M478.0,320.0 v-46.6025 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v46.6025 z" fill="var(--s2)"/>
+<text class="value" x="496.0" y="264.3975" text-anchor="middle">17.3</text>
+<text x="458.0" y="340" text-anchor="middle">FLEURS WER</text>
+<path d="M566.0,320.0 v-14.719999999999999 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v14.719999999999999 z" fill="var(--s0)"/>
+<text class="value" x="584.0" y="296.28" text-anchor="middle">6.4</text>
+<path d="M604.0,320.0 v-14.427499999999998 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v14.427499999999998 z" fill="var(--s1)"/>
+<text class="value" x="622.0" y="296.5725" text-anchor="middle">6.3</text>
+<path d="M642.0,320.0 v-10.625 a4.0,4.0 0 0 1 4.0,-4.0 h28.0 a4.0,4.0 0 0 1 4.0,4.0 v10.625 z" fill="var(--s2)"/>
+<text class="value" x="660.0" y="300.375" text-anchor="middle">5</text>
+<text x="622.0" y="340" text-anchor="middle">FLEURS CER</text>
+</svg>
