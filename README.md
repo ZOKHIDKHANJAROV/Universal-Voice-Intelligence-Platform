@@ -244,10 +244,112 @@ latency) and system events (greeting, barge-in, key presses, transfer,
 header shows the last 24 hours: calls, active now, share of answers that hit
 a scenario, transfers and median answer latency.
 
-The log is SQLite (`CALL_LOG_PATH`, default `data/calls.db`), kept for
-`CALL_LOG_RETENTION_DAYS` (30). `CALL_RECORD_AUDIO=true` also keeps each caller
-utterance as 8 kHz WAV for replay; it is off by default because callers must be
+The log is kept for `CALL_LOG_RETENTION_DAYS` (30). `CALL_RECORD_AUDIO=true`
+also keeps each caller utterance as 8 kHz WAV for replay (in `CALL_AUDIO_DIR`,
+on disk with either database); it is off by default because callers must be
 told when they are recorded.
+
+Where the log lives is set by `DATABASE_URL`:
+
+- **SQLite** (default, `DATABASE_URL` empty): one file, `CALL_LOG_PATH`
+  (`data/calls.db`). Nothing to install or run; right for a single laptop.
+- **PostgreSQL**: for a shared server, backups or reports from other tools.
+
+  1. Start the database: `docker compose --profile postgres up -d postgres`
+     (user, password and database `univoice`; change them with
+     `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` in `.env`).
+  2. API on the host: `pip install -e ".[postgres]"` and set
+     `DATABASE_URL=postgresql://univoice:univoice@localhost:5432/univoice`.
+     API in docker compose: the image already has the driver; use host
+     `postgres` instead of `localhost` and start with `--profile postgres`.
+  3. Restart the API. Tables are created on first use.
+
+  Switching starts an empty log: old calls stay in `data/calls.db` and are
+  not copied. To go back, empty `DATABASE_URL`.
+
+## Observability
+
+`/health` says the API is up; the call monitor (above) shows individual calls.
+For production there are Prometheus metrics, JSON logs and an optional
+Prometheus + Grafana stack.
+
+### Metrics: `GET /metrics`
+
+Prometheus text format. With `API_KEY` set, send it as `X-API-Key` or
+`Authorization: Bearer <key>`. Phone calls are labelled `source="phone"`, web
+console tests `source="console"`.
+
+| Metric | What it counts |
+|---|---|
+| `univoice_active_calls` | phone calls connected to the bot now |
+| `univoice_calls_total{source}` | calls started (a caller back from a failed transfer is not a new call) |
+| `univoice_call_ends_total{reason}` | bot sessions ended: `caller_hangup`, `transferred`, `done`, `silence`, `time_limit`, `error` |
+| `univoice_stage_seconds{stage,source}` | histogram per caller turn: `vad` (last voiced frame -> utterance to STT, the end-of-speech wait), `stt`, `intent`, `rag` and `llm` (maximum mode), `tts` (reply audio ready), `end_to_end` (caller stops talking -> reply ready) |
+| `univoice_answers_total{source,outcome}` | turns answered: `scenario` hit, `not_recognized`, `llm` (maximum mode) |
+| `univoice_scenario_hits_total{scenario}` | answers per scenario |
+| `univoice_unheard_utterances_total{source}` | utterances STT turned into no text |
+| `univoice_operator_transfers_total{trigger}` | hand-overs: `dtmf` (pressed 0) or `intent` (asked for an operator) |
+| `univoice_operator_unavailable_total` | transfers no operator answered |
+| `univoice_llm_answers_total{source,result}` | maximum mode: `ok`, or `fallback` to the pre-recorded answer |
+| `univoice_stt_language_total{source,language}` | language each utterance was transcribed as |
+| `univoice_stt_route_total{route,language}` | with `STT_MODEL_UZ`: `forced`, `detector`, `specialist` (Uzbek fine-tune sure), `compared`, `no_speech` |
+| `univoice_errors_total{stage}` | failures: `session`, `utterance`, `prompt`, `keepalive` |
+| `univoice_http_requests_total{method,route,status}`, `univoice_http_request_seconds` | API requests by route template |
+| `univoice_gpu_memory_used_bytes`, `univoice_gpu_memory_total_bytes` | per GPU, from NVML (`nvidia-ml-py`, in the `gpu` extra); absent without an NVIDIA GPU |
+
+Process metrics (`process_*`, `python_*`) come with the Prometheus client.
+
+To check it: start the API, send a recording from the console
+(<http://localhost:8000/>), then
+
+    curl -s localhost:8000/metrics | grep -E '^univoice_(calls|answers|stage_seconds_(sum|count))'
+
+### Logs
+
+One JSON object per line on stdout (`LOG_FORMAT=json`, the default;
+`LOG_FORMAT=text` for reading in a terminal). Every line written while a call
+is handled carries `call_uuid`: the Asterisk call UUID, the same key as in
+`/monitor`, including lines from STT worker threads and faster-whisper itself.
+Lines before Asterisk sends the UUID, and per-connection details, have
+`call_id` (our id for the AudioSocket connection). Console tests use one id for
+both. uvicorn's access and error lines go through the same handler.
+
+    {"ts": "2026-10-21T04:08:07.098+00:00", "level": "INFO", "logger": "univoice.realtime", "message": "STT call_id=... text='...' lang=uz confidence=0.833", "call_uuid": "61383f58-466a-4d28-930d-4a861de88e3a", "call_id": "2c596ffb-..."}
+
+To follow one call: `docker compose logs api | grep <call_uuid>`.
+
+### Prometheus and Grafana (optional)
+
+    docker compose --profile monitoring up -d
+
+- Prometheus <http://localhost:9090> scrapes `/metrics` every 15 s, keeps 30
+  days and evaluates the alert rules in
+  [infrastructure/monitoring/alerts.yml](infrastructure/monitoring/alerts.yml).
+- Grafana <http://localhost:3000> (`admin` / `GRAFANA_ADMIN_PASSWORD`, default
+  `admin`) opens on the provisioned "UniVoice AI" dashboard: active calls,
+  calls and answers per hour, scenario hit rate, top scenarios, transfers, LLM
+  fallbacks, latency per stage (p50/p90/p99), STT languages and routing,
+  errors, HTTP 5xx and GPU memory. Edit
+  [the dashboard JSON](infrastructure/monitoring/grafana/dashboards/univoice.json)
+  in git; UI changes are not saved.
+- Prometheus sends `API_KEY` from `.env` as a Bearer token. When the API runs
+  on the host (`scripts/start-local.ps1`) set
+  `METRICS_TARGET=host.docker.internal:8000`.
+
+Alert rules (thresholds are starting points):
+
+| Alert | Fires when |
+|---|---|
+| `UniVoiceDown` | `/metrics` unreachable for 2 min |
+| `UniVoiceCallsNotAnswered` | 3+ phone calls in 30 min and not one answered turn |
+| `UniVoiceSlowAnswers` | p90 end-to-end (end of speech -> reply) above 3.5 s for 10 min |
+| `UniVoiceErrors` | over 10% of call steps fail (15 min) |
+| `UniVoiceHttpErrors` | over 5% of API requests return 5xx (10 min) |
+| `UniVoiceLlmFallbacks` | most maximum-mode answers fall back to pre-recorded ones |
+| `UniVoiceGpuMemoryFull` | GPU memory above 95% for 10 min |
+
+No Alertmanager is bundled: alerts show in Prometheus and Grafana. To get
+Telegram or e-mail messages, add an Alertmanager and point Prometheus at it.
 
 ## Run locally
 
@@ -274,11 +376,18 @@ container. To reuse host downloads on a slow network (`HF_CACHE_DIR`,
 
     pytest
 
+The call-log tests also run against PostgreSQL when `TEST_DATABASE_URL` points
+at a database they may wipe (they are skipped otherwise):
+
+    docker compose --profile postgres up -d postgres
+    TEST_DATABASE_URL=postgresql://univoice:univoice@localhost:5432/univoice pytest tests/test_monitor.py
+
 ## API
 
 Set `API_KEY` to require an `X-API-Key` header on all `/api/v1` routes.
 
 - GET /health
+- GET /metrics (Prometheus; see [Observability](#observability))
 - GET /api/v1/scenarios
 - GET /api/v1/scenarios/{scenario_id}
 - POST /api/v1/scenarios/resolve

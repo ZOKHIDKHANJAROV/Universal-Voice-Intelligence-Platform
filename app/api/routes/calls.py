@@ -3,6 +3,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 
+from app.core import metrics
 from app.realtime import call_actions
 
 # Called by the Asterisk dialplan (CURL) right after the bot ends its
@@ -29,4 +30,5 @@ def operator_unavailable(call_uuid: str) -> str:
     """No operator answered; the dialplan is sending the caller back to the bot."""
     _check(call_uuid)
     call_actions.mark_operator_unavailable(call_uuid)
+    metrics.OPERATOR_UNAVAILABLE.inc()
     return "ok"

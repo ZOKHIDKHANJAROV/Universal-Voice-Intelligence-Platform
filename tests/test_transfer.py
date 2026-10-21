@@ -18,6 +18,7 @@ from app.realtime.audio_socket import (
     AudioSocketSession,
 )
 from app.speech.models import TranscriptionResult
+from conftest import metric
 
 client = TestClient(app)
 
@@ -83,7 +84,9 @@ async def _call(messages: list[bytes], call: uuid.UUID | None = None) -> tuple[_
 
 
 def test_pressing_zero_hands_the_call_to_an_operator() -> None:
+    before = metric("univoice_operator_transfers_total", trigger="dtmf")
     writer, call = asyncio.run(_call([_message(b"0", DTMF_TYPE)]))
+    assert metric("univoice_operator_transfers_total", trigger="dtmf") == before + 1
     # Prompt audio frames, then a hangup message that ends AudioSocket().
     assert writer.messages()[-1] == (HANGUP_TYPE, 0)
     assert call_actions.take(call) == "operator"
@@ -109,7 +112,9 @@ def test_asking_for_an_operator_transfers(monkeypatch) -> None:
         await server._process_utterance(session, b"\x00" * FRAME_BYTES * 30)
         return session
 
+    before = metric("univoice_operator_transfers_total", trigger="intent")
     session = asyncio.run(utterance())
+    assert metric("univoice_operator_transfers_total", trigger="intent") == before + 1
     assert session.transferring
     assert writer.messages()[-1] == (HANGUP_TYPE, 0)
     assert call_actions.take(call) == "operator"
@@ -120,8 +125,10 @@ def test_failed_transfer_returns_the_caller_to_the_bot() -> None:
     call_actions.request(call, call_actions.OPERATOR, "ru")
     assert client.get(f"/internal/calls/{call}/next").text == "operator"
     # The dialplan reports that nobody answered and reconnects the caller.
+    before = metric("univoice_operator_unavailable_total")
     assert client.get(f"/internal/calls/{call}/operator-unavailable").text == "ok"
     assert call_actions.take_operator_unavailable(call) == (True, "ru")
+    assert metric("univoice_operator_unavailable_total") == before + 1
     # Only once: a later reconnect greets normally again.
     assert call_actions.take_operator_unavailable(call) == (False, None)
 

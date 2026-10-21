@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 
 from app.audio.resample import resample
+from app.core.metrics import STT_ROUTE
 from app.speech.base import SpeechToText
 from app.speech.models import TranscriptionResult
 from app.speech.providers.whisper import WHISPER_SAMPLE_RATE, FasterWhisperSpeechToText
@@ -63,6 +64,7 @@ class LanguageRoutedSpeechToText(SpeechToText):
     ) -> TranscriptionResult:
         audio16 = resample(audio, sample_rate, WHISPER_SAMPLE_RATE)
         if language is not None:
+            STT_ROUTE.labels("forced", language).inc()
             return self._model_for(language).transcribe_pcm16(
                 audio16, WHISPER_SAMPLE_RATE, language=language
             )
@@ -73,6 +75,7 @@ class LanguageRoutedSpeechToText(SpeechToText):
             result = self._model_for(language).transcribe_pcm16(
                 audio16, WHISPER_SAMPLE_RATE, language=language
             )
+            STT_ROUTE.labels("detector", language).inc()
             return result.model_copy(update={"language_probability": probability})
 
         # Specialists first: a confident one saves decoding with the large model.
@@ -104,7 +107,10 @@ class LanguageRoutedSpeechToText(SpeechToText):
         if not heard:
             # Nothing believable: report the detector's pick with no text.
             fallback = next((r for r in results if r.language == language), results[0])
+            STT_ROUTE.labels("no_speech", fallback.language).inc()
             return fallback.model_copy(update={"text": "", "language_probability": probability})
         best = max(heard, key=lambda r: r.avg_logprob)
+        # Fewer results than candidates: a specialist was sure enough to stop early.
+        STT_ROUTE.labels("specialist" if len(results) < len(order) else "compared", best.language).inc()
         # Report how sure the decision is rather than the detector's weak guess.
         return best.model_copy(update={"language_probability": float(np.exp(best.avg_logprob))})
