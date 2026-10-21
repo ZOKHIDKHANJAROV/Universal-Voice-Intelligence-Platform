@@ -30,6 +30,10 @@ gpu = [
 tts-ru = [
     "piper-tts>=1.2",
 ]
+# Call log in PostgreSQL (DATABASE_URL=postgresql://...).
+postgres = [
+    "psycopg[binary]>=3.2,<4",
+]
 # Only for scripts/convert_whisper.py (CPU torch is enough).
 convert = [
     "torch>=2.3",

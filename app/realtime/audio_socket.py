@@ -198,7 +198,11 @@ class AudioSocketServer:
                     )
                     log = get_call_log()
                     log.start_call(call_uuid, "phone")
-                    summary = log.summary(call_uuid)
+                    try:
+                        summary = log.summary(call_uuid)
+                    except Exception:  # the call log's database is down
+                        LOGGER.exception("Could not read call %s from the call log", call_uuid)
+                        summary = None
                     if summary:
                         session.started_at = summary["started_at"]
                     if returned:
