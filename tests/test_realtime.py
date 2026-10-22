@@ -272,3 +272,36 @@ def test_missing_audio_counts_as_silence() -> None:
     kind, payload = asyncio.run(read())
     assert kind == AUDIO_TYPE
     assert payload == SILENCE * 10  # 200 ms
+
+
+def test_socket_reset_at_hangup_is_not_an_error(caplog) -> None:
+    """On Windows the caller's reset surfaces from wait_closed(); the call still ends cleanly."""
+
+    class _ResetWriter:
+        def get_extra_info(self, name):
+            return ("127.0.0.1", 0)
+
+        def write(self, data: bytes) -> None:
+            pass
+
+        async def drain(self) -> None:
+            pass
+
+        def is_closing(self) -> bool:
+            return True
+
+        def close(self) -> None:
+            pass
+
+        async def wait_closed(self) -> None:
+            raise ConnectionResetError(10054, "connection reset by peer")
+
+    async def scenario() -> None:
+        reader = asyncio.StreamReader()
+        reader.feed_eof()
+        server = AudioSocketServer()
+        await server._handle_client(reader, _ResetWriter())
+        assert server._sessions == {}
+
+    asyncio.run(scenario())
+    assert not [r for r in caplog.records if r.levelname == "ERROR"]

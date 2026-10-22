@@ -158,7 +158,10 @@ class AudioSocketServer:
                     session.asterisk_uuid, TRANSFERRED if session.transferring else ENDED
                 )
             writer.close()
-            await writer.wait_closed()
+            try:
+                await writer.wait_closed()
+            except ConnectionError:  # the caller's side already reset the socket
+                pass
 
     async def _keepalive(self, session: AudioSocketSession) -> None:
         try:
