@@ -295,7 +295,7 @@ console tests `source="console"`.
 | `univoice_stt_route_total{route,language}` | with `STT_MODEL_UZ`: `forced`, `detector`, `specialist` (Uzbek fine-tune sure), `compared`, `no_speech` |
 | `univoice_errors_total{stage}` | failures: `session`, `utterance`, `prompt`, `keepalive` |
 | `univoice_http_requests_total{method,route,status}`, `univoice_http_request_seconds` | API requests by route template |
-| `univoice_gpu_memory_used_bytes`, `univoice_gpu_memory_total_bytes` | per GPU, from NVML (`nvidia-ml-py`, in the `gpu` extra); absent without an NVIDIA GPU |
+| `univoice_gpu_memory_used_bytes`, `univoice_gpu_memory_total_bytes` | per GPU, from NVML (`nvidia-ml-py`); absent without an NVIDIA GPU |
 
 Process metrics (`process_*`, `python_*`) come with the Prometheus client.
 
