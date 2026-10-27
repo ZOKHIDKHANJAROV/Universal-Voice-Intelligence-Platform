@@ -21,14 +21,14 @@ data class ModelSpec(
 
 object Models {
     // ZOKHID/univoice-stt-uz converted with scripts/convert_whisper_ggml.py and
-    // quantized to q5_0 (~0.5 GB). Publish it, or import the file on the phone.
+    // quantized to q5_0 (whisper.cpp v1.9.5).
     val UZ = ModelSpec(
         language = "uz",
         title = "Oʻzbekcha (univoice-stt-uz, medium q5_0)",
         fileName = "ggml-univoice-stt-uz-q5_0.bin",
         defaultUrl = "https://huggingface.co/ZOKHID/univoice-stt-uz-ggml/resolve/main/ggml-univoice-stt-uz-q5_0.bin",
-        sizeBytes = null,
-        sha256 = null,
+        sizeBytes = 539_212_484,
+        sha256 = "3c5b9639dac43845c6d71f49115e16caeb0009064b68418a55ecddc094c4445d",
     )
 
     // The Uzbek fine-tune has forgotten Russian, so Russian gets its own model.

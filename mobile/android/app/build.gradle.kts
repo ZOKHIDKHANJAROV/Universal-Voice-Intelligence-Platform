@@ -27,6 +27,9 @@ android {
         ndk {
             // The Uzbek model needs a 64-bit phone with ~1.5 GB of free RAM.
             abiFilters += "arm64-v8a"
+            // ./gradlew assembleDebug -Pemulator: also x86_64, because the
+            // emulator's ARM translation crashes inside ggml (SIGILL).
+            if (hasProperty("emulator")) abiFilters += "x86_64"
         }
         if (withWhisper) {
             externalNativeBuild {
