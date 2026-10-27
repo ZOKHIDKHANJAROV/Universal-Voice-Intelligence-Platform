@@ -1,0 +1,5338 @@
+[
+ {
+  "text": "Suv chiqmayapti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv chiqmayapti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv chiqmayapti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv chiqmayapti",
+  "normalized": "suv chiqmayapti",
+  "latin": "suv chiqmayapti"
+ },
+ {
+  "text": "Operator bilan gaplashmoqchiman",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Operator bilan gaplashmoqchiman",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Operator bilan gaplashmoqchiman",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Operator bilan gaplashmoqchiman",
+  "normalized": "operator bilan gaplashmoqchiman",
+  "latin": "operator bilan gaplashmoqchiman"
+ },
+ {
+  "text": "Iltimos, operatorga ulang",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Iltimos, operatorga ulang",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Iltimos, operatorga ulang",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Iltimos, operatorga ulang",
+  "normalized": "iltimos operatorga ulang",
+  "latin": "iltimos operatorga ulang"
+ },
+ {
+  "text": "Jonli odam bilan gaplashsam bo'ladimi",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.85
+ },
+ {
+  "text": "Jonli odam bilan gaplashsam bo'ladimi",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.85
+ },
+ {
+  "text": "Jonli odam bilan gaplashsam bo'ladimi",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.85
+ },
+ {
+  "text": "Jonli odam bilan gaplashsam bo'ladimi",
+  "normalized": "jonli odam bilan gaplashsam bo'ladimi",
+  "latin": "jonli odam bilan gaplashsam bo'ladimi"
+ },
+ {
+  "text": "Соедините с оператором",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Соедините с оператором",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Соедините с оператором",
+  "language": null,
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Соедините с оператором",
+  "normalized": "соедините с оператором",
+  "latin": "soedinite s operatorom"
+ },
+ {
+  "text": "Хочу поговорить с живым человеком",
+  "language": "uz",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.8
+ },
+ {
+  "text": "Хочу поговорить с живым человеком",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.8
+ },
+ {
+  "text": "Хочу поговорить с живым человеком",
+  "language": null,
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.8
+ },
+ {
+  "text": "Хочу поговорить с живым человеком",
+  "normalized": "хочу поговорить с живым человеком",
+  "latin": "xochu pogovorit s jivim chelovekom"
+ },
+ {
+  "text": "Apparatdan suv chiqmayapti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparatdan suv chiqmayapti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparatdan suv chiqmayapti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparatdan suv chiqmayapti",
+  "normalized": "apparatdan suv chiqmayapti",
+  "latin": "apparatdan suv chiqmayapti"
+ },
+ {
+  "text": "Tugmani bosdim, suv chiqmadi",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Tugmani bosdim, suv chiqmadi",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Tugmani bosdim, suv chiqmadi",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Tugmani bosdim, suv chiqmadi",
+  "normalized": "tugmani bosdim suv chiqmadi",
+  "latin": "tugmani bosdim suv chiqmadi"
+ },
+ {
+  "text": "suv chiqmavotti aka",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv chiqmavotti aka",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv chiqmavotti aka",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv chiqmavotti aka",
+  "normalized": "suv chiqmavotti aka",
+  "latin": "suv chiqmavotti aka"
+ },
+ {
+  "text": "Apparat suv bermayapti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparat suv bermayapti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparat suv bermayapti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparat suv bermayapti",
+  "normalized": "apparat suv bermayapti",
+  "latin": "apparat suv bermayapti"
+ },
+ {
+  "text": "Suv kelmayapti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv kelmayapti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv kelmayapti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv kelmayapti",
+  "normalized": "suv kelmayapti",
+  "latin": "suv kelmayapti"
+ },
+ {
+  "text": "Suv to'xtab qoldi",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv to'xtab qoldi",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv to'xtab qoldi",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv to'xtab qoldi",
+  "normalized": "suv to'xtab qoldi",
+  "latin": "suv to'xtab qoldi"
+ },
+ {
+  "text": "Apparat ishlamayapti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat ishlamayapti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat ishlamayapti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat ishlamayapti",
+  "normalized": "apparat ishlamayapti",
+  "latin": "apparat ishlamayapti"
+ },
+ {
+  "text": "Сув чиқмаяпти",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Сув чиқмаяпти",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Сув чиқмаяпти",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Сув чиқмаяпти",
+  "normalized": "сув чиқмаяпти",
+  "latin": "suv chiqmayapti"
+ },
+ {
+  "text": "Вода не идет",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Вода не идет",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Вода не идет",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Вода не идет",
+  "normalized": "вода не идет",
+  "latin": "voda ne idet"
+ },
+ {
+  "text": "Автомат не наливает воду",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Автомат не наливает воду",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Автомат не наливает воду",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Автомат не наливает воду",
+  "normalized": "автомат не наливает воду",
+  "latin": "avtomat ne nalivaet vodu"
+ },
+ {
+  "text": "Нажал кнопку, вода не льется",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Нажал кнопку, вода не льется",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Нажал кнопку, вода не льется",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Нажал кнопку, вода не льется",
+  "normalized": "нажал кнопку вода не льется",
+  "latin": "najal knopku voda ne letsya"
+ },
+ {
+  "text": "Аппарат не работает",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Аппарат не работает",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Аппарат не работает",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Аппарат не работает",
+  "normalized": "аппарат не работает",
+  "latin": "apparat ne rabotaet"
+ },
+ {
+  "text": "Воды нет, ничего не льётся",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 1.0
+ },
+ {
+  "text": "Воды нет, ничего не льётся",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 1.0
+ },
+ {
+  "text": "Воды нет, ничего не льётся",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 1.0
+ },
+ {
+  "text": "Воды нет, ничего не льётся",
+  "normalized": "воды нет ничего не льется",
+  "latin": "vodi net nichego ne letsya"
+ },
+ {
+  "text": "Аппарат не дает воду",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Аппарат не дает воду",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Аппарат не дает воду",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Аппарат не дает воду",
+  "normalized": "аппарат не дает воду",
+  "latin": "apparat ne daet vodu"
+ },
+ {
+  "text": "Pulimni yeb qo'ydi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni yeb qo'ydi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni yeb qo'ydi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni yeb qo'ydi",
+  "normalized": "pulimni yeb qo'ydi",
+  "latin": "pulimni yeb qo'ydi"
+ },
+ {
+  "text": "Pulimni yeb qoʻydi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni yeb qoʻydi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni yeb qoʻydi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni yeb qoʻydi",
+  "normalized": "pulimni yeb qo'ydi",
+  "latin": "pulimni yeb qo'ydi"
+ },
+ {
+  "text": "Qaytimni bermadi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Qaytimni bermadi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Qaytimni bermadi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Qaytimni bermadi",
+  "normalized": "qaytimni bermadi",
+  "latin": "qaytimni bermadi"
+ },
+ {
+  "text": "Kartadan pul yechildi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Kartadan pul yechildi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Kartadan pul yechildi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Kartadan pul yechildi",
+  "normalized": "kartadan pul yechildi",
+  "latin": "kartadan pul yechildi"
+ },
+ {
+  "text": "Click bilan to'lov o'tmadi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Click bilan to'lov o'tmadi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Click bilan to'lov o'tmadi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Click bilan to'lov o'tmadi",
+  "normalized": "click bilan to'lov o'tmadi",
+  "latin": "click bilan to'lov o'tmadi"
+ },
+ {
+  "text": "Pulimni qaytarib bering",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni qaytarib bering",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni qaytarib bering",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni qaytarib bering",
+  "normalized": "pulimni qaytarib bering",
+  "latin": "pulimni qaytarib bering"
+ },
+ {
+  "text": "Pulimni qaytarib bermadi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni qaytarib bermadi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni qaytarib bermadi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Pulimni qaytarib bermadi",
+  "normalized": "pulimni qaytarib bermadi",
+  "latin": "pulimni qaytarib bermadi"
+ },
+ {
+  "text": "Пулимни еб қўйди",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Пулимни еб қўйди",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Пулимни еб қўйди",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Пулимни еб қўйди",
+  "normalized": "пулимни еб қўйди",
+  "latin": "pulimni yeb qo'ydi"
+ },
+ {
+  "text": "pulimni yeb qoydi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qoydi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qoydi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qoydi",
+  "normalized": "pulimni yeb qoydi",
+  "latin": "pulimni yeb qoydi"
+ },
+ {
+  "text": "Suv toxtab qoldi",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv toxtab qoldi",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv toxtab qoldi",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv toxtab qoldi",
+  "normalized": "suv toxtab qoldi",
+  "latin": "suv toxtab qoldi"
+ },
+ {
+  "text": "Автомат съел мои деньги",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Автомат съел мои деньги",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Автомат съел мои деньги",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Автомат съел мои деньги",
+  "normalized": "автомат съел мои деньги",
+  "latin": "avtomat s'el moi dengi"
+ },
+ {
+  "text": "Не вернул сдачу",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Не вернул сдачу",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Не вернул сдачу",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Не вернул сдачу",
+  "normalized": "не вернул сдачу",
+  "latin": "ne vernul sdachu"
+ },
+ {
+  "text": "Списались деньги с карты",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Списались деньги с карты",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Списались деньги с карты",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Списались деньги с карты",
+  "normalized": "списались деньги с карты",
+  "latin": "spisalis dengi s karti"
+ },
+ {
+  "text": "Оплата через Клик не прошла",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Оплата через Клик не прошла",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Оплата через Клик не прошла",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Оплата через Клик не прошла",
+  "normalized": "оплата через клик не прошла",
+  "latin": "oplata cherez klik ne proshla"
+ },
+ {
+  "text": "Верните мои деньги",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Верните мои деньги",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Верните мои деньги",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Верните мои деньги",
+  "normalized": "верните мои деньги",
+  "latin": "vernite moi dengi"
+ },
+ {
+  "text": "Apparatdan suv oqib yotibdi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparatdan suv oqib yotibdi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparatdan suv oqib yotibdi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparatdan suv oqib yotibdi",
+  "normalized": "apparatdan suv oqib yotibdi",
+  "latin": "apparatdan suv oqib yotibdi"
+ },
+ {
+  "text": "Atrofda suv toshib ketdi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Atrofda suv toshib ketdi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Atrofda suv toshib ketdi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Atrofda suv toshib ketdi",
+  "normalized": "atrofda suv toshib ketdi",
+  "latin": "atrofda suv toshib ketdi"
+ },
+ {
+  "text": "Truba yorildi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Truba yorildi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Truba yorildi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Truba yorildi",
+  "normalized": "truba yorildi",
+  "latin": "truba yorildi"
+ },
+ {
+  "text": "Pastda ko'lmak bo'lib qoldi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Pastda ko'lmak bo'lib qoldi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Pastda ko'lmak bo'lib qoldi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "Pastda ko'lmak bo'lib qoldi",
+  "normalized": "pastda ko'lmak bo'lib qoldi",
+  "latin": "pastda ko'lmak bo'lib qoldi"
+ },
+ {
+  "text": "Apparat tagidan suv sizib chiqyapti",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparat tagidan suv sizib chiqyapti",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparat tagidan suv sizib chiqyapti",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Apparat tagidan suv sizib chiqyapti",
+  "normalized": "apparat tagidan suv sizib chiqyapti",
+  "latin": "apparat tagidan suv sizib chiqyapti"
+ },
+ {
+  "text": "Из автомата течет вода",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Из автомата течет вода",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Из автомата течет вода",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Из автомата течет вода",
+  "normalized": "из автомата течет вода",
+  "latin": "iz avtomata techet voda"
+ },
+ {
+  "text": "Под аппаратом лужа",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Под аппаратом лужа",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Под аппаратом лужа",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Под аппаратом лужа",
+  "normalized": "под аппаратом лужа",
+  "latin": "pod apparatom luja"
+ },
+ {
+  "text": "Трубу прорвало",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Трубу прорвало",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Трубу прорвало",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Трубу прорвало",
+  "normalized": "трубу прорвало",
+  "latin": "trubu prorvalo"
+ },
+ {
+  "text": "Аппарат сломался, всё течёт",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Аппарат сломался, всё течёт",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Аппарат сломался, всё течёт",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Аппарат сломался, всё течёт",
+  "normalized": "аппарат сломался все течет",
+  "latin": "apparat slomalsya vse techet"
+ },
+ {
+  "text": "Из шланга капает вода",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Из шланга капает вода",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Из шланга капает вода",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Из шланга капает вода",
+  "normalized": "из шланга капает вода",
+  "latin": "iz shlanga kapaet voda"
+ },
+ {
+  "text": "Suvning ta'mi yomon",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Suvning ta'mi yomon",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Suvning ta'mi yomon",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Suvning ta'mi yomon",
+  "normalized": "suvning ta'mi yomon",
+  "latin": "suvning ta'mi yomon"
+ },
+ {
+  "text": "Suvning ta’mi yomon",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Suvning ta’mi yomon",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Suvning ta’mi yomon",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "Suvning ta’mi yomon",
+  "normalized": "suvning ta'mi yomon",
+  "latin": "suvning ta'mi yomon"
+ },
+ {
+  "text": "Suvdan sassiq hid kelyapti",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.85
+ },
+ {
+  "text": "Suvdan sassiq hid kelyapti",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.85
+ },
+ {
+  "text": "Suvdan sassiq hid kelyapti",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.85
+ },
+ {
+  "text": "Suvdan sassiq hid kelyapti",
+  "normalized": "suvdan sassiq hid kelyapti",
+  "latin": "suvdan sassiq hid kelyapti"
+ },
+ {
+  "text": "Suv loyqa",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv loyqa",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv loyqa",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv loyqa",
+  "normalized": "suv loyqa",
+  "latin": "suv loyqa"
+ },
+ {
+  "text": "Suv iflos",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv iflos",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv iflos",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv iflos",
+  "normalized": "suv iflos",
+  "latin": "suv iflos"
+ },
+ {
+  "text": "Suv achchiq",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv achchiq",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv achchiq",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv achchiq",
+  "normalized": "suv achchiq",
+  "latin": "suv achchiq"
+ },
+ {
+  "text": "Suvning rangi o'zgargan",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suvning rangi o'zgargan",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suvning rangi o'zgargan",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suvning rangi o'zgargan",
+  "normalized": "suvning rangi o'zgargan",
+  "latin": "suvning rangi o'zgargan"
+ },
+ {
+  "text": "Вода горькая и мутная",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Вода горькая и мутная",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Вода горькая и мутная",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Вода горькая и мутная",
+  "normalized": "вода горькая и мутная",
+  "latin": "voda gorkaya i mutnaya"
+ },
+ {
+  "text": "Вода воняет",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Вода воняет",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Вода воняет",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "Вода воняет",
+  "normalized": "вода воняет",
+  "latin": "voda vonyaet"
+ },
+ {
+  "text": "Вода грязная",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Вода грязная",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Вода грязная",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "Вода грязная",
+  "normalized": "вода грязная",
+  "latin": "voda gryaznaya"
+ },
+ {
+  "text": "У воды странный вкус",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "У воды странный вкус",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "У воды странный вкус",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "У воды странный вкус",
+  "normalized": "у воды странный вкус",
+  "latin": "u vodi stranniy vkus"
+ },
+ {
+  "text": "Неприятный запах у воды",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Неприятный запах у воды",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Неприятный запах у воды",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "Неприятный запах у воды",
+  "normalized": "неприятный запах у воды",
+  "latin": "nepriyatniy zapax u vodi"
+ },
+ {
+  "text": "Suv chiqmayotti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv chiqmayotti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv chiqmayotti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Suv chiqmayotti",
+  "normalized": "suv chiqmayotti",
+  "latin": "suv chiqmayotti"
+ },
+ {
+  "text": "Apparat ishlamadi",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat ishlamadi",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat ishlamadi",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat ishlamadi",
+  "normalized": "apparat ishlamadi",
+  "latin": "apparat ishlamadi"
+ },
+ {
+  "text": "Assalomu alaykum, men suv apparati haqida qo'ng'iroq qilyapman",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Assalomu alaykum, men suv apparati haqida qo'ng'iroq qilyapman",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Assalomu alaykum, men suv apparati haqida qo'ng'iroq qilyapman",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Assalomu alaykum, men suv apparati haqida qo'ng'iroq qilyapman",
+  "normalized": "assalomu alaykum men suv apparati haqida qo'ng'iroq qilyapman",
+  "latin": "assalomu alaykum men suv apparati haqida qo'ng'iroq qilyapman"
+ },
+ {
+  "text": "Salom, yaxshimisiz",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Salom, yaxshimisiz",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Salom, yaxshimisiz",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Salom, yaxshimisiz",
+  "normalized": "salom yaxshimisiz",
+  "latin": "salom yaxshimisiz"
+ },
+ {
+  "text": "Loyihamiz haqida gaplashamiz",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Loyihamiz haqida gaplashamiz",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Loyihamiz haqida gaplashamiz",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Loyihamiz haqida gaplashamiz",
+  "normalized": "loyihamiz haqida gaplashamiz",
+  "latin": "loyihamiz haqida gaplashamiz"
+ },
+ {
+  "text": "Kitobni o'qib chiqdim",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Kitobni o'qib chiqdim",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Kitobni o'qib chiqdim",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Kitobni o'qib chiqdim",
+  "normalized": "kitobni o'qib chiqdim",
+  "latin": "kitobni o'qib chiqdim"
+ },
+ {
+  "text": "Pul topish oson emas",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Pul topish oson emas",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Pul topish oson emas",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Pul topish oson emas",
+  "normalized": "pul topish oson emas",
+  "latin": "pul topish oson emas"
+ },
+ {
+  "text": "Bugun ob-havo yomon",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Bugun ob-havo yomon",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Bugun ob-havo yomon",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Bugun ob-havo yomon",
+  "normalized": "bugun ob havo yomon",
+  "latin": "bugun ob havo yomon"
+ },
+ {
+  "text": "Hidoyat yo'liga qayting",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Hidoyat yo'liga qayting",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Hidoyat yo'liga qayting",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Hidoyat yo'liga qayting",
+  "normalized": "hidoyat yo'liga qayting",
+  "latin": "hidoyat yo'liga qayting"
+ },
+ {
+  "text": "Suv ichish foydali",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Suv ichish foydali",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Suv ichish foydali",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Suv ichish foydali",
+  "normalized": "suv ichish foydali",
+  "latin": "suv ichish foydali"
+ },
+ {
+  "text": "Karta orqali to'lasa bo'ladimi?",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Karta orqali to'lasa bo'ladimi?",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Karta orqali to'lasa bo'ladimi?",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Karta orqali to'lasa bo'ladimi?",
+  "normalized": "karta orqali to'lasa bo'ladimi",
+  "latin": "karta orqali to'lasa bo'ladimi"
+ },
+ {
+  "text": "Здравствуйте, я по поводу автомата с водой",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Здравствуйте, я по поводу автомата с водой",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Здравствуйте, я по поводу автомата с водой",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Здравствуйте, я по поводу автомата с водой",
+  "normalized": "здравствуйте я по поводу автомата с водой",
+  "latin": "zdravstvuyte ya po povodu avtomata s vodoy"
+ },
+ {
+  "text": "Какого цвета ваш автомат?",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Какого цвета ваш автомат?",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Какого цвета ваш автомат?",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Какого цвета ваш автомат?",
+  "normalized": "какого цвета ваш автомат",
+  "latin": "kakogo tsveta vash avtomat"
+ },
+ {
+  "text": "Сколько стоит литр воды?",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Сколько стоит литр воды?",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Сколько стоит литр воды?",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Сколько стоит литр воды?",
+  "normalized": "сколько стоит литр воды",
+  "latin": "skolko stoit litr vodi"
+ },
+ {
+  "text": "Можно оплатить картой?",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Можно оплатить картой?",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Можно оплатить картой?",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Можно оплатить картой?",
+  "normalized": "можно оплатить картой",
+  "latin": "mojno oplatit kartoy"
+ },
+ {
+  "text": "Водитель уже приехал",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Водитель уже приехал",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Водитель уже приехал",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Водитель уже приехал",
+  "normalized": "водитель уже приехал",
+  "latin": "voditel uje priexal"
+ },
+ {
+  "text": "Спасибо, всё понятно",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Спасибо, всё понятно",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Спасибо, всё понятно",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Спасибо, всё понятно",
+  "normalized": "спасибо все понятно",
+  "latin": "spasibo vse ponyatno"
+ },
+ {
+  "text": "Bugun ishlamayman",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Bugun ishlamayman",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Bugun ishlamayman",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Bugun ishlamayman",
+  "normalized": "bugun ishlamayman",
+  "latin": "bugun ishlamayman"
+ },
+ {
+  "text": "Uydan chiqmayapman",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Uydan chiqmayapman",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Uydan chiqmayapman",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Uydan chiqmayapman",
+  "normalized": "uydan chiqmayapman",
+  "latin": "uydan chiqmayapman"
+ },
+ {
+  "text": "Kecha nega chiqmadingiz?",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Kecha nega chiqmadingiz?",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Kecha nega chiqmadingiz?",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Kecha nega chiqmadingiz?",
+  "normalized": "kecha nega chiqmadingiz",
+  "latin": "kecha nega chiqmadingiz"
+ },
+ {
+  "text": "SUV CHIQMAYAPTI!!!",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "SUV CHIQMAYAPTI!!!",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "SUV CHIQMAYAPTI!!!",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "SUV CHIQMAYAPTI!!!",
+  "normalized": "suv chiqmayapti",
+  "latin": "suv chiqmayapti"
+ },
+ {
+  "text": "suv chiqmayapti aka, iltimos",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv chiqmayapti aka, iltimos",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv chiqmayapti aka, iltimos",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv chiqmayapti aka, iltimos",
+  "normalized": "suv chiqmayapti aka iltimos",
+  "latin": "suv chiqmayapti aka iltimos"
+ },
+ {
+  "text": "Су шықмаяпти",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Су шықмаяпти",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Су шықмаяпти",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Су шықмаяпти",
+  "normalized": "су шықмаяпти",
+  "latin": "su shiqmayapti"
+ },
+ {
+  "text": "işlemeyabdi apparat",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "işlemeyabdi apparat",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "işlemeyabdi apparat",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "işlemeyabdi apparat",
+  "normalized": "ishlemeyabdi apparat",
+  "latin": "ishlemeyabdi apparat"
+ },
+ {
+  "text": "Apparat İşlamayapti",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat İşlamayapti",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat İşlamayapti",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "Apparat İşlamayapti",
+  "normalized": "apparat ishlamayapti",
+  "latin": "apparat ishlamayapti"
+ },
+ {
+  "text": "pulimni yeb qo‘ydi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qo‘ydi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qo‘ydi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qo‘ydi",
+  "normalized": "pulimni yeb qo'ydi",
+  "latin": "pulimni yeb qo'ydi"
+ },
+ {
+  "text": "pulimni yeb qoʻydi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qoʻydi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qoʻydi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qoʻydi",
+  "normalized": "pulimni yeb qo'ydi",
+  "latin": "pulimni yeb qo'ydi"
+ },
+ {
+  "text": "pulimni yeb qo`ydi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qo`ydi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qo`ydi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yeb qo`ydi",
+  "normalized": "pulimni yeb qo'ydi",
+  "latin": "pulimni yeb qo'ydi"
+ },
+ {
+  "text": "pulim qaytmadi",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pulim qaytmadi",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pulim qaytmadi",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pulim qaytmadi",
+  "normalized": "pulim qaytmadi",
+  "latin": "pulim qaytmadi"
+ },
+ {
+  "text": "men uyga chiqmayapman",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "men uyga chiqmayapman",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "men uyga chiqmayapman",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "men uyga chiqmayapman",
+  "normalized": "men uyga chiqmayapman",
+  "latin": "men uyga chiqmayapman"
+ },
+ {
+  "text": "suv oqib ketyapti",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv oqib ketyapti",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv oqib ketyapti",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv oqib ketyapti",
+  "normalized": "suv oqib ketyapti",
+  "latin": "suv oqib ketyapti"
+ },
+ {
+  "text": "kitob o'qib o'tiraman",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "kitob o'qib o'tiraman",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "kitob o'qib o'tiraman",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "kitob o'qib o'tiraman",
+  "normalized": "kitob o'qib o'tiraman",
+  "latin": "kitob o'qib o'tiraman"
+ },
+ {
+  "text": "loyiha haqida gapiraman",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "loyiha haqida gapiraman",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "loyiha haqida gapiraman",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "loyiha haqida gapiraman",
+  "normalized": "loyiha haqida gapiraman",
+  "latin": "loyiha haqida gapiraman"
+ },
+ {
+  "text": "suv loyqa",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv loyqa",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv loyqa",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv loyqa",
+  "normalized": "suv loyqa",
+  "latin": "suv loyqa"
+ },
+ {
+  "text": "suvning ta'mi yomon",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "suvning ta'mi yomon",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "suvning ta'mi yomon",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "suvning ta'mi yomon",
+  "normalized": "suvning ta'mi yomon",
+  "latin": "suvning ta'mi yomon"
+ },
+ {
+  "text": "вода не идёт",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "вода не идёт",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "вода не идёт",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "вода не идёт",
+  "normalized": "вода не идет",
+  "latin": "voda ne idet"
+ },
+ {
+  "text": "ВОДА НЕ ИДЁТ",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "ВОДА НЕ ИДЁТ",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "ВОДА НЕ ИДЁТ",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "ВОДА НЕ ИДЁТ",
+  "normalized": "вода не идет",
+  "latin": "voda ne idet"
+ },
+ {
+  "text": "деньги списались, а вода не пошла",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "деньги списались, а вода не пошла",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "деньги списались, а вода не пошла",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "деньги списались, а вода не пошла",
+  "normalized": "деньги списались а вода не пошла",
+  "latin": "dengi spisalis a voda ne poshla"
+ },
+ {
+  "text": "водитель приехал",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "водитель приехал",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "водитель приехал",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "водитель приехал",
+  "normalized": "водитель приехал",
+  "latin": "voditel priexal"
+ },
+ {
+  "text": "нет воды",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "нет воды",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "нет воды",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "нет воды",
+  "normalized": "нет воды",
+  "latin": "net vodi"
+ },
+ {
+  "text": "не льется вода",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "не льется вода",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "не льется вода",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "не льется вода",
+  "normalized": "не льется вода",
+  "latin": "ne letsya voda"
+ },
+ {
+  "text": "оператор",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "оператор",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "оператор",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "оператор",
+  "normalized": "оператор",
+  "latin": "operator"
+ },
+ {
+  "text": "соедините с оператором пожалуйста",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "соедините с оператором пожалуйста",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "соедините с оператором пожалуйста",
+  "language": null,
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "соедините с оператором пожалуйста",
+  "normalized": "соедините с оператором пожалуйста",
+  "latin": "soedinite s operatorom pojaluysta"
+ },
+ {
+  "text": "operatorga ulang",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "operatorga ulang",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "operatorga ulang",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "operatorga ulang",
+  "normalized": "operatorga ulang",
+  "latin": "operatorga ulang"
+ },
+ {
+  "text": "jonli odam bilan gaplashmoqchiman",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.8
+ },
+ {
+  "text": "jonli odam bilan gaplashmoqchiman",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.8
+ },
+ {
+  "text": "jonli odam bilan gaplashmoqchiman",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.8
+ },
+ {
+  "text": "jonli odam bilan gaplashmoqchiman",
+  "normalized": "jonli odam bilan gaplashmoqchiman",
+  "latin": "jonli odam bilan gaplashmoqchiman"
+ },
+ {
+  "text": "автомат протекает",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "автомат протекает",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "автомат протекает",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "автомат протекает",
+  "normalized": "автомат протекает",
+  "latin": "avtomat protekaet"
+ },
+ {
+  "text": "течёт вода из автомата",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "течёт вода из автомата",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "течёт вода из автомата",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.75
+ },
+ {
+  "text": "течёт вода из автомата",
+  "normalized": "течет вода из автомата",
+  "latin": "techet voda iz avtomata"
+ },
+ {
+  "text": "apparatdan suv oqyapti",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "apparatdan suv oqyapti",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "apparatdan suv oqyapti",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "apparatdan suv oqyapti",
+  "normalized": "apparatdan suv oqyapti",
+  "latin": "apparatdan suv oqyapti"
+ },
+ {
+  "text": "suv oqmayapti",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "suv oqmayapti",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "suv oqmayapti",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "suv oqmayapti",
+  "normalized": "suv oqmayapti",
+  "latin": "suv oqmayapti"
+ },
+ {
+  "text": "",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "",
+  "normalized": "",
+  "latin": ""
+ },
+ {
+  "text": "   ",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "   ",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "   ",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "   ",
+  "normalized": "",
+  "latin": ""
+ },
+ {
+  "text": "123",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "123",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "123",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "123",
+  "normalized": "123",
+  "latin": "123"
+ },
+ {
+  "text": "ok",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ok",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ok",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ok",
+  "normalized": "ok",
+  "latin": "ok"
+ },
+ {
+  "text": "Hello",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Hello",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Hello",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Hello",
+  "normalized": "hello",
+  "latin": "hello"
+ },
+ {
+  "text": "Привет, как дела",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Привет, как дела",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Привет, как дела",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Привет, как дела",
+  "normalized": "привет как дела",
+  "latin": "privet kak dela"
+ },
+ {
+  "text": "Straße",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Straße",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Straße",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "Straße",
+  "normalized": "strasse",
+  "latin": "strasse"
+ },
+ {
+  "text": "naïve café",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "naïve café",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "naïve café",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "naïve café",
+  "normalized": "naïve café",
+  "latin": "naïve café"
+ },
+ {
+  "text": "operator*",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "operator*",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "operator*",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "operator*",
+  "normalized": "operator",
+  "latin": "operator"
+ },
+ {
+  "text": "jonli odam",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "jonli odam",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "jonli odam",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "jonli odam",
+  "normalized": "jonli odam",
+  "latin": "jonli odam"
+ },
+ {
+  "text": "odam bilan",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "odam bilan",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "odam bilan",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "odam bilan",
+  "normalized": "odam bilan",
+  "latin": "odam bilan"
+ },
+ {
+  "text": "inson bilan",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "inson bilan",
+  "language": "ru",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "inson bilan",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "inson bilan",
+  "normalized": "inson bilan",
+  "latin": "inson bilan"
+ },
+ {
+  "text": "ulang",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ulang",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ulang",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ulang",
+  "normalized": "ulang",
+  "latin": "ulang"
+ },
+ {
+  "text": "ulab",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ulab",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ulab",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ulab",
+  "normalized": "ulab",
+  "latin": "ulab"
+ },
+ {
+  "text": "gaplash*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "gaplash*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "gaplash*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "gaplash*",
+  "normalized": "gaplash",
+  "latin": "gaplash"
+ },
+ {
+  "text": "оператор*",
+  "language": "uz",
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "оператор*",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "оператор*",
+  "language": null,
+  "scenario_id": "operator_request_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "оператор*",
+  "normalized": "оператор",
+  "latin": "operator"
+ },
+ {
+  "text": "живой человек",
+  "language": "uz",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "живой человек",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "живой человек",
+  "language": null,
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "живой человек",
+  "normalized": "живой человек",
+  "latin": "jivoy chelovek"
+ },
+ {
+  "text": "живым человеком",
+  "language": "uz",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "живым человеком",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "живым человеком",
+  "language": null,
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "живым человеком",
+  "normalized": "живым человеком",
+  "latin": "jivim chelovekom"
+ },
+ {
+  "text": "с человеком",
+  "language": "uz",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "с человеком",
+  "language": "ru",
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "с человеком",
+  "language": null,
+  "scenario_id": "operator_request_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "с человеком",
+  "normalized": "с человеком",
+  "latin": "s chelovekom"
+ },
+ {
+  "text": "соедините",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "соедините",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "соедините",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "соедините",
+  "normalized": "соедините",
+  "latin": "soedinite"
+ },
+ {
+  "text": "соединить",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "соединить",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "соединить",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "соединить",
+  "normalized": "соединить",
+  "latin": "soedinit"
+ },
+ {
+  "text": "позовите",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "позовите",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "позовите",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "позовите",
+  "normalized": "позовите",
+  "latin": "pozovite"
+ },
+ {
+  "text": "chiqma*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "chiqma*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "chiqma*",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "chiqma*",
+  "normalized": "chiqma",
+  "latin": "chiqma"
+ },
+ {
+  "text": "quyma*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "quyma*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "quyma*",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "quyma*",
+  "normalized": "quyma",
+  "latin": "quyma"
+ },
+ {
+  "text": "suv berma*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv berma*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv berma*",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv berma*",
+  "normalized": "suv berma",
+  "latin": "suv berma"
+ },
+ {
+  "text": "suv kelma*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv kelma*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv kelma*",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv kelma*",
+  "normalized": "suv kelma",
+  "latin": "suv kelma"
+ },
+ {
+  "text": "suv to'xtab",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv to'xtab",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv to'xtab",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "suv to'xtab",
+  "normalized": "suv to'xtab",
+  "latin": "suv to'xtab"
+ },
+ {
+  "text": "apparat to'xtab",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "apparat to'xtab",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "apparat to'xtab",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "apparat to'xtab",
+  "normalized": "apparat to'xtab",
+  "latin": "apparat to'xtab"
+ },
+ {
+  "text": "ishlama*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "ishlama*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "ishlama*",
+  "language": null,
+  "scenario_id": "vending_no_water_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "ishlama*",
+  "normalized": "ishlama",
+  "latin": "ishlama"
+ },
+ {
+  "text": "suv",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "suv",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "suv",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "suv",
+  "normalized": "suv",
+  "latin": "suv"
+ },
+ {
+  "text": "apparat*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "apparat*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "apparat*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "apparat*",
+  "normalized": "apparat",
+  "latin": "apparat"
+ },
+ {
+  "text": "tugma*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "tugma*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "tugma*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "tugma*",
+  "normalized": "tugma",
+  "latin": "tugma"
+ },
+ {
+  "text": "не идет",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не идет",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не идет",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не идет",
+  "normalized": "не идет",
+  "latin": "ne idet"
+ },
+ {
+  "text": "не налива*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не налива*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не налива*",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не налива*",
+  "normalized": "не налива",
+  "latin": "ne naliva"
+ },
+ {
+  "text": "не льет*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не льет*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не льет*",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не льет*",
+  "normalized": "не льет",
+  "latin": "ne let"
+ },
+ {
+  "text": "не дает воду",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "не дает воду",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "не дает воду",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "не дает воду",
+  "normalized": "не дает воду",
+  "latin": "ne daet vodu"
+ },
+ {
+  "text": "не выда*",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не выда*",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не выда*",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не выда*",
+  "normalized": "не выда",
+  "latin": "ne vida"
+ },
+ {
+  "text": "не работает",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не работает",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не работает",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не работает",
+  "normalized": "не работает",
+  "latin": "ne rabotaet"
+ },
+ {
+  "text": "воды нет",
+  "language": "uz",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "воды нет",
+  "language": "ru",
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "воды нет",
+  "language": null,
+  "scenario_id": "vending_no_water_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "воды нет",
+  "normalized": "воды нет",
+  "latin": "vodi net"
+ },
+ {
+  "text": "вода",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "вода",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "вода",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "вода",
+  "normalized": "вода",
+  "latin": "voda"
+ },
+ {
+  "text": "аппарат*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "аппарат*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "аппарат*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "аппарат*",
+  "normalized": "аппарат",
+  "latin": "apparat"
+ },
+ {
+  "text": "автомат*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "автомат*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "автомат*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "автомат*",
+  "normalized": "автомат",
+  "latin": "avtomat"
+ },
+ {
+  "text": "кнопк*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "кнопк*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "кнопк*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "кнопк*",
+  "normalized": "кнопк",
+  "latin": "knopk"
+ },
+ {
+  "text": "yeb qo'y*",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "yeb qo'y*",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "yeb qo'y*",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "yeb qo'y*",
+  "normalized": "yeb qo'y",
+  "latin": "yeb qo'y"
+ },
+ {
+  "text": "pulimni yedi",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yedi",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yedi",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pulimni yedi",
+  "normalized": "pulimni yedi",
+  "latin": "pulimni yedi"
+ },
+ {
+  "text": "qaytarib berma*",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "qaytarib berma*",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "qaytarib berma*",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "qaytarib berma*",
+  "normalized": "qaytarib berma",
+  "latin": "qaytarib berma"
+ },
+ {
+  "text": "qaytarib bering",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "qaytarib bering",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "qaytarib bering",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "qaytarib bering",
+  "normalized": "qaytarib bering",
+  "latin": "qaytarib bering"
+ },
+ {
+  "text": "qaytim* berma*",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "qaytim* berma*",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "qaytim* berma*",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "qaytim* berma*",
+  "normalized": "qaytim berma",
+  "latin": "qaytim berma"
+ },
+ {
+  "text": "pul yechil*",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pul yechil*",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pul yechil*",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "pul yechil*",
+  "normalized": "pul yechil",
+  "latin": "pul yechil"
+ },
+ {
+  "text": "to'lov o'tma*",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "to'lov o'tma*",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "to'lov o'tma*",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "to'lov o'tma*",
+  "normalized": "to'lov o'tma",
+  "latin": "to'lov o'tma"
+ },
+ {
+  "text": "karta ishlama*",
+  "language": "uz",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "karta ishlama*",
+  "language": "ru",
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "karta ishlama*",
+  "language": null,
+  "scenario_id": "vending_payment_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "karta ishlama*",
+  "normalized": "karta ishlama",
+  "latin": "karta ishlama"
+ },
+ {
+  "text": "pul",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pul",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pul",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pul",
+  "normalized": "pul",
+  "latin": "pul"
+ },
+ {
+  "text": "pulimni",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pulimni",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pulimni",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "pulimni",
+  "normalized": "pulimni",
+  "latin": "pulimni"
+ },
+ {
+  "text": "payme",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "payme",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "payme",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "payme",
+  "normalized": "payme",
+  "latin": "payme"
+ },
+ {
+  "text": "click",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "click",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "click",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "click",
+  "normalized": "click",
+  "latin": "click"
+ },
+ {
+  "text": "karta*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "karta*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "karta*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "karta*",
+  "normalized": "karta",
+  "latin": "karta"
+ },
+ {
+  "text": "plastik",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "plastik",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "plastik",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "plastik",
+  "normalized": "plastik",
+  "latin": "plastik"
+ },
+ {
+  "text": "to'lov",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "to'lov",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "to'lov",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "to'lov",
+  "normalized": "to'lov",
+  "latin": "to'lov"
+ },
+ {
+  "text": "qaytim*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "qaytim*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "qaytim*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "qaytim*",
+  "normalized": "qaytim",
+  "latin": "qaytim"
+ },
+ {
+  "text": "съел",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "съел",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "съел",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "съел",
+  "normalized": "съел",
+  "latin": "s'el"
+ },
+ {
+  "text": "сожрал",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "сожрал",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "сожрал",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "сожрал",
+  "normalized": "сожрал",
+  "latin": "sojral"
+ },
+ {
+  "text": "не вернул",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не вернул",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не вернул",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не вернул",
+  "normalized": "не вернул",
+  "latin": "ne vernul"
+ },
+ {
+  "text": "не выдал сдачу",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "не выдал сдачу",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "не выдал сдачу",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.85
+ },
+ {
+  "text": "не выдал сдачу",
+  "normalized": "не выдал сдачу",
+  "latin": "ne vidal sdachu"
+ },
+ {
+  "text": "сдачу не",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "сдачу не",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "сдачу не",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "сдачу не",
+  "normalized": "сдачу не",
+  "latin": "sdachu ne"
+ },
+ {
+  "text": "списал*",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "списал*",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "списал*",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "списал*",
+  "normalized": "списал",
+  "latin": "spisal"
+ },
+ {
+  "text": "не прошл*",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не прошл*",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не прошл*",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "не прошл*",
+  "normalized": "не прошл",
+  "latin": "ne proshl"
+ },
+ {
+  "text": "верните деньги",
+  "language": "uz",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "верните деньги",
+  "language": "ru",
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "верните деньги",
+  "language": null,
+  "scenario_id": "vending_payment_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "верните деньги",
+  "normalized": "верните деньги",
+  "latin": "vernite dengi"
+ },
+ {
+  "text": "деньги",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "деньги",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "деньги",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "деньги",
+  "normalized": "деньги",
+  "latin": "dengi"
+ },
+ {
+  "text": "пейми",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "пейми",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "пейми",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "пейми",
+  "normalized": "пейми",
+  "latin": "peymi"
+ },
+ {
+  "text": "клик",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "клик",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "клик",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "клик",
+  "normalized": "клик",
+  "latin": "klik"
+ },
+ {
+  "text": "оплат*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "оплат*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "оплат*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "оплат*",
+  "normalized": "оплат",
+  "latin": "oplat"
+ },
+ {
+  "text": "карт*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "карт*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "карт*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "карт*",
+  "normalized": "карт",
+  "latin": "kart"
+ },
+ {
+  "text": "сдач*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "сдач*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "сдач*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "сдач*",
+  "normalized": "сдач",
+  "latin": "sdach"
+ },
+ {
+  "text": "зависл*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "зависл*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "зависл*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "зависл*",
+  "normalized": "зависл",
+  "latin": "zavisl"
+ },
+ {
+  "text": "oqib yotibdi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqib yotibdi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqib yotibdi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqib yotibdi",
+  "normalized": "oqib yotibdi",
+  "latin": "oqib yotibdi"
+ },
+ {
+  "text": "oqib ketya*",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqib ketya*",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqib ketya*",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqib ketya*",
+  "normalized": "oqib ketya",
+  "latin": "oqib ketya"
+ },
+ {
+  "text": "oqyapti",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqyapti",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqyapti",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "oqyapti",
+  "normalized": "oqyapti",
+  "latin": "oqyapti"
+ },
+ {
+  "text": "toshib",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "toshib",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "toshib",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "toshib",
+  "normalized": "toshib",
+  "latin": "toshib"
+ },
+ {
+  "text": "toshdi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "toshdi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "toshdi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "toshdi",
+  "normalized": "toshdi",
+  "latin": "toshdi"
+ },
+ {
+  "text": "teshik",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "teshik",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "teshik",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "teshik",
+  "normalized": "teshik",
+  "latin": "teshik"
+ },
+ {
+  "text": "yorildi",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "yorildi",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "yorildi",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "yorildi",
+  "normalized": "yorildi",
+  "latin": "yorildi"
+ },
+ {
+  "text": "ko'lmak",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "ko'lmak",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "ko'lmak",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "ko'lmak",
+  "normalized": "ko'lmak",
+  "latin": "ko'lmak"
+ },
+ {
+  "text": "sizib",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sizib",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sizib",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sizib",
+  "normalized": "sizib",
+  "latin": "sizib"
+ },
+ {
+  "text": "sizyapti",
+  "language": "uz",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sizyapti",
+  "language": "ru",
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sizyapti",
+  "language": null,
+  "scenario_id": "vending_leak_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sizyapti",
+  "normalized": "sizyapti",
+  "latin": "sizyapti"
+ },
+ {
+  "text": "truba",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "truba",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "truba",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "truba",
+  "normalized": "truba",
+  "latin": "truba"
+ },
+ {
+  "text": "buzilgan",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "buzilgan",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "buzilgan",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "buzilgan",
+  "normalized": "buzilgan",
+  "latin": "buzilgan"
+ },
+ {
+  "text": "течет",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "течет",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "течет",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "течет",
+  "normalized": "течет",
+  "latin": "techet"
+ },
+ {
+  "text": "протекает",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "протекает",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "протекает",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "протекает",
+  "normalized": "протекает",
+  "latin": "protekaet"
+ },
+ {
+  "text": "подтекает",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "подтекает",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "подтекает",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "подтекает",
+  "normalized": "подтекает",
+  "latin": "podtekaet"
+ },
+ {
+  "text": "лужа",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "лужа",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "лужа",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "лужа",
+  "normalized": "лужа",
+  "latin": "luja"
+ },
+ {
+  "text": "затопило",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "затопило",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "затопило",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "затопило",
+  "normalized": "затопило",
+  "latin": "zatopilo"
+ },
+ {
+  "text": "прорвало",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "прорвало",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "прорвало",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "прорвало",
+  "normalized": "прорвало",
+  "latin": "prorvalo"
+ },
+ {
+  "text": "хлещет",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "хлещет",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "хлещет",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "хлещет",
+  "normalized": "хлещет",
+  "latin": "xleщet"
+ },
+ {
+  "text": "капает",
+  "language": "uz",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "капает",
+  "language": "ru",
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "капает",
+  "language": null,
+  "scenario_id": "vending_leak_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "капает",
+  "normalized": "капает",
+  "latin": "kapaet"
+ },
+ {
+  "text": "сломан*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "сломан*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "сломан*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "сломан*",
+  "normalized": "сломан",
+  "latin": "sloman"
+ },
+ {
+  "text": "разбит*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "разбит*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "разбит*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "разбит*",
+  "normalized": "разбит",
+  "latin": "razbit"
+ },
+ {
+  "text": "труб*",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "труб*",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "труб*",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "труб*",
+  "normalized": "труб",
+  "latin": "trub"
+ },
+ {
+  "text": "ta'mi yomon",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "ta'mi yomon",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "ta'mi yomon",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "ta'mi yomon",
+  "normalized": "ta'mi yomon",
+  "latin": "ta'mi yomon"
+ },
+ {
+  "text": "ta'mi g'alati",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "ta'mi g'alati",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "ta'mi g'alati",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "ta'mi g'alati",
+  "normalized": "ta'mi g'alati",
+  "latin": "ta'mi g'alati"
+ },
+ {
+  "text": "sassiq",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sassiq",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sassiq",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sassiq",
+  "normalized": "sassiq",
+  "latin": "sassiq"
+ },
+ {
+  "text": "hidi yomon",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "hidi yomon",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "hidi yomon",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.75
+ },
+ {
+  "text": "hidi yomon",
+  "normalized": "hidi yomon",
+  "latin": "hidi yomon"
+ },
+ {
+  "text": "hid kel*",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "hid kel*",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "hid kel*",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "hid kel*",
+  "normalized": "hid kel",
+  "latin": "hid kel"
+ },
+ {
+  "text": "badbo'y",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "badbo'y",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "badbo'y",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "badbo'y",
+  "normalized": "badbo'y",
+  "latin": "badbo'y"
+ },
+ {
+  "text": "loyqa",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "loyqa",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "loyqa",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "loyqa",
+  "normalized": "loyqa",
+  "latin": "loyqa"
+ },
+ {
+  "text": "iflos",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "iflos",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "iflos",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "iflos",
+  "normalized": "iflos",
+  "latin": "iflos"
+ },
+ {
+  "text": "achchiq",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "achchiq",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "achchiq",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "achchiq",
+  "normalized": "achchiq",
+  "latin": "achchiq"
+ },
+ {
+  "text": "sho'r",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sho'r",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sho'r",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.65
+ },
+ {
+  "text": "sho'r",
+  "normalized": "sho'r",
+  "latin": "sho'r"
+ },
+ {
+  "text": "rangi o'zgar*",
+  "language": "uz",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "rangi o'zgar*",
+  "language": "ru",
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "rangi o'zgar*",
+  "language": null,
+  "scenario_id": "vending_taste_uz",
+  "confidence": 0.7
+ },
+ {
+  "text": "rangi o'zgar*",
+  "normalized": "rangi o'zgar",
+  "latin": "rangi o'zgar"
+ },
+ {
+  "text": "ta'mi",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ta'mi",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ta'mi",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "ta'mi",
+  "normalized": "ta'mi",
+  "latin": "ta'mi"
+ },
+ {
+  "text": "yomon",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "yomon",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "yomon",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "yomon",
+  "normalized": "yomon",
+  "latin": "yomon"
+ },
+ {
+  "text": "hid",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "hid",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "hid",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "hid",
+  "normalized": "hid",
+  "latin": "hid"
+ },
+ {
+  "text": "rangi",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "rangi",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "rangi",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "rangi",
+  "normalized": "rangi",
+  "latin": "rangi"
+ },
+ {
+  "text": "горьк*",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "горьк*",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "горьк*",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "горьк*",
+  "normalized": "горьк",
+  "latin": "gork"
+ },
+ {
+  "text": "воняет",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.8
+ },
+ {
+  "text": "воняет",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.8
+ },
+ {
+  "text": "воняет",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.8
+ },
+ {
+  "text": "воняет",
+  "normalized": "воняет",
+  "latin": "vonyaet"
+ },
+ {
+  "text": "вонь",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "вонь",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "вонь",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "вонь",
+  "normalized": "вонь",
+  "latin": "von"
+ },
+ {
+  "text": "грязн*",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "грязн*",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "грязн*",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "грязн*",
+  "normalized": "грязн",
+  "latin": "gryazn"
+ },
+ {
+  "text": "невкусн*",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "невкусн*",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "невкусн*",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "невкусн*",
+  "normalized": "невкусн",
+  "latin": "nevkusn"
+ },
+ {
+  "text": "мутн*",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "мутн*",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "мутн*",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "мутн*",
+  "normalized": "мутн",
+  "latin": "mutn"
+ },
+ {
+  "text": "странный вкус",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "странный вкус",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "странный вкус",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "странный вкус",
+  "normalized": "странный вкус",
+  "latin": "stranniy vkus"
+ },
+ {
+  "text": "плохой вкус",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "плохой вкус",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "плохой вкус",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "плохой вкус",
+  "normalized": "плохой вкус",
+  "latin": "ploxoy vkus"
+ },
+ {
+  "text": "неприятный запах",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "неприятный запах",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "неприятный запах",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "неприятный запах",
+  "normalized": "неприятный запах",
+  "latin": "nepriyatniy zapax"
+ },
+ {
+  "text": "странный запах",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "странный запах",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "странный запах",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.7
+ },
+ {
+  "text": "странный запах",
+  "normalized": "странный запах",
+  "latin": "stranniy zapax"
+ },
+ {
+  "text": "тухл*",
+  "language": "uz",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "тухл*",
+  "language": "ru",
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "тухл*",
+  "language": null,
+  "scenario_id": "vending_taste_ru",
+  "confidence": 0.65
+ },
+ {
+  "text": "тухл*",
+  "normalized": "тухл",
+  "latin": "tuxl"
+ },
+ {
+  "text": "вкус",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "вкус",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "вкус",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "вкус",
+  "normalized": "вкус",
+  "latin": "vkus"
+ },
+ {
+  "text": "запах",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "запах",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "запах",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "запах",
+  "normalized": "запах",
+  "latin": "zapax"
+ },
+ {
+  "text": "цвет",
+  "language": "uz",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "цвет",
+  "language": "ru",
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "цвет",
+  "language": null,
+  "scenario_id": null,
+  "confidence": 0.0
+ },
+ {
+  "text": "цвет",
+  "normalized": "цвет",
+  "latin": "tsvet"
+ }
+]

@@ -1,0 +1,11 @@
+*.iml
+.gradle/
+.idea/
+.kotlin/
+local.properties
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+# Models are downloaded on the phone or imported from a file, never committed.
+*.bin
