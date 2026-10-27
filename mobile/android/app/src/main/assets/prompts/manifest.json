@@ -1,0 +1,185 @@
+{
+ "sample_rate": 24000,
+ "entries": [
+  {
+   "key": "operator_request_uz",
+   "language": "uz",
+   "text": "Operatorga ulayapman, iltimos, kuting.",
+   "file": "uz-7a360a59d5918f2e.wav"
+  },
+  {
+   "key": "operator_request_ru",
+   "language": "ru",
+   "text": "Соединяю с оператором, пожалуйста, подождите.",
+   "file": "ru-a7b0c102b1905c39.wav"
+  },
+  {
+   "key": "vending_no_water_uz",
+   "language": "uz",
+   "text": "Uzur so'raymiz. Iltimos, idish to'g'ri qo'yilganini tekshiring va tugmani qayta bosing. Agar suv chiqmasa, pulingizni qaytarib beramiz. Operator bilan bog'lanish uchun nolni bosing.",
+   "file": "uz-f561950d825e65ea.wav"
+  },
+  {
+   "key": "vending_no_water_ru",
+   "language": "ru",
+   "text": "Приносим извинения. Пожалуйста, проверьте, правильно ли стоит баклажка, и нажмите кнопку еще раз. Если вода не нальется, мы вернем вам деньги. Нажмите ноль для связи с оператором.",
+   "file": "ru-dd3958f4682f292b.wav"
+  },
+  {
+   "key": "vending_payment_uz",
+   "language": "uz",
+   "text": "To'lov bilan bog'liq noqulaylik uchun uzr. Pulingizni qaytarish uchun, iltimos apparat raqamini telegram botimizga yuboring yoki operator bilan bog'lanish uchun nolni bosing.",
+   "file": "uz-eae3bba655e574de.wav"
+  },
+  {
+   "key": "vending_payment_ru",
+   "language": "ru",
+   "text": "Извините за проблемы с оплатой. Чтобы вернуть деньги, пожалуйста, отправьте номер аппарата в наш телеграм-бот или нажмите ноль для связи с оператором.",
+   "file": "ru-1fd72305f16a1e70.wav"
+  },
+  {
+   "key": "vending_leak_uz",
+   "language": "uz",
+   "text": "Xabaringiz uchun rahmat! Biz nosozlik haqida ustalarga xabar berdik. Ular tez orada yetib borishadi. Operatorga ulanish uchun nolni bosing.",
+   "file": "uz-49a3c169ed69ba92.wav"
+  },
+  {
+   "key": "vending_leak_ru",
+   "language": "ru",
+   "text": "Спасибо за сигнал! Мы уже передали экстренную заявку мастерам, они скоро приедут и все починят. Для связи с оператором нажмите ноль.",
+   "file": "ru-d2b3730221430b60.wav"
+  },
+  {
+   "key": "vending_taste_uz",
+   "language": "uz",
+   "text": "Suv sifati bo'yicha shikoyatingiz qabul qilindi. Biz tezda filtrlarni tekshiramiz. Pulingizni qaytarish uchun operatorga ulaning, nolni bosing.",
+   "file": "uz-f65b1d183aac5211.wav"
+  },
+  {
+   "key": "vending_taste_ru",
+   "language": "ru",
+   "text": "Ваша жалоба на качество воды принята. Мы срочно проверим фильтры на этом аппарате. Для возврата средств нажмите ноль.",
+   "file": "ru-b5850ceaf6d587e6.wav"
+  },
+  {
+   "key": "greeting",
+   "language": "uz",
+   "text": "Assalomu alaykum! Qo'llab-quvvatlash xizmatiga qo'ng'iroq qildingiz.",
+   "file": "uz-69748a82824d22b9.wav"
+  },
+  {
+   "key": "greeting",
+   "language": "ru",
+   "text": "Здравствуйте! Вы позвонили в службу поддержки.",
+   "file": "ru-54537d63063ea489.wav"
+  },
+  {
+   "key": "not_understood",
+   "language": "uz",
+   "text": "Kechirasiz, muammoingizni aniqlay olmadim. Operator bilan bog'lanish uchun nolni bosing.",
+   "file": "uz-8b065a31d72f6579.wav"
+  },
+  {
+   "key": "not_understood",
+   "language": "ru",
+   "text": "Извините, не удалось определить проблему. Нажмите ноль для связи с оператором.",
+   "file": "ru-a03007532076bfbd.wav"
+  },
+  {
+   "key": "operator",
+   "language": "uz",
+   "text": "Operator bilan bog'lanish uchun nolni bosing.",
+   "file": "uz-4943f475128c1069.wav"
+  },
+  {
+   "key": "operator",
+   "language": "ru",
+   "text": "Нажмите ноль для связи с оператором.",
+   "file": "ru-12998fb3b383d768.wav"
+  },
+  {
+   "key": "transfer",
+   "language": "uz",
+   "text": "Operatorga ulayapman, iltimos, kuting.",
+   "file": "uz-7a360a59d5918f2e.wav"
+  },
+  {
+   "key": "transfer",
+   "language": "ru",
+   "text": "Соединяю с оператором, пожалуйста, подождите.",
+   "file": "ru-a7b0c102b1905c39.wav"
+  },
+  {
+   "key": "operator_unavailable",
+   "language": "uz",
+   "text": "Hozir barcha operatorlar band. Iltimos, muammoingizni aytib bering, yordam berishga harakat qilaman.",
+   "file": "uz-02f0670af7609b95.wav"
+  },
+  {
+   "key": "operator_unavailable",
+   "language": "ru",
+   "text": "Сейчас все операторы заняты. Пожалуйста, опишите проблему, я постараюсь помочь.",
+   "file": "ru-ed70d0d022a01430.wav"
+  },
+  {
+   "key": "no_input",
+   "language": "uz",
+   "text": "Iltimos, muammoingizni aytib bering.",
+   "file": "uz-5712eaffa258e366.wav"
+  },
+  {
+   "key": "no_input",
+   "language": "ru",
+   "text": "Пожалуйста, опишите вашу проблему.",
+   "file": "ru-4f0f954ccd3c7352.wav"
+  },
+  {
+   "key": "anything_else",
+   "language": "uz",
+   "text": "Yana savolingiz bormi?",
+   "file": "uz-2ddef55e2b5b0a0e.wav"
+  },
+  {
+   "key": "anything_else",
+   "language": "ru",
+   "text": "Есть ещё вопросы?",
+   "file": "ru-489bb10f712dd970.wav"
+  },
+  {
+   "key": "goodbye",
+   "language": "uz",
+   "text": "Qo'ng'irog'ingiz uchun rahmat. Xayr!",
+   "file": "uz-d558940f66e593a6.wav"
+  },
+  {
+   "key": "goodbye",
+   "language": "ru",
+   "text": "Спасибо за звонок. До свидания!",
+   "file": "ru-09ca6c24c941aa04.wav"
+  },
+  {
+   "key": "time_limit",
+   "language": "uz",
+   "text": "Qo'ng'iroq vaqti tugadi. Rahmat, xayr!",
+   "file": "uz-e0c773fb11d803e8.wav"
+  },
+  {
+   "key": "time_limit",
+   "language": "ru",
+   "text": "Время звонка истекло. Спасибо, до свидания!",
+   "file": "ru-682cad8b281e93d7.wav"
+  },
+  {
+   "key": "thinking",
+   "language": "uz",
+   "text": "Bir daqiqa, tekshirib ko'raman.",
+   "file": "uz-4b7dcc92ed9acaaa.wav"
+  },
+  {
+   "key": "thinking",
+   "language": "ru",
+   "text": "Секунду, уточняю.",
+   "file": "ru-4923d6d45fa0f66e.wav"
+  }
+ ]
+}

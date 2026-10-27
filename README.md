@@ -351,6 +351,17 @@ Alert rules (thresholds are starting points):
 No Alertmanager is bundled: alerts show in Prometheus and Grafana. To get
 Telegram or e-mail messages, add an Alertmanager and point Prometheus at it.
 
+## Offline Android app
+
+[mobile/android](mobile/android/README.md) is the minimum bot on a phone,
+with no server: hold a button and speak, whisper.cpp recognizes the speech
+on the phone (the Uzbek fine-tune or Whisper small for Russian), a Kotlin
+port of the scenario matcher picks the answer, and its pre-recorded audio
+plays. Each conversation stays on the phone as a chat with the caller's
+recording and the bot's answer, and can be exported for `scripts/eval_stt.py`.
+`ScenarioParityTest` checks that the phone picks the same scenarios as the
+server.
+
 ## Run locally
 
 On a single Windows laptop with a GPU, see [docs/local-run.md](docs/local-run.md)
