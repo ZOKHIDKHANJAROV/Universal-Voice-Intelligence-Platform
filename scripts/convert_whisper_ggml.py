@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -89,7 +90,8 @@ def main() -> int:
         converted.mkdir()
         write_mel_filters(model_dir, whisper_root)
         subprocess.run([sys.executable, str(converter), str(model_dir), str(whisper_root), str(converted)], check=True)
-        (converted / "ggml-model.bin").replace(f16)
+        # move, not replace: the temp directory may be on another disk.
+        shutil.move(converted / "ggml-model.bin", f16)
     print(f"f16: {f16} ({f16.stat().st_size / 1e6:.0f} MB)")
 
     final = f16
