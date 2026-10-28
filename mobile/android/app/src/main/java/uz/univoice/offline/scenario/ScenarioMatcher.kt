@@ -11,6 +11,12 @@ data class Scenario(
     val language: String,
     val keywords: List<String>,
     val contextKeywords: List<String>,
+    /** Problem words that count only next to a context keyword ("ishlama*"). */
+    val weakKeywords: List<String>,
+    /** Words that put the problem elsewhere (bankomat, кухня); they rule the scenario out. */
+    val excludeKeywords: List<String>,
+    /** Beats matching scenarios of lower priority whatever their score. */
+    val priority: Int,
     val action: String?,
     val message: String?,
     val enabled: Boolean,
@@ -60,11 +66,16 @@ class ScenarioMatcher(
             var bestContext = 0
             for (scenario in group) {
                 val words = if (scenario.language == "uz") latinTokens else tokens
-                val problems = scenario.keywords.count { KeywordMatcher.keywordMatches(it, words) }
-                if (problems == 0) continue
+                if (scenario.excludeKeywords.any { KeywordMatcher.keywordMatches(it, words) }) continue
+                var problems = scenario.keywords.count { KeywordMatcher.keywordMatches(it, words) }
                 val context = scenario.contextKeywords.count { KeywordMatcher.keywordMatches(it, words) }
+                if (context > 0) problems += scenario.weakKeywords.count { KeywordMatcher.keywordMatches(it, words) }
+                if (problems == 0) continue
                 val score = problems + 0.25 * context
-                if (score > bestScore) {
+                val current = best
+                if (current == null || scenario.priority > current.priority ||
+                    (scenario.priority == current.priority && score > bestScore)
+                ) {
                     best = scenario; bestScore = score; bestProblems = problems; bestContext = context
                 }
             }
@@ -118,6 +129,9 @@ class ScenarioMatcher(
                     language = item.getString("language"),
                     keywords = item.optJSONArray("keywords").strings(),
                     contextKeywords = item.optJSONArray("context_keywords").strings(),
+                    weakKeywords = item.optJSONArray("weak_keywords").strings(),
+                    excludeKeywords = item.optJSONArray("exclude_keywords").strings(),
+                    priority = item.optInt("priority", 0),
                     action = item.optString("action").takeIf { !item.isNull("action") && it.isNotEmpty() },
                     message = steps?.takeIf { it.length() > 0 }?.getJSONObject(0)?.optString("message"),
                     enabled = item.optBoolean("enabled", true),
