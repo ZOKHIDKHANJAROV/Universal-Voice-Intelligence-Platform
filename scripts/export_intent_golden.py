@@ -43,9 +43,9 @@ def main() -> int:
 
     service = ScenarioService()
     cases = json.loads((ROOT / "tests/data/intent_cases.json").read_text(encoding="utf-8"))
-    texts = [c[0] for c in cases["complaints"]] + [c[0] for c in cases["not_complaints"]] + EXTRA
+    texts = [c[0] for group in cases.values() for c in group] + EXTRA
     for scenario in service.list_scenarios():
-        texts += scenario.keywords + scenario.context_keywords
+        texts += scenario.keywords + scenario.context_keywords + scenario.weak_keywords + scenario.exclude_keywords
 
     seen: set[str] = set()
     rows = []

@@ -6,6 +6,9 @@
     "language": "uz",
     "keywords": ["operator*", "jonli odam", "odam bilan", "inson bilan"],
     "context_keywords": ["ulang", "ulab", "gaplash*"],
+    "weak_keywords": [],
+    "exclude_keywords": [],
+    "priority": 0,
     "action": "transfer",
     "steps": [
       {
@@ -23,6 +26,9 @@
     "language": "ru",
     "keywords": ["оператор*", "живой человек", "живым человеком", "с человеком"],
     "context_keywords": ["соедините", "соединить", "позовите"],
+    "weak_keywords": [],
+    "exclude_keywords": [],
+    "priority": 0,
     "action": "transfer",
     "steps": [
       {
@@ -38,8 +44,11 @@
     "title": "Water not dispensing (UZ)",
     "description": "Apparat suv quymayotgan holat.",
     "language": "uz",
-    "keywords": ["chiqma*", "quyma*", "suv berma*", "suv kelma*", "suv to'xtab", "apparat to'xtab", "ishlama*"],
+    "keywords": ["chiqma*", "quyma*", "suv berma*", "suv kelma*", "suv to'xtab", "apparat to'xtab"],
     "context_keywords": ["suv", "apparat*", "tugma*"],
+    "weak_keywords": ["ishlama*"],
+    "exclude_keywords": ["uyda", "kvartira*", "oshxona*", "bankomat*", "issiq suv"],
+    "priority": 0,
     "action": null,
     "steps": [
       {
@@ -55,8 +64,11 @@
     "title": "Water not dispensing (RU)",
     "description": "Аппарат не наливает воду.",
     "language": "ru",
-    "keywords": ["не идет", "не налива*", "не льет*", "не дает воду", "не выда*", "не работает", "воды нет", "нет воды"],
+    "keywords": ["не идет", "не налива*", "не льет*", "не дает воду", "не выда*", "воды нет", "нет воды"],
     "context_keywords": ["вода", "аппарат*", "автомат*", "кнопк*"],
+    "weak_keywords": ["не работает"],
+    "exclude_keywords": ["квартир*", "кухн*", "банкомат*", "горяч*"],
+    "priority": 0,
     "action": null,
     "steps": [
       {
@@ -72,8 +84,11 @@
     "title": "Payment issue (UZ)",
     "description": "Pul yeb qo'yish yoki qaytim bermaslik.",
     "language": "uz",
-    "keywords": ["yeb qo'y*", "pulimni yedi", "qaytarib berma*", "qaytarib bering", "qaytim* berma*", "pul yechil*", "to'lov o'tma*", "karta ishlama*"],
+    "keywords": ["yeb qo'y*", "pulimni yedi", "qaytim* berma*", "pul yechil*", "to'lov o'tma*", "karta ishlama*"],
     "context_keywords": ["pul", "pulimni", "payme", "click", "karta*", "plastik", "to'lov", "qaytim*"],
+    "weak_keywords": ["qaytarib berma*", "qaytarib bering"],
+    "exclude_keywords": ["uyda", "kvartira*", "oshxona*", "bankomat*", "issiq suv"],
+    "priority": 1,
     "action": null,
     "steps": [
       {
@@ -89,8 +104,11 @@
     "title": "Payment issue (RU)",
     "description": "Съел деньги, проблемы с оплатой.",
     "language": "ru",
-    "keywords": ["съел", "сожрал", "не вернул", "не выдал сдачу", "сдачу не", "списал*", "не прошл*", "верните деньги"],
+    "keywords": ["съел", "сожрал", "не выдал сдачу", "сдачу не", "списал*", "не прошл*", "верните деньги"],
     "context_keywords": ["деньги", "пейми", "клик", "оплат*", "карт*", "сдач*", "зависл*"],
+    "weak_keywords": ["не вернул"],
+    "exclude_keywords": ["квартир*", "кухн*", "банкомат*", "горяч*"],
+    "priority": 1,
     "action": null,
     "steps": [
       {
@@ -106,8 +124,11 @@
     "title": "Water leak / Broken (UZ)",
     "description": "Apparatdan suv oqishi, truba yorilishi.",
     "language": "uz",
-    "keywords": ["oqib yotibdi", "oqib ketya*", "oqyapti", "toshib", "toshdi", "teshik", "yorildi", "ko'lmak", "sizib", "sizyapti"],
+    "keywords": ["oqib yotibdi", "oqib ketya*", "toshib", "toshdi", "teshik", "yorildi", "ko'lmak", "sizib", "sizyapti"],
     "context_keywords": ["suv", "truba", "buzilgan", "apparat*"],
+    "weak_keywords": ["oqyapti"],
+    "exclude_keywords": ["uyda", "kvartira*", "oshxona*", "bankomat*", "issiq suv"],
+    "priority": 0,
     "action": null,
     "steps": [
       {
@@ -123,8 +144,11 @@
     "title": "Water leak / Broken (RU)",
     "description": "Протечка, лужа, сломанный аппарат.",
     "language": "ru",
-    "keywords": ["течет", "протекает", "подтекает", "лужа", "затопило", "прорвало", "хлещет", "капает"],
+    "keywords": ["протекает", "подтекает", "лужа", "затопило", "прорвало", "хлещет"],
     "context_keywords": ["вода", "сломан*", "разбит*", "труб*", "аппарат*", "автомат*"],
+    "weak_keywords": ["течет", "капает"],
+    "exclude_keywords": ["квартир*", "кухн*", "банкомат*", "горяч*"],
+    "priority": 0,
     "action": null,
     "steps": [
       {
@@ -142,6 +166,9 @@
     "language": "uz",
     "keywords": ["ta'mi yomon", "ta'mi g'alati", "sassiq", "hidi yomon", "hid kel*", "badbo'y", "loyqa", "iflos", "achchiq", "sho'r", "rangi o'zgar*"],
     "context_keywords": ["suv", "ta'mi", "yomon", "hid", "rangi"],
+    "weak_keywords": [],
+    "exclude_keywords": ["uyda", "kvartira*", "oshxona*", "bankomat*", "issiq suv"],
+    "priority": 0,
     "action": null,
     "steps": [
       {
@@ -159,6 +186,9 @@
     "language": "ru",
     "keywords": ["горьк*", "воняет", "вонь", "грязн*", "невкусн*", "мутн*", "странный вкус", "плохой вкус", "неприятный запах", "странный запах", "тухл*"],
     "context_keywords": ["вода", "вкус", "запах", "цвет"],
+    "weak_keywords": [],
+    "exclude_keywords": ["квартир*", "кухн*", "банкомат*", "горяч*"],
+    "priority": 0,
     "action": null,
     "steps": [
       {

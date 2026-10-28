@@ -132,6 +132,27 @@ The two remaining real matches use `loyqa` in its literal sense (silty
 ground). The hand-written cases were written together with the keywords;
 the 380 real sentences were not looked at while choosing them.
 
+Problems that are not about the machine still matched: "not working" or
+"leaking" alone gave 0.65, above the 0.6 threshold, so "lift ishlamayapti",
+"интернет не работает" or "кран на кухне течёт" got the machine's answer
+(10 of 21 such phrases). And "pulimni yeb qo'ydi suv bermadi" (it took my
+money, no water) went to "no water" instead of the refund. Scenarios now
+also have:
+
+- `weak_keywords`: problem words that count only next to a context keyword
+  (`ishlama*`, `не работает`, `течет`, `qaytarib berma*`);
+- `exclude_keywords`: words that put the problem elsewhere (`bankomat*`,
+  `кухн*`, `квартир*`, `issiq suv`, `горяч*`);
+- `priority`: payment scenarios beat the others when both match.
+
+| | before | after |
+|---|---|---|
+| Machine complaints (`complaints` in `intent_cases.json`) | 68/70 | 70/70 |
+| Other problems sent to the operator (`elsewhere`) | 0/11 | 11/11 |
+
+The cost: "не работает" or "течёт" without naming the machine or the water
+now gets "not understood, press 0 for an operator" instead of a guess.
+
 ## Choosing the language on short phrases
 
 Real calls showed Uzbek going to the wrong model: on 1-3 s phrases

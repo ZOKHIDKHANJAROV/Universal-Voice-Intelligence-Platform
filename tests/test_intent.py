@@ -30,6 +30,13 @@ def test_mentioning_water_or_money_is_not_a_complaint(scenarios, text, language)
     assert scenarios.resolve(text, language) == (None, 0.0)
 
 
+@pytest.mark.parametrize(("text", "language"), CASES["elsewhere"])
+def test_problems_outside_the_machine_go_to_an_operator(scenarios, text, language) -> None:
+    # "Not working" or "leaking" alone used to pick a machine scenario at 0.65:
+    # the bot told a caller with a broken lift how to restart a water machine.
+    assert scenarios.resolve(text, language) == (None, 0.0)
+
+
 @pytest.mark.parametrize("text", ["Привет, как дела", "Salom, yaxshimisiz", "Hello"])
 def test_unrelated_text_does_not_match(scenarios, text) -> None:
     assert scenarios.resolve(text) == (None, 0.0)
