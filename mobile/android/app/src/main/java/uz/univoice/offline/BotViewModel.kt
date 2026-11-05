@@ -4,7 +4,10 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -76,6 +79,10 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     private var engineSpec: ModelSpec? = null
     private var recordingStartedAt = 0L
 
+    // Streaming recognition of the current recording (Vosk only).
+    private var liveChunks: Channel<ShortArray>? = null
+    private var liveText: Deferred<String?>? = null
+
     private val _state = MutableStateFlow(UiState(language = settings.language, engine = settings.engine))
     val state: StateFlow<UiState> = _state
 
@@ -140,18 +147,53 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         val current = _state.value
         if (current.phase != Phase.IDLE && current.phase != Phase.PLAYING) return
         player.stop()
-        runCatching { recorder.start() }
+        val chunks = startLive(current.language)
+        runCatching { recorder.start(chunks?.let { channel -> { samples: ShortArray -> channel.trySend(samples) } }) }
             .onSuccess {
                 recordingStartedAt = System.currentTimeMillis()
                 _state.update { it.copy(phase = Phase.RECORDING, playingId = null) }
             }
-            .onFailure { e -> _state.update { it.copy(notice = "Mikrofon: ${e.message}") } }
+            .onFailure { e ->
+                stopLive()?.cancel()
+                _state.update { it.copy(notice = "Mikrofon: ${e.message}") }
+            }
+    }
+
+    /**
+     * Starts recognizing while the caller speaks; returns where the recorder
+     * sends its audio, or null when the engine cannot stream (Whisper) or
+     * the model is missing, and the recording is then recognized after release.
+     */
+    private fun startLive(language: String): Channel<ShortArray>? {
+        val spec = activeModel(language)
+        if (spec.engine != Engine.VOSK || !isAvailable(spec.engine) || !models.isReady(spec)) return null
+        val chunks = Channel<ShortArray>(Channel.UNLIMITED)
+        liveChunks = chunks
+        liveText = viewModelScope.async(sttDispatcher) {
+            runCatching {
+                // Chunks wait in the channel while the model loads (first use only).
+                loadEngine(language).startStream(language)?.use { stream ->
+                    for (samples in chunks) stream.accept(samples)
+                    stream.finish()
+                }
+            }.getOrNull()
+        }
+        return chunks
+    }
+
+    /** Ends the audio of the live recognition and returns its pending transcript. */
+    private fun stopLive(): Deferred<String?>? {
+        liveChunks?.close()
+        liveChunks = null
+        return liveText.also { liveText = null }
     }
 
     fun stopTalking() {
         if (_state.value.phase != Phase.RECORDING) return
         val samples = recorder.stop()
+        val live = stopLive()
         if (samples.size < Wav.STT_RATE * 3 / 10) {
+            live?.cancel()
             // Shorter than 0.3 s: a tap, not speech.
             _state.update { it.copy(phase = Phase.IDLE, notice = "Tugmani bosib turib gapiring · Удерживайте кнопку, пока говорите") }
             return
@@ -163,7 +205,14 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
             val audioFile = File(store.audioDir, "c$conversationId-${recordingStartedAt}.wav")
             withContext(Dispatchers.IO) { Wav.write(audioFile, samples) }
 
-            val result = runCatching { transcribe(Wav.toFloat(samples), language) }
+            val released = System.nanoTime()
+            val streamed = live?.await()
+            val result = if (streamed != null) {
+                // Recognition time here is the wait after release: what the caller feels.
+                Result.success(streamed to (System.nanoTime() - released) / 1_000_000)
+            } else {
+                runCatching { transcribe(Wav.toFloat(samples), language) }
+            }
             val (raw, millis) = result.getOrElse { e ->
                 _state.update { it.copy(phase = Phase.IDLE, notice = e.message) }
                 store.add(conversationId, Role.CALLER, "", language = language, audioPath = audioFile.absolutePath)
@@ -200,7 +249,8 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         engine?.let { if (engineSpec == spec) return it }
         check(models.isReady(spec)) { "Model yuklanmagan · Модель не загружена: ${spec.title}" }
         unloadEngine()
-        _state.update { it.copy(phase = Phase.LOADING_MODEL) }
+        // During live recognition the model loads while the caller is still speaking.
+        _state.update { if (it.phase == Phase.RECORDING) it else it.copy(phase = Phase.LOADING_MODEL) }
         val path = models.file(spec).absolutePath
         val loaded = when (spec.engine) {
             Engine.VOSK -> VoskEngine.load(path)
@@ -208,7 +258,7 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         }
         engine = loaded
         engineSpec = spec
-        _state.update { it.copy(phase = Phase.TRANSCRIBING) }
+        _state.update { if (it.phase == Phase.LOADING_MODEL) it.copy(phase = Phase.TRANSCRIBING) else it }
         return loaded
     }
 

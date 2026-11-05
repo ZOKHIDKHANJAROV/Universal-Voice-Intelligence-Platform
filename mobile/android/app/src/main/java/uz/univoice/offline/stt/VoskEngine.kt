@@ -18,11 +18,23 @@ class VoskEngine private constructor(private val model: Model) : SpeechEngine {
 
     override fun transcribe(audio: FloatArray, language: String, threads: Int): String {
         val pcm = ShortArray(audio.size) { (audio[it] * 32768f).coerceIn(-32768f, 32767f).toInt().toShort() }
-        return Recognizer(model, 16000f).use { recognizer ->
-            recognizer.acceptWaveForm(pcm, pcm.size)
-            JSONObject(recognizer.finalResult).optString("text")
-                .split(' ').filter { it.isNotBlank() && it != "[unk]" }.joinToString(" ")
+        return startStream(language).use { stream ->
+            stream.accept(pcm)
+            stream.finish()
         }
+    }
+
+    override fun startStream(language: String): SpeechStream = object : SpeechStream {
+        private val recognizer = Recognizer(model, 16000f)
+
+        override fun accept(audio: ShortArray) {
+            recognizer.acceptWaveForm(audio, audio.size)
+        }
+
+        override fun finish(): String = JSONObject(recognizer.finalResult).optString("text")
+            .split(' ').filter { it.isNotBlank() && it != "[unk]" }.joinToString(" ")
+
+        override fun close() = recognizer.close()
     }
 
     override fun close() = model.close()

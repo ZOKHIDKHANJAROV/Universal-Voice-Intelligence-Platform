@@ -20,7 +20,7 @@ class Recorder {
 
     /** Needs the RECORD_AUDIO permission, which the UI asks for first. */
     @SuppressLint("MissingPermission")
-    fun start() {
+    fun start(onChunk: ((ShortArray) -> Unit)? = null) {
         if (running) return
         val minSize = AudioRecord.getMinBufferSize(
             Wav.STT_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
@@ -40,16 +40,22 @@ class Recorder {
             val chunk = ByteArray(3200) // 100 ms
             while (running) {
                 val read = audio.read(chunk, 0, chunk.size)
-                if (read > 0) synchronized(buffer) { buffer.write(chunk, 0, read) }
+                if (read <= 0) continue
+                synchronized(buffer) { buffer.write(chunk, 0, read) }
+                if (onChunk != null) {
+                    val samples = ShortArray(read / 2)
+                    ByteBuffer.wrap(chunk, 0, read).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(samples)
+                    onChunk(samples)
+                }
             }
         }
     }
 
-    /** Stops and returns what was recorded. */
+    /** Stops and returns what was recorded; every chunk has gone to onChunk by then. */
     fun stop(): ShortArray {
         if (!running) return ShortArray(0)
         running = false
-        worker?.join(500)
+        worker?.join(1_000)
         record?.run { stop(); release() }
         record = null
         val bytes = synchronized(buffer) { buffer.toByteArray() }

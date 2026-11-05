@@ -6,6 +6,20 @@ import java.io.Closeable
 interface SpeechEngine : Closeable {
     /** Transcribes 16 kHz mono audio (floats in -1..1) spoken in [language]. */
     fun transcribe(audio: FloatArray, language: String, threads: Int): String
+
+    /**
+     * Recognition that runs while the caller speaks, so the text is ready
+     * moments after the button is released. Null when the engine cannot.
+     */
+    fun startStream(language: String): SpeechStream? = null
+}
+
+/** Audio goes in as it is recorded; [finish] returns the transcript. */
+interface SpeechStream : Closeable {
+    /** 16 kHz mono PCM16. */
+    fun accept(audio: ShortArray)
+
+    fun finish(): String
 }
 
 enum class Engine(val title: String) {
