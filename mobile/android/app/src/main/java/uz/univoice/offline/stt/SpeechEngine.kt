@@ -16,9 +16,16 @@ interface SpeechEngine : Closeable {
 
 /** Audio goes in as it is recorded; [finish] returns the transcript. */
 interface SpeechStream : Closeable {
-    /** 16 kHz mono PCM16. */
-    fun accept(audio: ShortArray)
+    /** 16 kHz mono PCM16. Returns true when the speaker finished a phrase (a pause). */
+    fun accept(audio: ShortArray): Boolean
 
+    /** The phrase in progress, not final. */
+    fun partial(): String
+
+    /** Phrases finished so far, joined; forgets them. */
+    fun take(): String
+
+    /** Flushes the phrase in progress and returns everything not yet taken. */
     fun finish(): String
 }
 

@@ -6,7 +6,11 @@ import android.media.MediaPlayer
 import java.io.File
 
 /** Plays one clip at a time: a recorded caller turn or a pre-recorded answer. */
-class Player(private val context: Context) {
+class Player(
+    private val context: Context,
+    /** USAGE_VOICE_COMMUNICATION when answering a call: it follows the call volume and route. */
+    private val usage: Int = AudioAttributes.USAGE_MEDIA,
+) {
     private var player: MediaPlayer? = null
 
     fun playFile(file: File, onDone: () -> Unit = {}) = play(onDone) { setDataSource(file.absolutePath) }
@@ -26,7 +30,7 @@ class Player(private val context: Context) {
         val media = MediaPlayer().apply {
             setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setUsage(usage)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build(),
             )

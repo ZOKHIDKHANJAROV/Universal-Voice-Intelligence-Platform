@@ -10,7 +10,7 @@ import java.nio.ByteOrder
 import kotlin.concurrent.thread
 
 /** Push-to-talk recording: 16 kHz mono PCM16, the rate Whisper works at. */
-class Recorder {
+class Recorder(private val source: Int = MediaRecorder.AudioSource.VOICE_RECOGNITION) {
     private var record: AudioRecord? = null
     private var worker: Thread? = null
     @Volatile private var running = false
@@ -27,7 +27,7 @@ class Recorder {
         )
         val audio = AudioRecord(
             // VOICE_RECOGNITION skips the call-oriented processing some phones apply.
-            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            source,
             Wav.STT_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
             maxOf(minSize, Wav.STT_RATE),
         )

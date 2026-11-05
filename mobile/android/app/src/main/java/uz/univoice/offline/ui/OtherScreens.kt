@@ -82,7 +82,8 @@ fun HistoryScreen(bot: BotViewModel, state: UiState, onBack: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text(format.format(Date(conversation.startedAt)) + if (conversation.id == state.conversationId) "  •" else "")
+                        val call = conversation.caller?.let { "📞 " + it.ifEmpty { "?" } + (if (conversation.callback) "  ↩" else "") + "  " } ?: ""
+                        Text(call + format.format(Date(conversation.startedAt)) + if (conversation.id == state.conversationId) "  •" else "")
                         Text(
                             conversation.preview.ifBlank { "—" } + "  (${conversation.turns})",
                             style = MaterialTheme.typography.bodySmall, maxLines = 1,
@@ -212,8 +213,26 @@ fun BenchmarkScreen(bot: BotViewModel, state: UiState, onBack: () -> Unit) {
 fun SettingsScreen(bot: BotViewModel, onBack: () -> Unit) {
     var phone by remember { mutableStateOf(bot.settings.operatorPhone) }
     var threads by remember { mutableIntStateOf(bot.settings.threads) }
+    var delay by remember { mutableIntStateOf(bot.settings.answerDelaySeconds) }
+    var maxCall by remember { mutableIntStateOf(bot.settings.maxCallSeconds) }
     Page("Sozlamalar · Настройки", onBack) { modifier ->
-        Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text("Avtojavob · Автоответчик", style = MaterialTheme.typography.titleMedium)
+            Text("Javob berishdan oldin kutish · Ждать до ответа: $delay s")
+            Slider(
+                value = delay.toFloat(),
+                onValueChange = { delay = it.toInt(); bot.settings.answerDelaySeconds = delay },
+                valueRange = 0f..10f,
+                steps = 9,
+            )
+            Text("Eng uzoq qoʻngʻiroq · Самый долгий звонок: ${maxCall / 60} min")
+            Slider(
+                value = (maxCall / 60).toFloat(),
+                onValueChange = { maxCall = it.toInt() * 60; bot.settings.maxCallSeconds = maxCall },
+                valueRange = 1f..10f,
+                steps = 8,
+            )
+            HorizontalDivider()
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it; bot.settings.operatorPhone = it },

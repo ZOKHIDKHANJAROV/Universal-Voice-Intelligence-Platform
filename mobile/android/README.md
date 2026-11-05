@@ -15,8 +15,59 @@ not at all if the model files are copied to the phone).
 | Chat | SQLite on the phone: each caller turn keeps its recording, transcript, language and recognition time; each bot turn its scenario, confidence and answer. History, replay, and an "export recordings" zip for `scripts/eval_stt.py`. |
 | Speed test | Menu → Tezlik testi / Тест скорости: recognition time on a bundled 6 s clip and the latest recordings. |
 
-Not in this version: automatic end-of-speech detection (push-to-talk
-instead), automatic language detection, live speech synthesis, iOS.
+Two ways to use it: hold the button and talk to the bot (chat), or switch on
+the **answering machine** and let it pick up the phone (below).
+
+Not in this version: live speech synthesis, iOS.
+
+## Answering machine
+
+The "Avtojavob · Автоответчик" switch under the title bar starts a
+foreground service (with a notification that has an off button). While it
+runs, the phone answers incoming calls by itself, offline:
+
+1. After a few rings (Settings: 0–10 s) it picks up and puts the call on speaker.
+2. It greets the caller in both languages, then listens with both Vosk models
+   at once (Uzbek and Russian); the more confident scenario wins, and the
+   answer comes in that language. On the 99 test phrases with silence around
+   them this finds the right scenario for 92 (93%).
+3. It plays the pre-recorded answer and asks "anything else?". Silence after
+   an answer ends the call with a goodbye; silence before one asks again
+   once, then says goodbye. The same timers as the server
+   (`REALTIME_NO_INPUT_SECONDS`, `REALTIME_FOLLOWUP_SECONDS`); the longest
+   call is a setting (1–10 min).
+4. A phone cannot transfer a call, so a request for an operator, or two
+   replies it did not understand, end with "your request is recorded, an
+   operator will call you back". That call is marked ↩ in the history, and
+   its chat shows a button that dials the caller back.
+5. Every call is a conversation in the history (caller's number, both sides'
+   words, the caller's recordings for the export), shown live if the app is open.
+
+Needs Android 9 or newer (earlier versions cannot hang up), the Vosk models
+(Whisper cannot stream), and these permissions, asked when the switch is
+turned on: microphone, phone, answer calls, notifications, and the call log
+(only to learn the caller's number; it can be refused). On Samsung phones also
+take the app out of "sleeping apps" so Android does not stop the service.
+
+Limits to know:
+
+- Android gives an app no way to play sound into a call or to hear the
+  caller's line. The phone is on speaker: the answers come out of its speaker
+  into its microphone, and the caller's voice comes out of the speaker into
+  the microphone. How well each side hears depends on the phone; the
+  speaker volume is set to maximum for the call. Some phones silence the
+  microphone for apps during calls: the chat then says "Mikrofon jim"
+  (microphone is mute), and the bot only greets.
+- The bot does not hear the caller while it talks (no interrupting).
+- The service stops when the phone restarts: switch it on again.
+- The callers' voices are recorded and kept on the phone; many countries
+  require telling callers. Put that in the greeting (`app/data/prompts.json`,
+  then `python -m scripts.export_mobile_prompts`).
+
+In a debug build the call can be driven without a caller or a microphone:
+push a WAV to `/sdcard/Android/data/uz.univoice.offline/files/call_input.wav`,
+then simulate the call in the emulator with `adb emu gsm call 998901234567`;
+the bot hears the file as the caller's first sentence.
 
 ## Build
 

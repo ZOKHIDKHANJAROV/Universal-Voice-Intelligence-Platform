@@ -22,6 +22,21 @@ class Settings(context: Context) {
         get() = runCatching { Engine.valueOf(prefs.getString("engine", null) ?: "VOSK") }.getOrDefault(Engine.VOSK)
         set(value) = prefs.edit().putString("engine", value.name).apply()
 
+    /** Seconds the phone rings before the answering machine picks up. */
+    var answerDelaySeconds: Int
+        get() = prefs.getInt("answer_delay_s", 2)
+        set(value) = prefs.edit().putInt("answer_delay_s", value.coerceIn(0, 10)).apply()
+
+    /** Longest call with the bot; it then says goodbye and hangs up. */
+    var maxCallSeconds: Int
+        get() = prefs.getInt("max_call_s", 300)
+        set(value) = prefs.edit().putInt("max_call_s", value.coerceIn(60, 600)).apply()
+
+    /** The answering machine is switched on (restored if Android restarts the service). */
+    var autoAnswer: Boolean
+        get() = prefs.getBoolean("auto_answer", false)
+        set(value) = prefs.edit().putBoolean("auto_answer", value).apply()
+
     /** whisper.cpp threads; 4 suits the big cores of most phones. */
     var threads: Int
         get() = prefs.getInt("threads", defaultThreads())

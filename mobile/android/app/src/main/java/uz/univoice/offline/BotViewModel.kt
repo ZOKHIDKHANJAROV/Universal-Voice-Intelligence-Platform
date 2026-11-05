@@ -17,6 +17,9 @@ import kotlinx.coroutines.withContext
 import uz.univoice.offline.audio.Player
 import uz.univoice.offline.audio.Recorder
 import uz.univoice.offline.audio.Wav
+import uz.univoice.offline.call.AutoAnswerService
+import uz.univoice.offline.call.CallPermissions
+import uz.univoice.offline.call.CallState
 import uz.univoice.offline.data.ChatStore
 import uz.univoice.offline.data.Conversation
 import uz.univoice.offline.data.Exporter
@@ -56,12 +59,20 @@ data class UiState(
     val notice: String? = null,
     val benchmark: List<BenchmarkRow> = emptyList(),
     val benchmarkRunning: Boolean = false,
+    /** The answering machine is on. */
+    val autoAnswer: Boolean = false,
+    /** A call is being answered right now. */
+    val inCall: Boolean = false,
+    /** The open conversation was a call: the caller's number ("" if unknown), else null. */
+    val callCaller: String? = null,
+    /** The open call needs a call back. */
+    val callNeedsCallback: Boolean = false,
 )
 
 class BotViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application
     val settings = Settings(application)
-    private val store = ChatStore(application)
+    private val store = ChatStore.get(application)
     private val models = ModelStore(application)
     private val prompts = PromptAudio(application.assets)
     private val recorder = Recorder()
@@ -98,12 +109,49 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     val promptCount: Int get() = prompts.count
 
     init {
+        viewModelScope.launch { CallState.status.collect { onCallStatus(it) } }
         refreshModels()
         val last = store.conversations().firstOrNull()
         if (last != null) openConversation(last.id) else newConversation()
     }
 
     fun conversations(): List<Conversation> = store.conversations()
+
+    private var shownCallRevision = -1
+
+    /** Shows the call being answered live in the chat, and keeps the switch and banner current. */
+    private fun onCallStatus(status: CallState.Status) {
+        _state.update { it.copy(autoAnswer = status.running, inCall = status.inCall) }
+        status.error?.let { message ->
+            _state.update { it.copy(notice = message) }
+            CallState.errorShown()
+        }
+        val id = status.conversationId ?: return
+        if (status.revision == shownCallRevision) return
+        shownCallRevision = status.revision
+        if (status.inCall && _state.value.conversationId != id) player.stop()
+        if (status.inCall || _state.value.conversationId == id) {
+            _state.update { it.copy(conversationId = id, messages = store.messages(id)) }
+            updateConversationInfo(id)
+        }
+    }
+
+    private fun updateConversationInfo(id: Long) {
+        val info = store.conversation(id)
+        _state.update { it.copy(callCaller = info?.caller, callNeedsCallback = info?.callback == true) }
+    }
+
+    /** What is missing before the answering machine can start, or null when it can. */
+    fun autoAnswerBlocker(): String? = when {
+        !CallPermissions.supported -> "Android 9+ kerak · Нужен Android 9 или новее"
+        Models.of(Engine.VOSK).none { models.isReady(it) } ->
+            "Avval Vosk modellarini yuklang (Modellar) · Сначала загрузите модели Vosk (Модели)"
+        else -> null
+    }
+
+    fun setAutoAnswer(on: Boolean) {
+        if (on) AutoAnswerService.start(app) else AutoAnswerService.stop(app)
+    }
 
     fun setLanguage(language: String) {
         settings.language = language
@@ -122,13 +170,14 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         val language = _state.value.language
         val greeting = matcher.prompt("greeting", language)
         val messageId = store.add(id, Role.BOT, greeting, language = language, audioKey = "greeting")
-        _state.update { it.copy(conversationId = id, messages = store.messages(id)) }
+        _state.update { it.copy(conversationId = id, messages = store.messages(id), callCaller = null, callNeedsCallback = false) }
         playAnswer(messageId, "greeting", language, greeting)
     }
 
     fun openConversation(id: Long) {
         player.stop()
         _state.update { it.copy(conversationId = id, messages = store.messages(id), playingId = null) }
+        updateConversationInfo(id)
     }
 
     fun deleteConversation(id: Long) {
@@ -145,6 +194,7 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startTalking() {
         val current = _state.value
+        if (current.inCall) return
         if (current.phase != Phase.IDLE && current.phase != Phase.PLAYING) return
         player.stop()
         val chunks = startLive(current.language)
@@ -386,6 +436,5 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         player.stop()
         if (recorder.isRecording) recorder.stop()
         engine?.close()
-        store.close()
     }
 }

@@ -27,17 +27,28 @@ data class Message(
     val createdAt: Long,
 )
 
-data class Conversation(val id: Long, val startedAt: Long, val turns: Int, val preview: String)
+data class Conversation(
+    val id: Long,
+    val startedAt: Long,
+    val turns: Int,
+    val preview: String,
+    /** An answered phone call: the caller's number, or "" when Android did not give it. Null for a chat. */
+    val caller: String? = null,
+    /** The caller's problem needs a person: call them back. */
+    val callback: Boolean = false,
+)
 
 /** Conversations and their messages, on the phone only. */
-class ChatStore(context: Context) : SQLiteOpenHelper(context, "chat.db", null, 1) {
+class ChatStore private constructor(context: Context) : SQLiteOpenHelper(context, "chat.db", null, 2) {
     val audioDir = File(context.filesDir, "recordings").apply { mkdirs() }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """CREATE TABLE conversations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                started_at INTEGER NOT NULL)""",
+                started_at INTEGER NOT NULL,
+                caller TEXT,
+                callback INTEGER NOT NULL DEFAULT 0)""",
         )
         db.execSQL(
             """CREATE TABLE messages (
@@ -57,13 +68,35 @@ class ChatStore(context: Context) : SQLiteOpenHelper(context, "chat.db", null, 1
         db.execSQL("CREATE INDEX messages_conversation ON messages(conversation_id, id)")
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE conversations ADD COLUMN caller TEXT")
+            db.execSQL("ALTER TABLE conversations ADD COLUMN callback INTEGER NOT NULL DEFAULT 0")
+        }
+    }
 
     override fun onConfigure(db: SQLiteDatabase) = db.setForeignKeyConstraintsEnabled(true)
 
     fun newConversation(): Long = writableDatabase.insert(
         "conversations", null, ContentValues().apply { put("started_at", System.currentTimeMillis()) },
     )
+
+    /** A conversation for an answered call; [caller] is "" when the number is unknown. */
+    fun newCall(caller: String): Long = writableDatabase.insert(
+        "conversations", null,
+        ContentValues().apply {
+            put("started_at", System.currentTimeMillis())
+            put("caller", caller)
+        },
+    )
+
+    fun markCallback(conversationId: Long) {
+        writableDatabase.update(
+            "conversations", ContentValues().apply { put("callback", 1) }, "id = ?", arrayOf(conversationId.toString()),
+        )
+    }
+
+    fun conversation(id: Long): Conversation? = conversations().firstOrNull { it.id == id }
 
     fun add(
         conversationId: Long,
@@ -112,13 +145,17 @@ class ChatStore(context: Context) : SQLiteOpenHelper(context, "chat.db", null, 1
     fun conversations(): List<Conversation> = readableDatabase.rawQuery(
         """SELECT c.id, c.started_at,
                   (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.role = 'CALLER'),
-                  (SELECT m.text FROM messages m WHERE m.conversation_id = c.id AND m.role = 'CALLER' ORDER BY m.id LIMIT 1)
+                  (SELECT m.text FROM messages m WHERE m.conversation_id = c.id AND m.role = 'CALLER' ORDER BY m.id LIMIT 1),
+                  c.caller, c.callback
            FROM conversations c ORDER BY c.id DESC""",
         null,
     ).use { cursor ->
         generateSequence {
             if (!cursor.moveToNext()) null
-            else Conversation(cursor.getLong(0), cursor.getLong(1), cursor.getInt(2), cursor.getString(3) ?: "")
+            else Conversation(
+                cursor.getLong(0), cursor.getLong(1), cursor.getInt(2), cursor.getString(3) ?: "",
+                caller = cursor.getString(4), callback = cursor.getInt(5) == 1,
+            )
         }.toList()
     }
 
@@ -144,4 +181,13 @@ class ChatStore(context: Context) : SQLiteOpenHelper(context, "chat.db", null, 1
 
     private fun Cursor.stringOrNull(column: String): String? =
         getColumnIndexOrThrow(column).let { if (isNull(it)) null else getString(it) }
+
+    companion object {
+        @Volatile private var instance: ChatStore? = null
+
+        /** One store for the chat screen and the call answering service. */
+        fun get(context: Context): ChatStore = instance ?: synchronized(this) {
+            instance ?: ChatStore(context.applicationContext).also { instance = it }
+        }
+    }
 }

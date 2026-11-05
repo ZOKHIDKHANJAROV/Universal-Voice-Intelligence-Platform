@@ -46,6 +46,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,6 +72,7 @@ import uz.univoice.offline.BotViewModel
 import uz.univoice.offline.ModelState
 import uz.univoice.offline.Phase
 import uz.univoice.offline.UiState
+import uz.univoice.offline.call.CallPermissions
 import uz.univoice.offline.data.Message
 import uz.univoice.offline.data.Role
 
@@ -124,7 +126,9 @@ fun ChatScreen(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit) 
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
+            AutoAnswerCard(bot, state, onNavigate, snackbar)
             ReadinessBanner(bot, state, onNavigate)
+            CallbackBanner(state)
             val listState = rememberLazyListState()
             LaunchedEffect(state.messages.size) {
                 if (state.messages.isNotEmpty()) listState.animateScrollToItem(state.messages.size - 1)
@@ -140,6 +144,74 @@ fun ChatScreen(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit) 
                 }
             }
             TalkButton(bot, state)
+        }
+    }
+}
+
+/** The switch that turns the answering machine on: it then picks up incoming calls by itself. */
+@Composable
+private fun AutoAnswerCard(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit, snackbar: SnackbarHostState) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var pending by remember { mutableStateOf(false) }
+    fun turnOn() {
+        val blocker = bot.autoAnswerBlocker()
+        if (blocker != null) {
+            scope.launch { snackbar.showSnackbar(blocker) }
+            return
+        }
+        bot.setAutoAnswer(true)
+    }
+    val permissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        if (pending) {
+            pending = false
+            if (CallPermissions.missing(context).isEmpty()) turnOn()
+            else scope.launch { snackbar.showSnackbar("Ruxsatlar kerak: telefon, mikrofon · Нужны разрешения: телефон, микрофон") }
+        }
+    }
+    Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Avtojavob · Автоответчик", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    when {
+                        state.inCall -> "Qoʻngʻiroq davom etmoqda · Идёт звонок" +
+                            (state.callCaller?.takeIf { it.isNotEmpty() }?.let { ": $it" } ?: "")
+                        state.autoAnswer -> "Yoqilgan: qoʻngʻiroqni kutmoqda · Включён: ждёт звонок"
+                        else -> "Oʻchirilgan · Выключен"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Switch(
+                checked = state.autoAnswer,
+                onCheckedChange = { on ->
+                    when {
+                        !on -> bot.setAutoAnswer(false)
+                        CallPermissions.missing(context).isNotEmpty() -> {
+                            pending = true
+                            permissions.launch(CallPermissions.requested())
+                        }
+                        else -> turnOn()
+                    }
+                },
+            )
+        }
+    }
+}
+
+/** An answered call that ended with "an operator will call you back": the way to do it. */
+@Composable
+private fun CallbackBanner(state: UiState) {
+    val context = LocalContext.current
+    val number = state.callCaller?.takeIf { it.isNotEmpty() && state.callNeedsCallback } ?: return
+    Surface(color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("Qayta qoʻngʻiroq kerak · Нужен перезвон: $number", Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+            TextButton(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number"))) }) {
+                Icon(Icons.Default.Call, null)
+                Text(" Qoʻngʻiroq · Позвонить")
+            }
         }
     }
 }
@@ -225,8 +297,8 @@ private fun TalkButton(bot: BotViewModel, state: UiState) {
     val context = LocalContext.current
     var permissionAsked by remember { mutableStateOf(false) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { permissionAsked = true }
-    val busy = state.phase == Phase.TRANSCRIBING || state.phase == Phase.LOADING_MODEL
-    val label = when (state.phase) {
+    val busy = state.inCall || state.phase == Phase.TRANSCRIBING || state.phase == Phase.LOADING_MODEL
+    val label = if (state.inCall) "Qoʻngʻiroq davom etmoqda · Идёт звонок" else when (state.phase) {
         Phase.RECORDING -> "Gapiring… qoʻyib yuboring · Говорите… отпустите"
         Phase.LOADING_MODEL -> "Model yuklanmoqda… · Загрузка модели…"
         Phase.TRANSCRIBING -> "Tanilmoqda… · Распознаю…"
