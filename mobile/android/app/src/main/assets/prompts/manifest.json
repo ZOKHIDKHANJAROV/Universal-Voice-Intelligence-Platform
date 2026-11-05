@@ -180,6 +180,30 @@
    "language": "ru",
    "text": "Секунду, уточняю.",
    "file": "ru-4923d6d45fa0f66e.wav"
+  },
+  {
+   "key": "repeat",
+   "language": "uz",
+   "text": "Kechirasiz, tushunmadim. Iltimos, muammoingizni boshqacha so'zlar bilan ayting.",
+   "file": "uz-709eddc86c49f1c3.wav"
+  },
+  {
+   "key": "repeat",
+   "language": "ru",
+   "text": "Извините, не понял. Пожалуйста, опишите проблему другими словами.",
+   "file": "ru-19504f6e7acf5658.wav"
+  },
+  {
+   "key": "callback",
+   "language": "uz",
+   "text": "Muammoingiz qayd etildi. Operator tez orada sizga qayta qo'ng'iroq qiladi. Xayr!",
+   "file": "uz-bc6f79d82d59508c.wav"
+  },
+  {
+   "key": "callback",
+   "language": "ru",
+   "text": "Ваше обращение записано. Оператор скоро вам перезвонит. До свидания!",
+   "file": "ru-6c887c5b65d92a58.wav"
   }
  ]
 }
