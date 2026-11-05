@@ -203,6 +203,34 @@ all 7 noise clips empty, no Uzbek phrase lost to Russian. On the 350-clip set
 short Russian 148/150 vs 147/150; the noise rule costs 2-3 short Uzbek
 clips, which come back as "not recognized" instead of a wrong answer.
 
+## A light engine for weak phones
+
+The phone only has to pick a scenario: the answer is a pre-recorded file. So
+engines were compared by the scenario they lead to, not by WER
+(`scripts/eval_keyword_stt.py`), on 99 phrases synthesized with the bot's own
+voices (61 Uzbek, 38 Russian; 29 should reach no scenario: other topics and
+problems outside the machine). Speed is recognition time over audio length on
+one desktop CPU core; the server ran on the GPU.
+
+| Engine | Size | Scenario right | Speed |
+|---|---|---|---|
+| Vosk small 0.22, full vocabulary | 51 MB uz / 46 MB ru | **96/99** | ×0.18 |
+| Vosk small, only words the scenario keywords match (4174 uz / 1941 ru) | same | 80/99 | ×0.03 |
+| Server: Whisper large-v3 + Uzbek fine-tune | 3 GB + 1.5 GB | 95/99 | ×0.28 (GPU) |
+
+Limiting Vosk to the scenario words was the obvious "recognize only the
+needed words" design, and it is the worst: with nothing else allowed, every
+sound becomes the nearest keyword. "Сколько стоит литр воды?" came out as a
+taste complaint, "Водитель уже приехал" as a payment one; 7 of the 29
+no-scenario phrases got a scenario. With the whole vocabulary Vosk missed
+only "вода не идет" (heard "не дед"), "Пулимни еб қўйди" ("ep") and "под
+аппаратом лужа". On a real 6 s Uzbek recording it wrote "internet
+ishlamayapti modelda qizil chiroq yonib turibdi" (one word off) in 0.41 s.
+
+So the Android app uses full-vocabulary Vosk by default; Whisper stays as an
+option. The test set is synthesized speech, so real phone recordings (Menu →
+export) are the next check.
+
 ## Not measured yet
 
 - Real call audio and vending vocabulary. FLEURS is read news-style speech.
