@@ -38,5 +38,13 @@
   "thinking": {
     "uz": "Bir daqiqa, tekshirib ko'raman.",
     "ru": "Секунду, уточняю."
+  },
+  "repeat": {
+    "uz": "Kechirasiz, tushunmadim. Iltimos, muammoingizni boshqacha so'zlar bilan ayting.",
+    "ru": "Извините, не понял. Пожалуйста, опишите проблему другими словами."
+  },
+  "callback": {
+    "uz": "Muammoingiz qayd etildi. Operator tez orada sizga qayta qo'ng'iroq qiladi. Xayr!",
+    "ru": "Ваше обращение записано. Оператор скоро вам перезвонит. До свидания!"
   }
 }

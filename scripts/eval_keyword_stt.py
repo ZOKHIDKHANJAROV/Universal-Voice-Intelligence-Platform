@@ -9,6 +9,8 @@ pre-recorded file. This runs every clip of a manifest through
   - vosk-grammar: the same model limited to the words the scenarios use
                   (every vocabulary word a scenario keyword matches, the rest
                   becomes [unk]);
+  - vosk-auto:    both models listen, the more confident scenario wins (what
+                  the phone does when it does not know the caller's language);
   - server:       optional, the running API's /console/analyze (Whisper),
 
 then through ScenarioService with the intent threshold, and prints how many
@@ -128,6 +130,30 @@ class Vosk:
         return " ".join(w for w in text.split() if w != "[unk]")
 
 
+class Auto:
+    """Both Vosk models listen; the answer with the higher confidence wins.
+
+    What the phone does when the caller's language is not known (an incoming
+    call): a tie goes to the model whose own language the scenario is in.
+    """
+
+    def __init__(self, service: ScenarioService, models: dict[str, Vosk]) -> None:
+        self.service = service
+        self.models = models
+
+    def resolve(self, pcm: bytes) -> tuple[str, str | None, float]:
+        best = ("", None, 0.0, -1)
+        for language, model in self.models.items():
+            text = model.transcribe(pcm)
+            scenario, confidence = self.service.resolve(text, language)
+            own = 1 if scenario and scenario.language == language else 0
+            if scenario and (confidence, own) > (best[2], best[3]):
+                best = (text, scenario.id, confidence, own)
+            elif not best[0]:
+                best = (text, None, 0.0, -1)
+        return best[0], best[1], best[2]
+
+
 def server_transcribe(url: str, path: Path, language: str) -> str:
     import httpx
 
@@ -145,6 +171,8 @@ def main() -> int:
     parser.add_argument("--vosk-uz", type=Path)
     parser.add_argument("--vosk-ru", type=Path)
     parser.add_argument("--server", help="API base URL, e.g. http://localhost:8000")
+    parser.add_argument("--pad", action="store_true",
+                        help="add 0.5 s of silence before and 1 s after every clip, as on a real call")
     parser.add_argument("--show", choices=("errors", "all", "none"), default="errors")
     args = parser.parse_args()
 
@@ -157,23 +185,34 @@ def main() -> int:
             print(f"[{language}] grammar: {len(words)} words")
             engines.setdefault("vosk-full", {})[language] = Vosk(model_dir, None)
             engines.setdefault("vosk-grammar", {})[language] = Vosk(model_dir, words)
+    auto = None
+    if args.vosk_uz and args.vosk_ru:
+        auto = Auto(service, {"uz": engines["vosk-full"]["uz"], "ru": engines["vosk-full"]["ru"]})
+        engines["vosk-auto"] = {"uz": "auto", "ru": "auto"}
     if args.server:
         engines["server"] = {"uz": "server", "ru": "server"}
 
     totals = {name: {"ok": 0, "n": 0, "seconds": 0.0, "audio": 0.0} for name in engines}
     for row in rows:
         pcm = pcm16k(row["audio"])
+        if args.pad:
+            pcm = bytes(16000) + pcm + bytes(32000)
         duration = len(pcm) / 32000
         for name, by_language in engines.items():
             engine = by_language.get(row["language"])
             if engine is None:
                 continue
             start = time.perf_counter()
-            text = (server_transcribe(args.server, row["audio"], row["language"]) if engine == "server"
-                    else engine.transcribe(pcm))
-            seconds = time.perf_counter() - start
-            scenario, confidence = service.resolve(text, row["language"])
-            got = scenario.id if scenario and confidence >= MIN_CONFIDENCE else None
+            if engine == "auto":
+                text, scenario_id, confidence = auto.resolve(pcm)
+                seconds = time.perf_counter() - start
+                got = scenario_id if confidence >= MIN_CONFIDENCE else None
+            else:
+                text = (server_transcribe(args.server, row["audio"], row["language"]) if engine == "server"
+                        else engine.transcribe(pcm))
+                seconds = time.perf_counter() - start
+                scenario, confidence = service.resolve(text, row["language"])
+                got = scenario.id if scenario and confidence >= MIN_CONFIDENCE else None
             ok = got == (row["scenario"] or None)
             total = totals[name]
             total["ok"] += ok; total["n"] += 1; total["seconds"] += seconds; total["audio"] += duration

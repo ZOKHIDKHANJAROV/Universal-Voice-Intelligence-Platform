@@ -227,6 +227,18 @@ only "вода не идет" (heard "не дед"), "Пулимни еб қўй
 аппаратом лужа". On a real 6 s Uzbek recording it wrote "internet
 ishlamayapti modelda qizil chiroq yonib turibdi" (one word off) in 0.41 s.
 
+A real call has silence around the words, which the tight clips above lack.
+With 0.5 s before and 1 s after every clip (`--pad`) the full-vocabulary
+result is 92/99 (93%): the shortest phrase, "Suv chiqmayapti", became "sud
+hukmi artdi" for the Uzbek model, and "suv chiqmavotti aka" and the
+Cyrillic-written Uzbek clip failed the same way.
+
+When the language is not known, which is the case on a phone call, both
+models listen and the more confident scenario wins (`vosk-auto`): the same
+96/99 on the tight clips and 92/99 padded, so the caller does not have to
+choose a language. The cost is twice the work, ×0.49 of audio length on one
+desktop core.
+
 So the Android app uses full-vocabulary Vosk by default; Whisper stays as an
 option. The test set is synthesized speech, so real phone recordings (Menu →
 export) are the next check.
