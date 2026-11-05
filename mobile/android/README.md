@@ -84,7 +84,8 @@ fallback.
 1. Menu → Modellar / Модели: Vosk is chosen; download the Uzbek and
    Russian models (~100 MB together) or import their .zip files
    (`vosk-model-small-uz-0.22.zip` and `vosk-model-small-ru-0.22.zip`
-   from alphacephei.com, checked by sha256 and unpacked by the app).
+   from alphacephei.com, mirrored on Hugging Face as `ZOKHID/univoice-vosk`;
+   checked by sha256 and unpacked by the app).
    Whisper is there for phones fast enough for it.
 2. Menu → Sozlamalar / Настройки: the operator's phone number for the
    "call an operator" button shown when the bot did not understand.

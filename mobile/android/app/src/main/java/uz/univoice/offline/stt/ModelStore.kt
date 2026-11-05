@@ -24,14 +24,15 @@ data class ModelSpec(
 )
 
 object Models {
-    // Official small models (Apache 2.0) from https://alphacephei.com/vosk/models.
+    // Official small models (Apache 2.0) from https://alphacephei.com/vosk/models,
+    // mirrored unchanged on Hugging Face: the original server is slow and stalls.
     val VOSK_UZ = ModelSpec(
         id = "vosk_uz",
         engine = Engine.VOSK,
         language = "uz",
         title = "Oʻzbekcha (Vosk small 0.22)",
         fileName = "vosk-model-small-uz-0.22.zip",
-        defaultUrl = "https://alphacephei.com/vosk/models/vosk-model-small-uz-0.22.zip",
+        defaultUrl = "https://huggingface.co/ZOKHID/univoice-vosk/resolve/main/vosk-model-small-uz-0.22.zip",
         sizeBytes = 51_061_189,
         sha256 = "ffb77328df64f222a3fac6e368e0baff9dc1258f11b6b5ca5deaa82e5f688e6a",
     )
@@ -42,7 +43,7 @@ object Models {
         language = "ru",
         title = "Русский (Vosk small 0.22)",
         fileName = "vosk-model-small-ru-0.22.zip",
-        defaultUrl = "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip",
+        defaultUrl = "https://huggingface.co/ZOKHID/univoice-vosk/resolve/main/vosk-model-small-ru-0.22.zip",
         sizeBytes = 46_236_750,
         sha256 = "961d5ff98a17f4aa6de69864d0aa71fa5bac682301d2b5d17a3f24c5c99a46d4",
     )
