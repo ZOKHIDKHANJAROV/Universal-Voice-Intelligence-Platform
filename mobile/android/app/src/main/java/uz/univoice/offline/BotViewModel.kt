@@ -4,7 +4,10 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,10 +24,13 @@ import uz.univoice.offline.data.Message
 import uz.univoice.offline.data.PromptAudio
 import uz.univoice.offline.data.Role
 import uz.univoice.offline.scenario.ScenarioMatcher
+import uz.univoice.offline.stt.Engine
 import uz.univoice.offline.stt.Hallucinations
 import uz.univoice.offline.stt.ModelSpec
 import uz.univoice.offline.stt.ModelStore
 import uz.univoice.offline.stt.Models
+import uz.univoice.offline.stt.SpeechEngine
+import uz.univoice.offline.stt.VoskEngine
 import uz.univoice.offline.stt.WhisperEngine
 import java.io.File
 
@@ -41,6 +47,7 @@ data class BenchmarkRow(val name: String, val audioSeconds: Double, val sttMilli
 
 data class UiState(
     val language: String = "uz",
+    val engine: Engine = Engine.VOSK,
     val conversationId: Long = 0,
     val messages: List<Message> = emptyList(),
     val phase: Phase = Phase.IDLE,
@@ -64,18 +71,30 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         ScenarioMatcher.parsePrompts(asset("prompts.json")),
     )
 
-    // whisper.cpp contexts are not thread-safe and the Uzbek model takes ~0.6 GB
+    // Neither engine is thread-safe and the Whisper Uzbek model takes ~0.6 GB
     // of RAM: one model loaded at a time, used from one thread.
     @OptIn(ExperimentalCoroutinesApi::class)
     private val sttDispatcher = Dispatchers.Default.limitedParallelism(1)
-    private var engine: WhisperEngine? = null
-    private var engineLanguage: String? = null
+    private var engine: SpeechEngine? = null
+    private var engineSpec: ModelSpec? = null
     private var recordingStartedAt = 0L
 
-    private val _state = MutableStateFlow(UiState(language = settings.language))
+    // Streaming recognition of the current recording (Vosk only).
+    private var liveChunks: Channel<ShortArray>? = null
+    private var liveText: Deferred<String?>? = null
+
+    private val _state = MutableStateFlow(UiState(language = settings.language, engine = settings.engine))
     val state: StateFlow<UiState> = _state
 
-    val sttAvailable: Boolean get() = WhisperEngine.available
+    val sttAvailable: Boolean get() = isAvailable(_state.value.engine)
+
+    fun isAvailable(engine: Engine): Boolean = when (engine) {
+        Engine.VOSK -> VoskEngine.available
+        Engine.WHISPER -> WhisperEngine.available
+    }
+
+    /** The model the chosen engine needs for [language]. */
+    fun activeModel(language: String = _state.value.language): ModelSpec = Models.forLanguage(_state.value.engine, language)
     val promptCount: Int get() = prompts.count
 
     init {
@@ -89,6 +108,12 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     fun setLanguage(language: String) {
         settings.language = language
         _state.update { it.copy(language = language) }
+    }
+
+    fun setEngine(engine: Engine) {
+        settings.engine = engine
+        _state.update { it.copy(engine = engine) }
+        viewModelScope.launch(sttDispatcher) { unloadEngine() }
     }
 
     fun newConversation() {
@@ -122,18 +147,53 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         val current = _state.value
         if (current.phase != Phase.IDLE && current.phase != Phase.PLAYING) return
         player.stop()
-        runCatching { recorder.start() }
+        val chunks = startLive(current.language)
+        runCatching { recorder.start(chunks?.let { channel -> { samples: ShortArray -> channel.trySend(samples) } }) }
             .onSuccess {
                 recordingStartedAt = System.currentTimeMillis()
                 _state.update { it.copy(phase = Phase.RECORDING, playingId = null) }
             }
-            .onFailure { e -> _state.update { it.copy(notice = "Mikrofon: ${e.message}") } }
+            .onFailure { e ->
+                stopLive()?.cancel()
+                _state.update { it.copy(notice = "Mikrofon: ${e.message}") }
+            }
+    }
+
+    /**
+     * Starts recognizing while the caller speaks; returns where the recorder
+     * sends its audio, or null when the engine cannot stream (Whisper) or
+     * the model is missing, and the recording is then recognized after release.
+     */
+    private fun startLive(language: String): Channel<ShortArray>? {
+        val spec = activeModel(language)
+        if (spec.engine != Engine.VOSK || !isAvailable(spec.engine) || !models.isReady(spec)) return null
+        val chunks = Channel<ShortArray>(Channel.UNLIMITED)
+        liveChunks = chunks
+        liveText = viewModelScope.async(sttDispatcher) {
+            runCatching {
+                // Chunks wait in the channel while the model loads (first use only).
+                loadEngine(language).startStream(language)?.use { stream ->
+                    for (samples in chunks) stream.accept(samples)
+                    stream.finish()
+                }
+            }.getOrNull()
+        }
+        return chunks
+    }
+
+    /** Ends the audio of the live recognition and returns its pending transcript. */
+    private fun stopLive(): Deferred<String?>? {
+        liveChunks?.close()
+        liveChunks = null
+        return liveText.also { liveText = null }
     }
 
     fun stopTalking() {
         if (_state.value.phase != Phase.RECORDING) return
         val samples = recorder.stop()
+        val live = stopLive()
         if (samples.size < Wav.STT_RATE * 3 / 10) {
+            live?.cancel()
             // Shorter than 0.3 s: a tap, not speech.
             _state.update { it.copy(phase = Phase.IDLE, notice = "Tugmani bosib turib gapiring · Удерживайте кнопку, пока говорите") }
             return
@@ -145,7 +205,14 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
             val audioFile = File(store.audioDir, "c$conversationId-${recordingStartedAt}.wav")
             withContext(Dispatchers.IO) { Wav.write(audioFile, samples) }
 
-            val result = runCatching { transcribe(Wav.toFloat(samples), language) }
+            val released = System.nanoTime()
+            val streamed = live?.await()
+            val result = if (streamed != null) {
+                // Recognition time here is the wait after release: what the caller feels.
+                Result.success(streamed to (System.nanoTime() - released) / 1_000_000)
+            } else {
+                runCatching { transcribe(Wav.toFloat(samples), language) }
+            }
             val (raw, millis) = result.getOrElse { e ->
                 _state.update { it.copy(phase = Phase.IDLE, notice = e.message) }
                 store.add(conversationId, Role.CALLER, "", language = language, audioPath = audioFile.absolutePath)
@@ -176,19 +243,29 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
             text to (System.nanoTime() - started) / 1_000_000
         }
 
-    private fun loadEngine(language: String): WhisperEngine {
-        check(WhisperEngine.available) { "Bu ilovada nutqni tanish yoʻq · В этой сборке нет распознавания речи" }
-        engine?.let { if (engineLanguage == language) return it }
-        val spec = Models.forLanguage(language)
+    private fun loadEngine(language: String): SpeechEngine {
+        val spec = activeModel(language)
+        check(isAvailable(spec.engine)) { "Bu ilovada nutqni tanish yoʻq · В этой сборке нет распознавания речи" }
+        engine?.let { if (engineSpec == spec) return it }
         check(models.isReady(spec)) { "Model yuklanmagan · Модель не загружена: ${spec.title}" }
+        unloadEngine()
+        // During live recognition the model loads while the caller is still speaking.
+        _state.update { if (it.phase == Phase.RECORDING) it else it.copy(phase = Phase.LOADING_MODEL) }
+        val path = models.file(spec).absolutePath
+        val loaded = when (spec.engine) {
+            Engine.VOSK -> VoskEngine.load(path)
+            Engine.WHISPER -> WhisperEngine.load(path)
+        }
+        engine = loaded
+        engineSpec = spec
+        _state.update { if (it.phase == Phase.LOADING_MODEL) it.copy(phase = Phase.TRANSCRIBING) else it }
+        return loaded
+    }
+
+    private fun unloadEngine() {
         engine?.close()
         engine = null
-        _state.update { it.copy(phase = Phase.LOADING_MODEL) }
-        val loaded = WhisperEngine.load(models.file(spec).absolutePath)
-        engine = loaded
-        engineLanguage = language
-        _state.update { it.copy(phase = Phase.TRANSCRIBING) }
-        return loaded
+        engineSpec = null
     }
 
     // ----- playback -----
@@ -230,8 +307,8 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshModels() {
         _state.update { s ->
             s.copy(models = Models.all.associate { spec ->
-                val current = s.models[spec.language]
-                spec.language to when {
+                val current = s.models[spec.id]
+                spec.id to when {
                     current is ModelState.Busy -> current
                     models.isReady(spec) -> ModelState.Ready
                     else -> current as? ModelState.Failed ?: ModelState.Missing
@@ -246,16 +323,14 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteModel(spec: ModelSpec) {
         viewModelScope.launch(sttDispatcher) {
-            if (engineLanguage == spec.language) {
-                engine?.close(); engine = null; engineLanguage = null
-            }
+            if (engineSpec == spec) unloadEngine()
             models.delete(spec)
             setModel(spec, ModelState.Missing)
         }
     }
 
     private fun runModelJob(spec: ModelSpec, job: ((Long, Long) -> Unit) -> Unit) {
-        if (_state.value.models[spec.language] is ModelState.Busy) return
+        if (_state.value.models[spec.id] is ModelState.Busy) return
         setModel(spec, ModelState.Busy(0, spec.sizeBytes ?: -1))
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { job { done, total -> setModel(spec, ModelState.Busy(done, total)) } }
@@ -265,7 +340,7 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun setModel(spec: ModelSpec, value: ModelState) =
-        _state.update { it.copy(models = it.models + (spec.language to value)) }
+        _state.update { it.copy(models = it.models + (spec.id to value)) }
 
     // ----- export and benchmark -----
 

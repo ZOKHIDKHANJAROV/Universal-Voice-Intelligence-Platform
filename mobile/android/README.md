@@ -8,7 +8,8 @@ not at all if the model files are copied to the phone).
 
 | Part | How it works on the phone |
 |---|---|
-| Speech recognition | [whisper.cpp](https://github.com/ggml-org/whisper.cpp) through JNI. Uzbek: the project's fine-tune ([ZOKHID/univoice-stt-uz](https://huggingface.co/ZOKHID/univoice-stt-uz)) converted to ggml q5_0 (~0.5 GB). Russian: Whisper small q5_1 (190 MB), because the Uzbek model has forgotten Russian. The language is picked with the UZ / RU switch. |
+| Speech recognition (default) | [Vosk](https://alphacephei.com/vosk/) small models, ~50 MB per language (Uzbek 51 MB, Russian 46 MB zip), several times faster than real time even on old phones. On 99 synthesized scenario phrases it reaches the right scenario as often as the server's Whisper large-v3 (96 vs 95, `docs/stt-evaluation.md`). |
+| Speech recognition (optional) | Modellar → Whisper: [whisper.cpp](https://github.com/ggml-org/whisper.cpp) through JNI. Uzbek: the project's fine-tune ([ZOKHID/univoice-stt-uz](https://huggingface.co/ZOKHID/univoice-stt-uz)) converted to ggml q5_0 (~0.5 GB). Russian: Whisper small q5_1 (190 MB), because the Uzbek model has forgotten Russian. The language is picked with the UZ / RU switch. |
 | Scenario | A Kotlin port of `app/services/scenario_service.py`; `scenarios.json` and `prompts.json` are packed from `app/data` at build time, so the phone and the call bot answer alike. |
 | Answer | WAV files rendered ahead of time by `scripts/export_mobile_prompts.py` into `app/src/main/assets/prompts`. |
 | Chat | SQLite on the phone: each caller turn keeps its recording, transcript, language and recognition time; each bot turn its scenario, confidence and answer. History, replay, and an "export recordings" zip for `scripts/eval_stt.py`. |
@@ -28,8 +29,8 @@ Needs the Android SDK with NDK `29.0.14206865` and CMake `4.1.2`
        git -C mobile/android/third_party/whisper.cpp checkout v1.9.5
 
    (on a fresh clone of this repository: `git submodule update --init`).
-   Without it the app still builds and runs — chat, scenarios, answers — but
-   shows "no speech recognition in this build".
+   Without it the app still builds and runs with Vosk, the default engine;
+   only the Whisper engine is missing.
 
 2. Answers (from the repository root; TTS services running as for
    `make render-prompts`, or with `--from-cache` to reuse the 8 kHz call audio):
@@ -80,7 +81,12 @@ fallback.
 
 (or copy the APK to the phone and open it; allow installing from this source).
 
-1. Menu → Modellar / Модели: download or import the Uzbek and Russian models.
+1. Menu → Modellar / Модели: Vosk is chosen; download the Uzbek and
+   Russian models (~100 MB together) or import their .zip files
+   (`vosk-model-small-uz-0.22.zip` and `vosk-model-small-ru-0.22.zip`
+   from alphacephei.com, mirrored on Hugging Face as `ZOKHID/univoice-vosk`;
+   checked by sha256 and unpacked by the app).
+   Whisper is there for phones fast enough for it.
 2. Menu → Sozlamalar / Настройки: the operator's phone number for the
    "call an operator" button shown when the bot did not understand.
 3. Menu → Tezlik testi: run it on each phone you plan to use. "×" is
@@ -88,7 +94,8 @@ fallback.
    too late to feel like a conversation.
 4. Hold the microphone button, speak, release.
 
-The model needs a 64-bit phone with about 1.5 GB of free memory.
+Vosk needs about 300 MB of memory. The Whisper Uzbek model needs about
+1.5 GB of free memory.
 
 ## Exported recordings
 
