@@ -18,6 +18,15 @@ class Scenario(BaseModel):
     # Words naming the subject (water, money, machine). They raise confidence
     # but never select a scenario on their own: "suv" alone is not a complaint.
     context_keywords: list[str] = Field(default_factory=list)
+    # Problem words too general to trust alone ("ishlama*", "течет": a lift or
+    # the internet can be broken too). They count only next to a context keyword.
+    weak_keywords: list[str] = Field(default_factory=list)
+    # Words that put the problem somewhere else (a cash machine, a flat's
+    # kitchen, hot water); any of them rules the scenario out.
+    exclude_keywords: list[str] = Field(default_factory=list)
+    # Beats matching scenarios of lower priority whatever their score: "it took
+    # my money and gave no water" is a payment problem, not a water one.
+    priority: int = 0
     # "transfer": hand the call to an operator instead of answering.
     action: str | None = None
     steps: list[ScenarioStep]

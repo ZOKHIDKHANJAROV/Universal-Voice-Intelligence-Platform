@@ -58,7 +58,18 @@
     ["У воды странный вкус", "ru", "vending_taste_ru"],
     ["Неприятный запах у воды", "ru", "vending_taste_ru"],
     ["Suv chiqmayotti", "uz", "vending_no_water_uz"],
-    ["Apparat ishlamadi", "uz", "vending_no_water_uz"]
+    ["Apparat ishlamadi", "uz", "vending_no_water_uz"],
+    ["apparatdan suv chiqmayapti", "uz", "vending_no_water_uz"],
+    ["pul tashladim lekin suv kelmadi", "uz", "vending_no_water_uz"],
+    ["apparat ishlamayapti", "uz", "vending_no_water_uz"],
+    ["pulimni yeb qo'ydi suv bermadi", "uz", "vending_payment_uz"],
+    ["kartadan pul yechildi lekin suv chiqmadi", "uz", "vending_payment_uz"],
+    ["apparat tagidan suv oqib yotibdi", "uz", "vending_leak_uz"],
+    ["apparatdan suv oqyapti", "uz", "vending_leak_uz"],
+    ["автомат не работает", "ru", "vending_no_water_ru"],
+    ["деньги списались а воды нет", "ru", "vending_payment_ru"],
+    ["автомат не вернул деньги", "ru", "vending_payment_ru"],
+    ["из автомата течёт вода", "ru", "vending_leak_ru"]
   ],
   "not_complaints": [
     ["Assalomu alaykum, men suv apparati haqida qo'ng'iroq qilyapman", "uz"],
@@ -79,5 +90,18 @@
     ["Bugun ishlamayman", "uz"],
     ["Uydan chiqmayapman", "uz"],
     ["Kecha nega chiqmadingiz?", "uz"]
+  ],
+  "elsewhere": [
+    ["internet ishlamayapti modemda qizil chiroq yonib turibdi", "uz"],
+    ["telefonim ishlamayapti", "uz"],
+    ["lift ishlamayapti", "uz"],
+    ["bankomat kartamni qaytarib bermadi", "uz"],
+    ["issiq suv kelmayapti uyda", "uz"],
+    ["kran oqyapti oshxonada", "uz"],
+    ["интернет не работает", "ru"],
+    ["лифт не работает", "ru"],
+    ["горячей воды нет дома", "ru"],
+    ["банкомат не вернул карту", "ru"],
+    ["кран на кухне течёт", "ru"]
   ]
 }

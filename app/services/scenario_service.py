@@ -218,16 +218,20 @@ class ScenarioService:
         tokens: list[str], latin_tokens: list[str], scenarios: list[Scenario]
     ) -> tuple[Scenario, int, int] | None:
         best: tuple[Scenario, int, int] | None = None
-        best_score = 0.0
+        best_rank = (0, 0.0)
         for scenario in scenarios:
             words = latin_tokens if scenario.language == "uz" else tokens
+            if any(keyword_matches(k, words) for k in scenario.exclude_keywords):
+                continue
             problems = sum(keyword_matches(k, words) for k in scenario.keywords)
+            context = sum(keyword_matches(k, words) for k in scenario.context_keywords)
+            if context:
+                problems += sum(keyword_matches(k, words) for k in scenario.weak_keywords)
             if not problems:
                 continue
-            context = sum(keyword_matches(k, words) for k in scenario.context_keywords)
-            score = problems + 0.25 * context
-            if score > best_score:
-                best_score = score
+            rank = (scenario.priority, problems + 0.25 * context)
+            if best is None or rank > best_rank:
+                best_rank = rank
                 best = (scenario, problems, context)
         return best
 
@@ -237,7 +241,7 @@ def _dump(scenarios: list[dict]) -> str:
     blocks = []
     for scenario in scenarios:
         block = json.dumps(scenario, ensure_ascii=False, indent=2)
-        for key in ("keywords", "context_keywords"):
+        for key in ("keywords", "context_keywords", "weak_keywords", "exclude_keywords"):
             expanded = json.dumps(scenario[key], ensure_ascii=False, indent=2).replace("\n", "\n  ")
             block = block.replace(f'"{key}": {expanded}', f'"{key}": {json.dumps(scenario[key], ensure_ascii=False)}')
         blocks.append("\n".join("  " + line for line in block.split("\n")))

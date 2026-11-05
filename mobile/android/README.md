@@ -46,6 +46,10 @@ Needs the Android SDK with NDK `29.0.14206865` and CMake `4.1.2`
    Cortex-A55/A75 or newer cores; that build crashes on older (armv8.0)
    phones, so measure with the default build first.
 
+   `-Pemulator` adds an x86_64 library for the Android emulator: its ARM
+   translation crashes inside whisper.cpp (SIGILL). Recognition on the
+   emulator only checks that it works; measure speed on real phones.
+
 ## Uzbek model
 
 whisper.cpp needs the fine-tune in its own format. From the repository root:
@@ -55,10 +59,15 @@ whisper.cpp needs the fine-tune in its own format. From the repository root:
     cmake --build build/whisper --target whisper-quantize -j
     python -m scripts.convert_whisper_ggml --quantize-bin build/whisper/bin/whisper-quantize
 
-This writes `models/ggml/ggml-univoice-stt-uz-q5_0.bin` and prints its size
-and sha256. Either publish it (the app's default address is
-`ZOKHID/univoice-stt-uz-ggml` on Hugging Face; set `sizeBytes` and `sha256`
-in `Models.UZ`) or copy it to the phone and use Modellar → Fayldan.
+This writes `models/ggml/ggml-univoice-stt-uz-q5_0.bin` (539 212 484 bytes)
+and prints its size and sha256; `Models.UZ` holds them, so the app checks the
+download. The app downloads it from `ZOKHID/univoice-stt-uz-ggml` on Hugging
+Face; or copy it to the phone and use Modellar → Fayldan.
+
+On Windows without a C compiler, run the same commands in a
+`python:3.12-slim` container (`apt-get install cmake build-essential` first).
+On the emulator the converted model transcribes the bundled clip as "internet
+ishlamayapti modemda qizil chiroq yonib turibdi".
 
 The app runs it the way the server does (`docs/stt-evaluation.md`): Uzbek
 forced, greedy decoding, no timestamps (they made it drop the first words),
