@@ -28,6 +28,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -47,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import uz.univoice.offline.BotViewModel
 import uz.univoice.offline.ModelState
 import uz.univoice.offline.UiState
+import uz.univoice.offline.stt.Engine
 import uz.univoice.offline.stt.ModelSpec
 import uz.univoice.offline.stt.Models
 import uz.univoice.offline.stt.WhisperEngine
@@ -94,16 +98,35 @@ fun HistoryScreen(bot: BotViewModel, state: UiState, onBack: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelsScreen(bot: BotViewModel, state: UiState, onBack: () -> Unit) {
     Page("Modellar · Модели", onBack) { modifier ->
         Column(modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text("Tanish usuli · Движок распознавания", style = MaterialTheme.typography.titleSmall)
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                Engine.entries.forEachIndexed { index, engine ->
+                    SegmentedButton(
+                        selected = state.engine == engine,
+                        onClick = { bot.setEngine(engine) },
+                        shape = SegmentedButtonDefaults.itemShape(index, Engine.entries.size),
+                        icon = {},
+                    ) { Text(engine.title, maxLines = 1) }
+                }
+            }
+            Text(
+                when (state.engine) {
+                    Engine.VOSK -> "~50 MB, har qanday telefonda tez · ~50 МБ, быстро на любом телефоне"
+                    Engine.WHISPER -> "190–540 MB, tez telefon kerak · 190–540 МБ, нужен быстрый телефон"
+                },
+                style = MaterialTheme.typography.bodySmall,
+            )
             if (!bot.sttAvailable) {
-                Text("Bu yigʻmada whisper.cpp yoʻq: modellarni yuklash mumkin, lekin tanish ishlamaydi. " +
-                    "В этой сборке нет whisper.cpp: модели можно загрузить, но распознавание не заработает.",
+                Text("Bu yigʻmada ${state.engine.name} yoʻq: modellarni yuklash mumkin, lekin tanish ishlamaydi. " +
+                    "В этой сборке нет ${state.engine.name}: модели можно загрузить, но распознавание не заработает.",
                     color = MaterialTheme.colorScheme.error)
             }
-            Models.all.forEach { spec -> ModelCard(bot, spec, state.models[spec.language] ?: ModelState.Missing) }
+            Models.of(state.engine).forEach { spec -> ModelCard(bot, spec, state.models[spec.id] ?: ModelState.Missing) }
             Text("Javob yozuvlari · Записи ответов: ${bot.promptCount}", style = MaterialTheme.typography.bodySmall)
         }
     }
@@ -115,7 +138,7 @@ private fun ModelCard(bot: BotViewModel, spec: ModelSpec, model: ModelState) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) bot.import(spec, uri)
     }
-    Card {
+    Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(spec.title, style = MaterialTheme.typography.titleMedium)
             spec.sizeBytes?.let { Text("%.0f MB".format(it / 1e6), style = MaterialTheme.typography.bodySmall) }
@@ -132,7 +155,9 @@ private fun ModelCard(bot: BotViewModel, spec: ModelSpec, model: ModelState) {
                     Text("%.0f / %s MB".format(model.done / 1e6, if (model.total > 0) "%.0f".format(model.total / 1e6) else "?"))
                 }
             }
-            if (model !is ModelState.Busy) {
+            if (model == ModelState.Ready) {
+                TextButton(onClick = { bot.deleteModel(spec) }) { Text("Oʻchirish") }
+            } else if (model !is ModelState.Busy) {
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it; bot.settings.setModelUrl(spec, it) },
@@ -143,7 +168,6 @@ private fun ModelCard(bot: BotViewModel, spec: ModelSpec, model: ModelState) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { bot.download(spec) }) { Text("Yuklab olish") }
                     OutlinedButton(onClick = { picker.launch(arrayOf("*/*")) }) { Text("Fayldan") }
-                    if (model == ModelState.Ready) TextButton(onClick = { bot.deleteModel(spec) }) { Text("Oʻchirish") }
                 }
             }
         }
@@ -156,8 +180,8 @@ fun BenchmarkScreen(bot: BotViewModel, state: UiState, onBack: () -> Unit) {
         LazyColumn(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
                 Text("${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} · " +
-                    "${Runtime.getRuntime().availableProcessors()} CPU · threads ${bot.settings.threads} · ${state.language}")
-                Text(WhisperEngine.systemInfo(), style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                    "${Runtime.getRuntime().availableProcessors()} CPU · threads ${bot.settings.threads} · ${state.language} · ${bot.activeModel().title}")
+                if (state.engine == Engine.WHISPER) Text(WhisperEngine.systemInfo(), style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
                 Button(onClick = { bot.runBenchmark() }, enabled = !state.benchmarkRunning, modifier = Modifier.padding(top = 8.dp)) {
                     Text(if (state.benchmarkRunning) "…" else "Boshlash · Запустить")
                 }

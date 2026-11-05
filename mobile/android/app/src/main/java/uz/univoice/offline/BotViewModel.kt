@@ -21,10 +21,13 @@ import uz.univoice.offline.data.Message
 import uz.univoice.offline.data.PromptAudio
 import uz.univoice.offline.data.Role
 import uz.univoice.offline.scenario.ScenarioMatcher
+import uz.univoice.offline.stt.Engine
 import uz.univoice.offline.stt.Hallucinations
 import uz.univoice.offline.stt.ModelSpec
 import uz.univoice.offline.stt.ModelStore
 import uz.univoice.offline.stt.Models
+import uz.univoice.offline.stt.SpeechEngine
+import uz.univoice.offline.stt.VoskEngine
 import uz.univoice.offline.stt.WhisperEngine
 import java.io.File
 
@@ -41,6 +44,7 @@ data class BenchmarkRow(val name: String, val audioSeconds: Double, val sttMilli
 
 data class UiState(
     val language: String = "uz",
+    val engine: Engine = Engine.VOSK,
     val conversationId: Long = 0,
     val messages: List<Message> = emptyList(),
     val phase: Phase = Phase.IDLE,
@@ -64,18 +68,26 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
         ScenarioMatcher.parsePrompts(asset("prompts.json")),
     )
 
-    // whisper.cpp contexts are not thread-safe and the Uzbek model takes ~0.6 GB
+    // Neither engine is thread-safe and the Whisper Uzbek model takes ~0.6 GB
     // of RAM: one model loaded at a time, used from one thread.
     @OptIn(ExperimentalCoroutinesApi::class)
     private val sttDispatcher = Dispatchers.Default.limitedParallelism(1)
-    private var engine: WhisperEngine? = null
-    private var engineLanguage: String? = null
+    private var engine: SpeechEngine? = null
+    private var engineSpec: ModelSpec? = null
     private var recordingStartedAt = 0L
 
-    private val _state = MutableStateFlow(UiState(language = settings.language))
+    private val _state = MutableStateFlow(UiState(language = settings.language, engine = settings.engine))
     val state: StateFlow<UiState> = _state
 
-    val sttAvailable: Boolean get() = WhisperEngine.available
+    val sttAvailable: Boolean get() = isAvailable(_state.value.engine)
+
+    fun isAvailable(engine: Engine): Boolean = when (engine) {
+        Engine.VOSK -> VoskEngine.available
+        Engine.WHISPER -> WhisperEngine.available
+    }
+
+    /** The model the chosen engine needs for [language]. */
+    fun activeModel(language: String = _state.value.language): ModelSpec = Models.forLanguage(_state.value.engine, language)
     val promptCount: Int get() = prompts.count
 
     init {
@@ -89,6 +101,12 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     fun setLanguage(language: String) {
         settings.language = language
         _state.update { it.copy(language = language) }
+    }
+
+    fun setEngine(engine: Engine) {
+        settings.engine = engine
+        _state.update { it.copy(engine = engine) }
+        viewModelScope.launch(sttDispatcher) { unloadEngine() }
     }
 
     fun newConversation() {
@@ -176,19 +194,28 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
             text to (System.nanoTime() - started) / 1_000_000
         }
 
-    private fun loadEngine(language: String): WhisperEngine {
-        check(WhisperEngine.available) { "Bu ilovada nutqni tanish yoʻq · В этой сборке нет распознавания речи" }
-        engine?.let { if (engineLanguage == language) return it }
-        val spec = Models.forLanguage(language)
+    private fun loadEngine(language: String): SpeechEngine {
+        val spec = activeModel(language)
+        check(isAvailable(spec.engine)) { "Bu ilovada nutqni tanish yoʻq · В этой сборке нет распознавания речи" }
+        engine?.let { if (engineSpec == spec) return it }
         check(models.isReady(spec)) { "Model yuklanmagan · Модель не загружена: ${spec.title}" }
-        engine?.close()
-        engine = null
+        unloadEngine()
         _state.update { it.copy(phase = Phase.LOADING_MODEL) }
-        val loaded = WhisperEngine.load(models.file(spec).absolutePath)
+        val path = models.file(spec).absolutePath
+        val loaded = when (spec.engine) {
+            Engine.VOSK -> VoskEngine.load(path)
+            Engine.WHISPER -> WhisperEngine.load(path)
+        }
         engine = loaded
-        engineLanguage = language
+        engineSpec = spec
         _state.update { it.copy(phase = Phase.TRANSCRIBING) }
         return loaded
+    }
+
+    private fun unloadEngine() {
+        engine?.close()
+        engine = null
+        engineSpec = null
     }
 
     // ----- playback -----
@@ -230,8 +257,8 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshModels() {
         _state.update { s ->
             s.copy(models = Models.all.associate { spec ->
-                val current = s.models[spec.language]
-                spec.language to when {
+                val current = s.models[spec.id]
+                spec.id to when {
                     current is ModelState.Busy -> current
                     models.isReady(spec) -> ModelState.Ready
                     else -> current as? ModelState.Failed ?: ModelState.Missing
@@ -246,16 +273,14 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteModel(spec: ModelSpec) {
         viewModelScope.launch(sttDispatcher) {
-            if (engineLanguage == spec.language) {
-                engine?.close(); engine = null; engineLanguage = null
-            }
+            if (engineSpec == spec) unloadEngine()
             models.delete(spec)
             setModel(spec, ModelState.Missing)
         }
     }
 
     private fun runModelJob(spec: ModelSpec, job: ((Long, Long) -> Unit) -> Unit) {
-        if (_state.value.models[spec.language] is ModelState.Busy) return
+        if (_state.value.models[spec.id] is ModelState.Busy) return
         setModel(spec, ModelState.Busy(0, spec.sizeBytes ?: -1))
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { job { done, total -> setModel(spec, ModelState.Busy(done, total)) } }
@@ -265,7 +290,7 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun setModel(spec: ModelSpec, value: ModelState) =
-        _state.update { it.copy(models = it.models + (spec.language to value)) }
+        _state.update { it.copy(models = it.models + (spec.id to value)) }
 
     // ----- export and benchmark -----
 

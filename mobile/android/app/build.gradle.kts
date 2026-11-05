@@ -4,7 +4,7 @@ plugins {
 }
 
 // whisper.cpp is a git submodule. Without it the app still builds and runs
-// (chat, scenarios, recorded answers), but speech recognition is unavailable.
+// with Vosk, the default engine; only the Whisper engine is unavailable.
 val whisperDir = rootProject.file("third_party/whisper.cpp")
 val withWhisper = whisperDir.resolve("CMakeLists.txt").exists()
 if (!withWhisper) {
@@ -104,6 +104,10 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui-tooling-preview")
+    // Vosk (Kaldi) speech recognition, the default light engine. Its JNA
+    // dependency is published as an .aar, which Gradle does not pick by itself.
+    implementation("com.alphacephei:vosk-android:0.3.75")
+    implementation("net.java.dev.jna:jna:5.18.1@aar")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     testImplementation("junit:junit:4.13.2")

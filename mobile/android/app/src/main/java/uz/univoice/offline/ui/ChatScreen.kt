@@ -162,14 +162,14 @@ private fun LanguageSwitch(language: String, onChange: (String) -> Unit) {
 @Composable
 private fun ReadinessBanner(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit) {
     val message = when {
-        !bot.sttAvailable -> "Bu yigʻmada nutqni tanish yoʻq (whisper.cpp ulanmagan) · В этой сборке нет распознавания речи"
-        state.models[state.language] !is ModelState.Ready -> "Nutq modeli yuklanmagan · Модель речи не загружена"
+        !bot.sttAvailable -> "Bu yigʻmada ${state.engine.name} yoʻq · В этой сборке нет ${state.engine.name}: Modellar"
+        state.models[bot.activeModel(state.language).id] !is ModelState.Ready -> "Nutq modeli yuklanmagan · Модель речи не загружена"
         else -> null
     } ?: return
     Surface(color = MaterialTheme.colorScheme.errorContainer, modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(message, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-            if (bot.sttAvailable) TextButton(onClick = { onNavigate(Screen.MODELS) }) { Text("Modellar") }
+            TextButton(onClick = { onNavigate(Screen.MODELS) }) { Text("Modellar") }
         }
     }
 }

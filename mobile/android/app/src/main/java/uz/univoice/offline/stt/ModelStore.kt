@@ -10,8 +10,12 @@ import java.security.MessageDigest
 
 /** A speech model the app can use, and where to get it. */
 data class ModelSpec(
+    /** Key for its state and its custom URL; Whisper keeps the language for old settings. */
+    val id: String,
+    val engine: Engine,
     val language: String,
     val title: String,
+    /** The downloaded file: a ggml .bin for Whisper, a .zip of the model folder for Vosk. */
     val fileName: String,
     val defaultUrl: String,
     val sizeBytes: Long?,
@@ -20,9 +24,34 @@ data class ModelSpec(
 )
 
 object Models {
+    // Official small models (Apache 2.0) from https://alphacephei.com/vosk/models.
+    val VOSK_UZ = ModelSpec(
+        id = "vosk_uz",
+        engine = Engine.VOSK,
+        language = "uz",
+        title = "Oʻzbekcha (Vosk small 0.22)",
+        fileName = "vosk-model-small-uz-0.22.zip",
+        defaultUrl = "https://alphacephei.com/vosk/models/vosk-model-small-uz-0.22.zip",
+        sizeBytes = 51_061_189,
+        sha256 = "ffb77328df64f222a3fac6e368e0baff9dc1258f11b6b5ca5deaa82e5f688e6a",
+    )
+
+    val VOSK_RU = ModelSpec(
+        id = "vosk_ru",
+        engine = Engine.VOSK,
+        language = "ru",
+        title = "Русский (Vosk small 0.22)",
+        fileName = "vosk-model-small-ru-0.22.zip",
+        defaultUrl = "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip",
+        sizeBytes = 46_236_750,
+        sha256 = "961d5ff98a17f4aa6de69864d0aa71fa5bac682301d2b5d17a3f24c5c99a46d4",
+    )
+
     // ZOKHID/univoice-stt-uz converted with scripts/convert_whisper_ggml.py and
     // quantized to q5_0 (whisper.cpp v1.9.5).
     val UZ = ModelSpec(
+        id = "uz",
+        engine = Engine.WHISPER,
         language = "uz",
         title = "Oʻzbekcha (univoice-stt-uz, medium q5_0)",
         fileName = "ggml-univoice-stt-uz-q5_0.bin",
@@ -33,6 +62,8 @@ object Models {
 
     // The Uzbek fine-tune has forgotten Russian, so Russian gets its own model.
     val RU = ModelSpec(
+        id = "ru",
+        engine = Engine.WHISPER,
         language = "ru",
         title = "Русский (whisper small q5_1)",
         fileName = "ggml-small-q5_1.bin",
@@ -41,21 +72,30 @@ object Models {
         sha256 = "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb",
     )
 
-    val all = listOf(UZ, RU)
+    val all = listOf(VOSK_UZ, VOSK_RU, UZ, RU)
 
-    fun forLanguage(language: String): ModelSpec = all.first { it.language == language }
+    fun of(engine: Engine): List<ModelSpec> = all.filter { it.engine == engine }
+
+    fun forLanguage(engine: Engine, language: String): ModelSpec =
+        all.first { it.engine == engine && it.language == language }
 }
 
 /** Models live in app storage: downloaded once, or imported from a file. */
 class ModelStore(private val context: Context) {
     private val directory = File(context.filesDir, "models").apply { mkdirs() }
 
-    fun file(spec: ModelSpec): File = File(directory, spec.fileName)
+    /** The ggml file, or the unpacked Vosk model folder. */
+    fun file(spec: ModelSpec): File = File(directory, spec.fileName.removeSuffix(".zip"))
 
-    fun isReady(spec: ModelSpec): Boolean = file(spec).let { it.exists() && it.length() > 1_000_000 }
+    fun isReady(spec: ModelSpec): Boolean = file(spec).let {
+        when (spec.engine) {
+            Engine.WHISPER -> it.isFile && it.length() > 1_000_000
+            Engine.VOSK -> File(it, "am/final.mdl").isFile && File(it, "graph").isDirectory
+        }
+    }
 
     fun delete(spec: ModelSpec) {
-        file(spec).delete()
+        file(spec).deleteRecursively()
         partial(spec).delete()
     }
 
@@ -64,7 +104,21 @@ class ModelStore(private val context: Context) {
      * [progress] gets (bytes so far, total or -1). Blocking: call off the main thread.
      */
     fun download(spec: ModelSpec, url: String, progress: (Long, Long) -> Unit) {
-        val part = partial(spec)
+        // Slow mirrors stall mid-file (alphacephei.com often does): resume a few times.
+        var attempt = 0
+        while (true) {
+            try {
+                fetch(partial(spec), url, progress)
+                break
+            } catch (e: java.io.IOException) {
+                if (++attempt >= 6) throw e
+                Thread.sleep(2_000L * attempt)
+            }
+        }
+        install(spec, partial(spec))
+    }
+
+    private fun fetch(part: File, url: String, progress: (Long, Long) -> Unit) {
         var current = URL(url)
         var redirects = 0
         while (true) {
@@ -75,6 +129,11 @@ class ModelStore(private val context: Context) {
                 if (part.exists() && part.length() > 0) setRequestProperty("Range", "bytes=${part.length()}-")
             }
             val code = connection.responseCode
+            if (code == 416 && part.length() > 0) {
+                // The previous attempt already got the whole file.
+                connection.disconnect()
+                break
+            }
             if (code in 300..399) {
                 // HuggingFace redirects to its CDN, sometimes across hosts.
                 val location = connection.getHeaderField("Location") ?: error("redirect without Location")
@@ -91,10 +150,9 @@ class ModelStore(private val context: Context) {
             connection.disconnect()
             break
         }
-        install(spec, part)
     }
 
-    /** Copies a model file the user picked (e.g. sent over USB or a messenger). */
+    /** Copies a model file (or Vosk .zip) the user picked, e.g. sent over USB or a messenger. */
     fun import(spec: ModelSpec, uri: Uri, progress: (Long, Long) -> Unit) {
         val part = partial(spec)
         val total = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: -1
@@ -125,20 +183,49 @@ class ModelStore(private val context: Context) {
     }
 
     private fun install(spec: ModelSpec, part: File) {
-        check(isGgml(part)) { part.delete(); "not a whisper.cpp (ggml) model file" }
+        when (spec.engine) {
+            Engine.WHISPER -> check(hasMagic(part, "lmgg")) { part.delete(); "not a whisper.cpp (ggml) model file" }
+            Engine.VOSK -> check(hasMagic(part, "PK\u0003\u0004")) { part.delete(); "not a Vosk model .zip" }
+        }
         spec.sha256?.let { expected ->
             val actual = sha256(part)
             check(actual == expected) { part.delete(); "checksum mismatch: $actual" }
         }
         val target = file(spec)
-        target.delete()
-        check(part.renameTo(target)) { "could not move model into place" }
+        target.deleteRecursively()
+        if (spec.engine == Engine.VOSK) {
+            unzip(part, target)
+            part.delete()
+            check(isReady(spec)) { target.deleteRecursively(); "the archive has no Vosk model in it" }
+        } else {
+            check(part.renameTo(target)) { "could not move model into place" }
+        }
     }
 
-    private fun isGgml(file: File): Boolean = file.inputStream().use { input ->
-        val magic = ByteArray(4)
-        // "lmgg": the ggml magic 0x67676d6c written little-endian.
-        input.read(magic) == 4 && String(magic, Charsets.US_ASCII) == "lmgg"
+    /** Unpacks [archive] into [target], dropping the archive's top folder (vosk-model-small-uz-0.22/). */
+    private fun unzip(archive: File, target: File) {
+        val temporary = File(target.path + ".unpacking").apply { deleteRecursively(); mkdirs() }
+        java.util.zip.ZipInputStream(archive.inputStream().buffered()).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                val path = entry.name.replace('\\', '/').substringAfter('/', "")
+                if (path.isEmpty()) continue
+                val out = File(temporary, path)
+                check(out.canonicalPath.startsWith(temporary.canonicalPath + File.separator)) { "bad path in archive: ${entry.name}" }
+                if (entry.isDirectory) out.mkdirs()
+                else {
+                    out.parentFile?.mkdirs()
+                    out.outputStream().use { zip.copyTo(it) }
+                }
+            }
+        }
+        check(temporary.renameTo(target)) { "could not move model into place" }
+    }
+
+    // ggml: "lmgg", the magic 0x67676d6c written little-endian. zip: "PK" 3 4.
+    private fun hasMagic(file: File, magic: String): Boolean = file.inputStream().use { input ->
+        val head = ByteArray(4)
+        input.read(head) == 4 && String(head, Charsets.ISO_8859_1) == magic
     }
 
     private fun sha256(file: File): String {

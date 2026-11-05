@@ -2,19 +2,18 @@ package uz.univoice.offline.stt
 
 import android.util.Log
 import uz.univoice.offline.BuildConfig
-import java.io.Closeable
 
 /**
  * whisper.cpp through JNI (src/main/cpp/whisper_jni.cpp). One instance holds
  * one loaded model; it is not thread-safe, so the caller serializes access.
  */
-class WhisperEngine private constructor(private var handle: Long) : Closeable {
+class WhisperEngine private constructor(private var handle: Long) : SpeechEngine {
 
     /**
      * Transcribes 16 kHz mono audio in [language] ("uz", "ru"). Runs the way
      * the server runs the Uzbek model: greedy, no timestamps, no prompt.
      */
-    fun transcribe(audio: FloatArray, language: String, threads: Int): String {
+    override fun transcribe(audio: FloatArray, language: String, threads: Int): String {
         check(handle != 0L) { "model is closed" }
         return String(nativeTranscribe(handle, audio, language, threads), Charsets.UTF_8).trim()
     }
