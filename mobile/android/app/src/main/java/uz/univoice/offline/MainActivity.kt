@@ -6,10 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,6 +17,7 @@ import uz.univoice.offline.ui.HistoryScreen
 import uz.univoice.offline.ui.ModelsScreen
 import uz.univoice.offline.ui.Screen
 import uz.univoice.offline.ui.SettingsScreen
+import uz.univoice.offline.ui.UniVoiceTheme
 
 class MainActivity : ComponentActivity() {
     private val bot: BotViewModel by viewModels()
@@ -29,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+            UniVoiceTheme {
                 val state by bot.state.collectAsStateWithLifecycle()
                 var screen by rememberSaveable { mutableStateOf(Screen.CHAT) }
                 BackHandler(enabled = screen != Screen.CHAT) { screen = Screen.CHAT }

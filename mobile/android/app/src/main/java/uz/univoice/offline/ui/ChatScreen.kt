@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
@@ -71,6 +78,7 @@ import kotlinx.coroutines.launch
 import uz.univoice.offline.BotViewModel
 import uz.univoice.offline.ModelState
 import uz.univoice.offline.Phase
+import uz.univoice.offline.R
 import uz.univoice.offline.UiState
 import uz.univoice.offline.call.CallPermissions
 import uz.univoice.offline.data.Message
@@ -107,14 +115,20 @@ fun ChatScreen(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit) 
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text("UniVoice") },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Logo(32.dp)
+                        Spacer(Modifier.size(10.dp))
+                        Text("UniVoice", fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
+                    }
+                },
                 actions = {
                     LanguageSwitch(state.language, bot::setLanguage)
-                    IconButton(onClick = { bot.newConversation() }) { Icon(Icons.Default.Add, "Yangi suhbat") }
                     IconButton(onClick = { onNavigate(Screen.HISTORY) }) { Icon(Icons.AutoMirrored.Filled.List, "Tarix") }
                     Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, null) }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            DropdownMenuItem(text = { Text("Yangi suhbat · Новый разговор") }, onClick = { menu = false; bot.newConversation() })
                             DropdownMenuItem(text = { Text("Modellar · Модели") }, onClick = { menu = false; onNavigate(Screen.MODELS) })
                             DropdownMenuItem(text = { Text("Tezlik testi · Тест скорости") }, onClick = { menu = false; onNavigate(Screen.BENCHMARK) })
                             DropdownMenuItem(text = { Text("Yozuvlarni eksport · Экспорт записей") }, onClick = { menu = false; share() })
@@ -133,7 +147,8 @@ fun ChatScreen(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit) 
             LaunchedEffect(state.messages.size) {
                 if (state.messages.isNotEmpty()) listState.animateScrollToItem(state.messages.size - 1)
             }
-            LazyColumn(
+            if (state.messages.isEmpty()) EmptyState(Modifier.weight(1f).fillMaxWidth(), state.autoAnswer)
+            else LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
@@ -169,10 +184,19 @@ private fun AutoAnswerCard(bot: BotViewModel, state: UiState, onNavigate: (Scree
             else scope.launch { snackbar.showSnackbar("Ruxsatlar kerak: telefon, mikrofon · Нужны разрешения: телефон, микрофон") }
         }
     }
-    Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    val active = state.autoAnswer || state.inCall
+    val onColor = if (active) Color.White else MaterialTheme.colorScheme.onSurface
+    val background = if (active) Modifier.background(Brush.linearGradient(listOf(BrandTeal, BrandBlue)))
+    else Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+    Box(Modifier.padding(horizontal = 12.dp, vertical = 8.dp).clip(RoundedCornerShape(20.dp)).then(background)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(44.dp).clip(CircleShape).background(onColor.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
+            ) { Icon(Icons.Default.Call, null, tint = onColor) }
+            Spacer(Modifier.size(14.dp))
             Column(Modifier.weight(1f)) {
-                Text("Avtojavob · Автоответчик", style = MaterialTheme.typography.titleSmall)
+                Text("Avtojavob · Автоответчик", style = MaterialTheme.typography.titleMedium, color = onColor, fontWeight = FontWeight.SemiBold)
                 Text(
                     when {
                         state.inCall -> "Qoʻngʻiroq davom etmoqda · Идёт звонок" +
@@ -181,6 +205,7 @@ private fun AutoAnswerCard(bot: BotViewModel, state: UiState, onNavigate: (Scree
                         else -> "Oʻchirilgan · Выключен"
                     },
                     style = MaterialTheme.typography.bodySmall,
+                    color = onColor.copy(alpha = 0.85f),
                 )
             }
             Switch(
@@ -197,6 +222,36 @@ private fun AutoAnswerCard(bot: BotViewModel, state: UiState, onNavigate: (Scree
                 },
             )
         }
+    }
+}
+
+/** The logo: the launcher icon's bubble and sound wave on its teal-to-blue tile. */
+@Composable
+fun Logo(size: androidx.compose.ui.unit.Dp) {
+    Box(
+        Modifier.size(size).clip(RoundedCornerShape(size * 0.28f))
+            .background(Brush.linearGradient(listOf(BrandTeal, BrandBlue))),
+        contentAlignment = Alignment.Center,
+    ) {
+        // The launcher art keeps a wide safe margin; crop it for the small tile.
+        Image(painterResource(R.drawable.ic_launcher_foreground), null, Modifier.size(size * 2.1f), contentScale = ContentScale.Fit)
+    }
+}
+
+@Composable
+private fun EmptyState(modifier: Modifier, on: Boolean) {
+    Column(modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Logo(96.dp)
+        Spacer(Modifier.height(20.dp))
+        Text("UniVoice", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            if (on) "Avtojavob yoqilgan. Qoʻngʻiroq shu yerda koʻrinadi." + LINE + "Автоответчик включён. Звонок появится здесь."
+            else "Avtojavobni yoqing yoki mikrofon tugmasini bosib sinab koʻring." + LINE + "Включите автоответчик или проверьте голосом кнопкой микрофона.",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -250,10 +305,17 @@ private fun ReadinessBanner(bot: BotViewModel, state: UiState, onNavigate: (Scre
 private fun Bubble(bot: BotViewModel, message: Message, playing: Boolean) {
     val context = LocalContext.current
     val caller = message.role == Role.CALLER
+    if (message.role == Role.SYSTEM) {
+        Text(
+            message.text, Modifier.fillMaxWidth().padding(vertical = 4.dp), textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (caller) Arrangement.End else Arrangement.Start) {
         Surface(
             color = if (caller) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(16.dp),
+            shape = if (caller) RoundedCornerShape(18.dp, 18.dp, 4.dp, 18.dp) else RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp),
             modifier = Modifier.widthIn(max = 320.dp),
         ) {
             Column(Modifier.padding(12.dp)) {
@@ -317,7 +379,9 @@ private fun TalkButton(bot: BotViewModel, state: UiState) {
             else -> MaterialTheme.colorScheme.primary
         }
         Box(
-            Modifier.size(88.dp).clip(CircleShape).background(color)
+            Modifier.size(96.dp).clip(CircleShape).background(
+                if (color == MaterialTheme.colorScheme.primary) Brush.linearGradient(listOf(BrandTeal, BrandBlue)) else Brush.linearGradient(listOf(color, color)),
+            )
                 .pointerInput(busy) {
                     if (busy) return@pointerInput
                     detectTapGestures(onPress = {
@@ -341,3 +405,5 @@ private fun TalkButton(bot: BotViewModel, state: UiState) {
         }
     }
 }
+
+private const val LINE = "\n"

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A speech bubble holding a sound wave: a voice that answers. Kept inside the 66dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M38,30h32a8,8 0 0 1 8,8v22a8,8 0 0 1 -8,8H52L38,80V68a8,8 0 0 1 -8,-8V38a8,8 0 0 1 8,-8z" />
+    <path android:strokeColor="#FF0F766E" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M40,49V55" />
+    <path android:strokeColor="#FF0F766E" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M47,44V60" />
+    <path android:strokeColor="#FF0F766E" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M54,38V66" />
+    <path android:strokeColor="#FF0F766E" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M61,44V60" />
+    <path android:strokeColor="#FF0F766E" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M68,49V55" />
+</vector>
