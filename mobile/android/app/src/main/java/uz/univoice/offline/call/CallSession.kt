@@ -48,6 +48,8 @@ class CallSession(
     private val started = SystemClock.elapsedRealtime()
     private var conversationId = 0L
     private var micWarned = false
+    /** Index in [MIC_SOURCES] of the audio source that works on this phone during a call. */
+    private var micSource = 0
 
     private fun elapsed() = SystemClock.elapsedRealtime() - started
 
@@ -132,7 +134,8 @@ class CallSession(
      */
     private suspend fun listen(timeoutMs: Long): Turn? {
         val chunks = Channel<ShortArray>(Channel.UNLIMITED)
-        val recorder = openMic()
+        var recorder = openMic()
+        val listenStart = SystemClock.elapsedRealtime()
         try {
             recorder.start { chunks.trySend(it) }
         } catch (e: Exception) {
@@ -151,7 +154,24 @@ class CallSession(
             while (true) {
                 val wait = if (speechSeen) Long.MAX_VALUE else deadline - SystemClock.elapsedRealtime()
                 if (wait <= 0) return null
-                val chunk = withTimeoutOrNull(wait) { chunks.receive() } ?: return null
+                // Some phones give the microphone to the call and feed apps silence or nothing:
+                // try the other audio sources before giving up on this turn.
+                val probe = if (count == 0 || peak == 0) 1_500L else Long.MAX_VALUE
+                val chunk = withTimeoutOrNull(minOf(wait, probe)) { chunks.receive() }
+                if (chunk == null) {
+                    val dead = SystemClock.elapsedRealtime() - listenStart >= 1_500 && (count == 0 || peak == 0)
+                    if (dead && micSource < MIC_SOURCES.size - 1 && !speechSeen) {
+                        recorder.stop()
+                        micSource++
+                        Log.w(TAG, "microphone silent; trying source ${MIC_SOURCES[micSource]}")
+                        recorder = openMic()
+                        recorder.start { chunks.trySend(it) }
+                        count = 0; peak = 0
+                        continue
+                    }
+                    if (deadline - SystemClock.elapsedRealtime() <= 0) return null
+                    continue
+                }
                 if (skip-- > 0) continue
                 count++
                 for (sample in chunk) peak = maxOf(peak, abs(sample.toInt()))
@@ -178,7 +198,7 @@ class CallSession(
             chunks.close()
             streams.forEach { it.second.close() }
             // Exactly zero for seconds is a muted microphone, not a quiet room.
-            if (peak == 0 && count > 30) {
+            if ((peak == 0 && count > 30) || (count == 0 && timeoutMs > 3_000)) {
                 warnMic("Mikrofon jim: telefon qoʻngʻiroq paytida mikrofonni bermayapti · Микрофон молчит: телефон не отдаёт его во время звонка")
             }
             Log.i(TAG, "listened: peak=$peak chunks=$count speech=$speechSeen")
@@ -189,7 +209,7 @@ class CallSession(
     private fun openMic(): Mic {
         val clip = if (BuildConfig.DEBUG) context.getExternalFilesDir(null)?.resolve(TEST_CLIP)?.takeIf { it.exists() } else null
         if (clip != null) return ClipMic(clip)
-        val recorder = Recorder()
+        val recorder = Recorder(MIC_SOURCES[micSource])
         return object : Mic {
             override fun start(onChunk: (ShortArray) -> Unit) = recorder.start(onChunk)
             override fun stop() { recorder.stop() }
@@ -236,6 +256,14 @@ class CallSession(
 
     companion object {
         private const val TAG = "CallSession"
+
+        /** Tried in turn when the microphone gives an app nothing during a call. */
+        private val MIC_SOURCES = intArrayOf(
+            android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            android.media.MediaRecorder.AudioSource.MIC,
+            android.media.MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+            android.media.MediaRecorder.AudioSource.CAMCORDER,
+        )
 
         /** Debug builds only: files/call_input.wav is played to the bot instead of the microphone, once. */
         private const val TEST_CLIP = "call_input.wav"
