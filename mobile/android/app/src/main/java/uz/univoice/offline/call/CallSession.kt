@@ -48,6 +48,9 @@ class CallSession(
     private val started = SystemClock.elapsedRealtime()
     private var conversationId = 0L
     private var micWarned = false
+
+    /** A USB sound card, if one is plugged in: the phone's own microphone is deaf during a call. */
+    private val usb = UsbAudio.find(context)
     /** Index in [MIC_SOURCES] of the audio source that works on this phone during a call. */
     private var micSource = 0
 
@@ -56,6 +59,8 @@ class CallSession(
     /** Runs until the dialog ends the call or the coroutine is cancelled (the caller hung up). */
     suspend fun run(): Outcome {
         conversationId = store.newCall(caller)
+        player.device = usb.output
+        Log.i(TAG, "usb audio: input=${usb.input?.productName} output=${usb.output?.productName}")
         CallState.callStarted(conversationId, caller)
         log(Role.SYSTEM, if (caller.isEmpty()) "Qoʻngʻiroq · Звонок" else "Qoʻngʻiroq · Звонок: $caller")
 
@@ -210,7 +215,7 @@ class CallSession(
     private fun openMic(): Mic {
         val clip = if (BuildConfig.DEBUG) context.getExternalFilesDir(null)?.resolve(TEST_CLIP)?.takeIf { it.exists() } else null
         if (clip != null) return ClipMic(clip)
-        val recorder = Recorder(MIC_SOURCES[micSource])
+        val recorder = Recorder(MIC_SOURCES[micSource], usb.input)
         return object : Mic {
             override fun start(onChunk: (ShortArray) -> Unit) = recorder.start(onChunk)
             override fun stop() { recorder.stop() }
@@ -291,7 +296,11 @@ class CallAudio(context: Context) {
     fun enter() {
         speaker = audio.isSpeakerphoneOn
         volume = audio.getStreamVolume(AudioManager.STREAM_VOICE_CALL)
-        audio.isSpeakerphoneOn = true
+        // A wired headset carries the call by cable (to a sound card); the speaker would only add echo.
+        val wired = audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any {
+            it.type == android.media.AudioDeviceInfo.TYPE_WIRED_HEADSET || it.type == android.media.AudioDeviceInfo.TYPE_WIRED_HEADPHONES
+        }
+        audio.isSpeakerphoneOn = !wired
         audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, audio.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), 0)
     }
 
@@ -299,6 +308,21 @@ class CallAudio(context: Context) {
     fun exit() {
         audio.isSpeakerphoneOn = speaker
         audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, volume, 0)
+    }
+}
+
+/** The input and output of a USB sound card or headset, when one is attached. */
+class UsbAudio(val input: android.media.AudioDeviceInfo?, val output: android.media.AudioDeviceInfo?) {
+    companion object {
+        private val TYPES = setOf(android.media.AudioDeviceInfo.TYPE_USB_DEVICE, android.media.AudioDeviceInfo.TYPE_USB_HEADSET)
+
+        fun find(context: Context): UsbAudio {
+            val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            return UsbAudio(
+                audio.getDevices(AudioManager.GET_DEVICES_INPUTS).firstOrNull { it.type in TYPES },
+                audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).firstOrNull { it.type in TYPES },
+            )
+        }
     }
 }
 

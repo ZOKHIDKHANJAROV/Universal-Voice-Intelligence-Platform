@@ -13,6 +13,9 @@ class Player(
 ) {
     private var player: MediaPlayer? = null
 
+    /** An external (USB) output to play through instead of the phone's speaker. */
+    var device: android.media.AudioDeviceInfo? = null
+
     fun playFile(file: File, onDone: () -> Unit = {}) = play(onDone) { setDataSource(file.absolutePath) }
 
     /** Assets are stored uncompressed (noCompress "wav") so they can be opened directly. */
@@ -35,6 +38,7 @@ class Player(
                     .build(),
             )
             source()
+            if (device != null && android.os.Build.VERSION.SDK_INT >= 28) setPreferredDevice(device)
             setOnCompletionListener { stop(); onDone() }
             setOnErrorListener { _, _, _ -> stop(); onDone(); true }
             prepare()

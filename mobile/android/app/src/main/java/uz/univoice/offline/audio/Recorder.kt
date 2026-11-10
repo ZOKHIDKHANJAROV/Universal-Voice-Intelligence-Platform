@@ -11,7 +11,11 @@ import java.nio.ByteOrder
 import kotlin.concurrent.thread
 
 /** Push-to-talk recording: 16 kHz mono PCM16, the rate Whisper works at. */
-class Recorder(private val source: Int = MediaRecorder.AudioSource.VOICE_RECOGNITION) {
+class Recorder(
+    private val source: Int = MediaRecorder.AudioSource.VOICE_RECOGNITION,
+    /** An external (USB) microphone to record from instead of the phone's own. */
+    private val device: android.media.AudioDeviceInfo? = null,
+) {
     private var record: AudioRecord? = null
     private var worker: Thread? = null
     @Volatile private var running = false
@@ -33,6 +37,7 @@ class Recorder(private val source: Int = MediaRecorder.AudioSource.VOICE_RECOGNI
             maxOf(minSize, Wav.STT_RATE),
         )
         check(audio.state == AudioRecord.STATE_INITIALIZED) { "microphone unavailable" }
+        if (device != null) audio.preferredDevice = device
         buffer.reset()
         record = audio
         running = true
