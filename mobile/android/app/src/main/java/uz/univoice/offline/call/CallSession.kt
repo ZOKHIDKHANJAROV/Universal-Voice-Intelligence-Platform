@@ -165,7 +165,8 @@ class CallSession(
                         micSource++
                         Log.w(TAG, "microphone silent; trying source ${MIC_SOURCES[micSource]}")
                         recorder = openMic()
-                        recorder.start { chunks.trySend(it) }
+                        runCatching { recorder.start { chunks.trySend(it) } }
+                            .onFailure { Log.w(TAG, "source ${MIC_SOURCES[micSource]} refused: ${it.message}") }
                         count = 0; peak = 0
                         continue
                     }
@@ -263,6 +264,10 @@ class CallSession(
             android.media.MediaRecorder.AudioSource.MIC,
             android.media.MediaRecorder.AudioSource.VOICE_COMMUNICATION,
             android.media.MediaRecorder.AudioSource.CAMCORDER,
+            // The call's own line: phones give these to system apps only, a few to everyone.
+            android.media.MediaRecorder.AudioSource.VOICE_CALL,
+            android.media.MediaRecorder.AudioSource.VOICE_DOWNLINK,
+            android.media.MediaRecorder.AudioSource.VOICE_UPLINK,
         )
 
         /** Debug builds only: files/call_input.wav is played to the bot instead of the microphone, once. */

@@ -37,11 +37,23 @@ class Recorder(private val source: Int = MediaRecorder.AudioSource.VOICE_RECOGNI
         record = audio
         running = true
         audio.startRecording()
+        Log.i("Recorder", "source $source started: recordingState=${audio.recordingState} state=${audio.state}")
         worker = thread(name = "recorder") {
             val chunk = ByteArray(3200) // 100 ms
+            var failures = 0
+            var firstRead = false
             while (running) {
                 val read = audio.read(chunk, 0, chunk.size)
-                if (read <= 0) continue
+                if (read > 0 && !firstRead) {
+                    firstRead = true
+                    Log.i("Recorder", "source $source: first data, $read bytes")
+                }
+                if (read <= 0) {
+                    if (failures % 50 == 0) Log.w("Recorder", "source $source: read returned $read (state ${audio.recordingState})")
+                    failures++
+                    Thread.sleep(20)
+                    continue
+                }
                 synchronized(buffer) { buffer.write(chunk, 0, read) }
                 if (onChunk != null) {
                     val samples = ShortArray(read / 2)
