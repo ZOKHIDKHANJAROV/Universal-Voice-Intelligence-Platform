@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">UniVoice</string>
+    <string name="accessibility_description">Avtojavob qoʻngʻiroq paytida qoʻngʻiroq qiluvchini eshitishi uchun kerak. Ekrandagi hech narsani oʻqimaydi. · Нужно, чтобы автоответчик слышал звонящего во время звонка. Ничего не читает с экрана.</string>
 </resources>

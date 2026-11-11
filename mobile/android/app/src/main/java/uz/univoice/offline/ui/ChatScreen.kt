@@ -141,6 +141,7 @@ fun ChatScreen(bot: BotViewModel, state: UiState, onNavigate: (Screen) -> Unit) 
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             AutoAnswerCard(bot, state, onNavigate, snackbar)
+            AccessibilityHint(state)
             ReadinessBanner(bot, state, onNavigate)
             CallbackBanner(state)
             val listState = rememberLazyListState()
@@ -252,6 +253,29 @@ private fun EmptyState(modifier: Modifier, on: Boolean) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+/**
+ * Since Android 10 a phone feeds silence to apps recording during a call,
+ * unless the app has an accessibility service switched on.
+ */
+@Composable
+private fun AccessibilityHint(state: UiState) {
+    val context = LocalContext.current
+    if (!state.autoAnswer || android.os.Build.VERSION.SDK_INT < 29 ||
+        uz.univoice.offline.call.CallAccessibilityService.isEnabled(context)) return
+    Surface(color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Qoʻngʻiroqni eshitish uchun «UniVoice Avtojavob» xizmatini yoqing · " +
+                    "Чтобы слышать звонящего, включите службу «UniVoice Avtojavob»",
+                Modifier.weight(1f), style = MaterialTheme.typography.bodySmall,
+            )
+            TextButton(onClick = {
+                context.startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            }) { Text("Yoqish · Включить") }
+        }
     }
 }
 

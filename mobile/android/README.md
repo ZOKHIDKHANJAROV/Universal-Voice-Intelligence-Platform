@@ -54,10 +54,23 @@ Limits to know:
 - Android gives an app no way to play sound into a call or to hear the
   caller's line. The phone is on speaker: the answers come out of its speaker
   into its microphone, and the caller's voice comes out of the speaker into
-  the microphone. How well each side hears depends on the phone; the
-  speaker volume is set to maximum for the call. Some phones silence the
-  microphone for apps during calls: the chat then says "Mikrofon jim"
-  (microphone is mute), and the bot only greets.
+  the microphone. The speaker volume is set to maximum for the call.
+- Since Android 10 a phone feeds silence to every app that records during a
+  call, unless the app has an accessibility service switched on. The app
+  ships one that does nothing else ("UniVoice Avtojavob": Settings ->
+  Accessibility -> Downloaded apps); the chat shows a button to it while it
+  is off. On Android 13+ a sideloaded app first needs App info -> menu ->
+  "Allow restricted settings", and Play Protect may refuse to install it
+  from a file until its app scanning is paused.
+- Tested phones: Redmi Note 12 (Android 15) hears the caller with the
+  service on. Galaxy S8 (Android 9) gives apps no microphone data at all in
+  a call (the audio driver returns nothing, every source), so it cannot work
+  there; the chat says "Mikrofon jim" (microphone is mute) and the bot only
+  greets. Whether the caller hears the bot depends on the phone's echo
+  cancelling; check it with a real call.
+- With a USB sound card attached the app records from and plays through it
+  instead (its input and output found automatically), for wiring the call
+  through the headset jack by cable.
 - The bot does not hear the caller while it talks (no interrupting).
 - The service stops when the phone restarts: switch it on again.
 - The callers' voices are recorded and kept on the phone; many countries

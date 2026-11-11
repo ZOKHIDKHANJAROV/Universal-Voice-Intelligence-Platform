@@ -37,6 +37,20 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
+        <!-- Lets the answering machine record during a call (Android 10+ silences other apps). -->
+        <service
+            android:name=".call.CallAccessibilityService"
+            android:exported="false"
+            android:label="UniVoice Avtojavob"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/call_accessibility" />
+        </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"
