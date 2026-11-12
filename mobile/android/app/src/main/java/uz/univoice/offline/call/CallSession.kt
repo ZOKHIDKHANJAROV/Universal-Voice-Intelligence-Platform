@@ -64,7 +64,6 @@ class CallSession(
         CallState.callStarted(conversationId, caller)
         log(Role.SYSTEM, if (caller.isEmpty()) "Qoʻngʻiroq · Звонок" else "Qoʻngʻiroq · Звонок: $caller")
 
-        if (BuildConfig.DEBUG) probePlayback()
         val dialog = CallDialog(matcher, dialogConfig)
         var step = dialog.start()
         var callback = false
@@ -98,31 +97,6 @@ class CallSession(
     }
 
     data class Outcome(val reason: String?, val callback: Boolean)
-
-    /**
-     * Debug builds, for now: the call's echo cancelling removes what the
-     * phone's own speaker plays, so the caller may hear nothing. Plays the
-     * greeting once per kind of sound, numbered in the chat, to learn which
-     * one this phone lets through to the caller.
-     */
-    private suspend fun probePlayback() {
-        val asset = prompts.assetFor("greeting", "uz", matcher.prompt("greeting", "uz")) ?: return
-        val usages = listOf(
-            AudioAttributes.USAGE_VOICE_COMMUNICATION to "voice",
-            AudioAttributes.USAGE_MEDIA to "media",
-            AudioAttributes.USAGE_ALARM to "alarm",
-            AudioAttributes.USAGE_NOTIFICATION_RINGTONE to "ringtone",
-        )
-        for ((index, pair) in usages.withIndex()) {
-            val (usage, name) = pair
-            log(Role.SYSTEM, "Test ${index + 1}/${usages.size}: $name")
-            Log.i(TAG, "probe ${index + 1}: usage $name")
-            player.usage = usage
-            play(asset)
-            kotlinx.coroutines.delay(1_500)
-        }
-        player.usage = AudioAttributes.USAGE_VOICE_COMMUNICATION
-    }
 
     private class Turn(val readings: List<Heard>, val audio: File)
 
