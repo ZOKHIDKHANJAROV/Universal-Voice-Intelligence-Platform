@@ -29,9 +29,10 @@ gpu = [
     "nvidia-cublas-cu12>=12.4,<13",
     "nvidia-cudnn-cu12>=9.1,<10",
 ]
-# Russian prompt voice (Navoiy is Uzbek-only): TTS_PROVIDER_RU=piper.
+# Russian prompt voice (Navoiy is Uzbek-only): TTS_PROVIDER_RU=piper or vosk.
 tts-ru = [
     "piper-tts>=1.2",
+    "vosk-tts>=0.3",
 ]
 # Call log in PostgreSQL (DATABASE_URL=postgresql://...).
 postgres = [

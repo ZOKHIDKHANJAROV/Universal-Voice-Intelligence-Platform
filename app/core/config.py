@@ -89,6 +89,10 @@ class Settings(BaseSettings):
     tts_piper_length_scale: float = 1.0
     tts_piper_noise_scale: float = 0.667
     tts_piper_noise_w: float = 0.8
+    # vosk-tts Russian voices (TTS_PROVIDER_RU=vosk): model folder, speaker 0-4, pace (1.0 normal).
+    tts_vosk_model_path: str = ""
+    tts_vosk_speaker: int = 0
+    tts_vosk_speech_rate: float | None = None
     tts_output_dir: Path = Path("/var/lib/univoice/audio")
     # Pre-rendered 8 kHz phrases played on calls (see scripts/render_prompts.py).
     tts_prompt_cache_dir: Path = Path("/var/lib/univoice/audio/prompts")

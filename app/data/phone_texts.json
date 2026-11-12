@@ -7,6 +7,10 @@
   "voice": {
     "_comment": "Voice settings for scripts/export_mobile_prompts.py (environment variables override them). Navoiy speed: 1.0 is normal. Piper: length_scale above 1 is slower; lower noise values are smoother and softer.",
     "TTS_NAVOIY_SPEED": 1.0,
+    "_comment_ru": "Russian: vosk-tts young female voice (speaker 4 of vosk-model-tts-ru-0.10-multi, put under models/vosk-tts). Set TTS_PROVIDER_RU=piper to go back to Piper.",
+    "TTS_PROVIDER_RU": "vosk",
+    "TTS_VOSK_MODEL_PATH": "models/vosk-tts/vosk-model-tts-ru-0.10-multi",
+    "TTS_VOSK_SPEAKER": 4,
     "TTS_PIPER_LENGTH_SCALE": 1.08,
     "TTS_PIPER_NOISE_SCALE": 0.55,
     "TTS_PIPER_NOISE_W": 0.6
@@ -34,11 +38,11 @@
     },
     "repeat": {
       "uz": "Kechirasiz, yaxshi tushunmadim. Boshqacharoq aytib bera olasizmi?",
-      "ru": "Простите, я не совсем понял. Можете сказать по-другому?"
+      "ru": "Простите, я не совсем поняла. Можете сказать по-другому?"
     },
     "callback": {
       "uz": "Tushundim, murojaatingizni yozib oldim. Operatorimiz tez orada sizga qo'ng'iroq qiladi. Sog' bo'ling!",
-      "ru": "Понял, я записал ваше обращение. Наш оператор скоро вам перезвонит. Всего доброго!"
+      "ru": "Поняла, я записала ваше обращение. Наш оператор скоро вам перезвонит. Всего доброго!"
     }
   },
   "scenarios": {

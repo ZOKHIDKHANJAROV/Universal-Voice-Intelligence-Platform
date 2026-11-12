@@ -6,6 +6,7 @@ from app.tts.base import TextToSpeech
 from app.tts.providers.http import NavoiyHttpTextToSpeech
 from app.tts.providers.navoiy import NavoiyTextToSpeech
 from app.tts.providers.piper import PiperTextToSpeech
+from app.tts.providers.vosk_tts import VoskTextToSpeech
 
 
 @lru_cache(maxsize=4)
@@ -37,6 +38,13 @@ def _build_provider(name: str) -> TextToSpeech:
             length_scale=settings.tts_piper_length_scale,
             noise_scale=settings.tts_piper_noise_scale,
             noise_w=settings.tts_piper_noise_w,
+        )
+
+    if name == "vosk":
+        return VoskTextToSpeech(
+            settings.tts_vosk_model_path,
+            settings.tts_vosk_speaker,
+            speech_rate=settings.tts_vosk_speech_rate,
         )
 
     raise ValueError(f"Unknown TTS provider: {name}")
