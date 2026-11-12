@@ -1,11 +1,15 @@
 {
   "_comment": "What the offline phone app says instead of the server's wording: friendlier, and without 'press zero' (a phone cannot transfer a call; it promises a callback). Keys not listed here fall back to prompts.json and scenarios.json.",
   "emotions": {
-    "_comment": "How the Uzbek voice (Navoiy) sounds per phrase: xursand (happy), mehribon (warm), xotirjam (calm). 'default' covers the scenario answers.",
-    "default": "mehribon",
-    "greeting": "xursand",
-    "anything_else": "xursand",
-    "goodbye": "xursand"
+    "_comment": "How the Uzbek voice (Navoiy) sounds per phrase: mehribon (warm, gentle), xursand (happy), xotirjam (calm). 'default' covers every phrase not listed.",
+    "default": "mehribon"
+  },
+  "voice": {
+    "_comment": "Voice settings for scripts/export_mobile_prompts.py (environment variables override them). Navoiy speed: 1.0 is normal. Piper: length_scale above 1 is slower; lower noise values are smoother and softer.",
+    "TTS_NAVOIY_SPEED": 1.0,
+    "TTS_PIPER_LENGTH_SCALE": 1.08,
+    "TTS_PIPER_NOISE_SCALE": 0.55,
+    "TTS_PIPER_NOISE_W": 0.6
   },
   "prompts": {
     "greeting": {

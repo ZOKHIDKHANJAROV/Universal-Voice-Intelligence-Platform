@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -101,6 +102,10 @@ def main() -> int:
     args = parser.parse_args()
 
     args.out.mkdir(parents=True, exist_ok=True)
+    # The phone voice's settings (speed, smoothness) live in phone_texts.json.
+    for name, value in _phone_data().get("voice", {}).items():
+        if not name.startswith("_"):
+            os.environ.setdefault(name, str(value))
     entries, failures = [], 0
     for key, language, text in phrases():
         digest = hashlib.sha1(f"{language}\n{text}\n{args.rate}".encode("utf-8")).hexdigest()[:16]
