@@ -118,6 +118,34 @@ class ScenarioMatcher(
     )
 
     companion object {
+        /**
+         * The app's matcher: the server's scenarios and prompts with the phone's
+         * own wording from phone_texts.json laid over them (friendlier, and no
+         * "press zero", since a phone promises a callback instead).
+         */
+        fun forPhone(scenariosJson: String, promptsJson: String, phoneTextsJson: String?): ScenarioMatcher {
+            var scenarios = parseScenarios(scenariosJson)
+            var prompts = parsePrompts(promptsJson)
+            if (phoneTextsJson != null) {
+                val root = JSONObject(phoneTextsJson)
+                root.optJSONObject("scenarios")?.let { texts ->
+                    scenarios = scenarios.map { s ->
+                        if (texts.has(s.id) && s.message != null) s.copy(message = texts.getString(s.id)) else s
+                    }
+                }
+                root.optJSONObject("prompts")?.let { texts ->
+                    val merged = prompts.mapValues { it.value.toMutableMap() }.toMutableMap()
+                    for (key in texts.keys()) {
+                        val byLanguage = texts.getJSONObject(key)
+                        val target = merged.getOrPut(key) { mutableMapOf() }
+                        for (language in byLanguage.keys()) target[language] = byLanguage.getString(language)
+                    }
+                    prompts = merged
+                }
+            }
+            return ScenarioMatcher(scenarios, prompts)
+        }
+
         fun parseScenarios(json: String): List<Scenario> {
             val array = JSONArray(json)
             return (0 until array.length()).map { i ->

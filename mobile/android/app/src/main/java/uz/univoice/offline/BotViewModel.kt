@@ -77,9 +77,8 @@ class BotViewModel(application: Application) : AndroidViewModel(application) {
     private val prompts = PromptAudio(application.assets)
     private val recorder = Recorder()
     private val player = Player(application)
-    private val matcher: ScenarioMatcher = ScenarioMatcher(
-        ScenarioMatcher.parseScenarios(asset("scenarios.json")),
-        ScenarioMatcher.parsePrompts(asset("prompts.json")),
+    private val matcher: ScenarioMatcher = ScenarioMatcher.forPhone(
+        asset("scenarios.json"), asset("prompts.json"), runCatching { asset("phone_texts.json") }.getOrNull(),
     )
 
     // Neither engine is thread-safe and the Whisper Uzbek model takes ~0.6 GB

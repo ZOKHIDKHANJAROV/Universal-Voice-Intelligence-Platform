@@ -10,9 +10,10 @@ from app.tts.models import SpeechSynthesisResult
 
 
 class NavoiyHttpTextToSpeech(TextToSpeech):
-    def __init__(self, base_url: str, timeout_seconds: int = 120) -> None:
+    def __init__(self, base_url: str, timeout_seconds: int = 120, speed: float | None = None) -> None:
         self._base_url = base_url.rstrip("/")
         self._timeout_seconds = timeout_seconds
+        self._speed = speed
 
     def synthesize(
         self, text: str, output_path: Path, language: str = "uz"
@@ -33,8 +34,11 @@ class NavoiyHttpTextToSpeech(TextToSpeech):
         if language not in ("uz", "ru"):
             raise ValueError("Navoiy HTTP TTS currently supports Uzbek and Russian")
 
+        body: dict[str, object] = {"text": text, "language": language}
+        if self._speed is not None:
+            body["speed"] = self._speed
         payload = json.dumps(
-            {"text": text, "language": language},
+            body,
             ensure_ascii=False,
         ).encode("utf-8")
         request = urllib.request.Request(

@@ -1,0 +1,43 @@
+{
+  "_comment": "What the offline phone app says instead of the server's wording: friendlier, and without 'press zero' (a phone cannot transfer a call; it promises a callback). Keys not listed here fall back to prompts.json and scenarios.json.",
+  "prompts": {
+    "greeting": {
+      "uz": "Assalomu alaykum! Suv apparatlari xizmati. Qanday muammo bo'ldi, aytib bering.",
+      "ru": "Здравствуйте! Служба поддержки водоматов. Расскажите, что случилось?"
+    },
+    "no_input": {
+      "uz": "Sizni eshitmayapman. Muammoingizni qisqacha aytib bering, iltimos.",
+      "ru": "Я вас не слышу. Расскажите, пожалуйста, коротко, что случилось."
+    },
+    "anything_else": {
+      "uz": "Yana biror narsada yordam kerakmi?",
+      "ru": "Могу ещё чем-нибудь помочь?"
+    },
+    "goodbye": {
+      "uz": "Qo'ng'iroq qilganingiz uchun rahmat! Kuningiz yaxshi o'tsin.",
+      "ru": "Спасибо, что позвонили! Хорошего дня."
+    },
+    "time_limit": {
+      "uz": "Afsuski, vaqtimiz tugadi. Rahmat, sog' bo'ling!",
+      "ru": "К сожалению, время звонка закончилось. Спасибо и всего доброго!"
+    },
+    "repeat": {
+      "uz": "Kechirasiz, yaxshi tushunmadim. Boshqacharoq aytib bera olasizmi?",
+      "ru": "Простите, я не совсем понял. Можете сказать по-другому?"
+    },
+    "callback": {
+      "uz": "Tushundim, murojaatingizni yozib oldim. Operatorimiz tez orada sizga qo'ng'iroq qiladi. Sog' bo'ling!",
+      "ru": "Понял, я записал ваше обращение. Наш оператор скоро вам перезвонит. Всего доброго!"
+    }
+  },
+  "scenarios": {
+    "vending_no_water_uz": "Noqulaylik uchun uzr! Idish to'g'ri turganini tekshirib, tugmani yana bir bor bosib ko'ring. Suv baribir chiqmasa, pulingizni qaytarib beramiz.",
+    "vending_no_water_ru": "Извините за неудобство! Проверьте, пожалуйста, ровно ли стоит бутылка, и нажмите кнопку ещё раз. Если вода так и не пойдёт, мы вернём деньги.",
+    "vending_payment_uz": "To'lov bilan muammo bo'lgani uchun uzr. Apparat raqamini Telegram botimizga yuboring, pulingizni qaytarib beramiz.",
+    "vending_payment_ru": "Извините, что так вышло с оплатой. Отправьте номер аппарата в наш Телеграм-бот, и мы вернём деньги.",
+    "vending_leak_uz": "Xabar berganingiz uchun katta rahmat! Ustalarga darhol yetkazdik, ular tez orada kelib, tuzatib ketishadi.",
+    "vending_leak_ru": "Спасибо большое, что сообщили! Мы уже передали мастерам, они скоро приедут и всё починят.",
+    "vending_taste_uz": "Rahmat, shikoyatingizni qabul qildim. Filtrlarni tezda tekshiramiz. Pulingizni qaytarish uchun apparat raqamini Telegram botimizga yuboring.",
+    "vending_taste_ru": "Спасибо, жалобу на воду приняли. Мы срочно проверим фильтры. Чтобы вернуть деньги, отправьте номер аппарата в наш Телеграм-бот."
+  }
+}

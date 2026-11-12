@@ -83,6 +83,12 @@ class Settings(BaseSettings):
     tts_navoiy_checkpoint: str = ""
     tts_navoiy_reference_audio: str = ""
     tts_navoiy_emotion: str = "warm"
+    # Navoiy speaking rate (the HTTP service's own default when unset).
+    tts_navoiy_speed: float | None = None
+    # Piper voice delivery: < 1 speaks faster; more noise = livelier intonation.
+    tts_piper_length_scale: float = 1.0
+    tts_piper_noise_scale: float = 0.667
+    tts_piper_noise_w: float = 0.8
     tts_output_dir: Path = Path("/var/lib/univoice/audio")
     # Pre-rendered 8 kHz phrases played on calls (see scripts/render_prompts.py).
     tts_prompt_cache_dir: Path = Path("/var/lib/univoice/audio/prompts")

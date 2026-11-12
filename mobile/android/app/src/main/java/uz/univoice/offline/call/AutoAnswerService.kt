@@ -75,10 +75,8 @@ class AutoAnswerService : Service() {
         super.onCreate()
         settings = Settings(this)
         store = ChatStore.get(this)
-        matcher = ScenarioMatcher(
-            ScenarioMatcher.parseScenarios(assets.open("scenarios.json").bufferedReader().use { it.readText() }),
-            ScenarioMatcher.parsePrompts(assets.open("prompts.json").bufferedReader().use { it.readText() }),
-        )
+        fun text(name: String) = assets.open(name).bufferedReader().use { it.readText() }
+        matcher = ScenarioMatcher.forPhone(text("scenarios.json"), text("prompts.json"), runCatching { text("phone_texts.json") }.getOrNull())
         prompts = PromptAudio(assets)
     }
 

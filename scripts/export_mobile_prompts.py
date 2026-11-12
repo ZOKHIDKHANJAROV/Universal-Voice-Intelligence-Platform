@@ -33,15 +33,28 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = ROOT / "mobile/android/app/src/main/assets/prompts"
 
 
+PHONE_TEXTS = ROOT / "app/data/phone_texts.json"
+
+
+def phone_texts() -> tuple[dict[str, dict[str, str]], dict[str, str]]:
+    """The phone's own wording (prompts, scenario answers) over the server's."""
+    if not PHONE_TEXTS.exists():
+        return {}, {}
+    data = json.loads(PHONE_TEXTS.read_text(encoding="utf-8"))
+    return data.get("prompts", {}), data.get("scenarios", {})
+
+
 def phrases() -> list[tuple[str, str, str]]:
     """(key, language, text) for everything the phone can say."""
+    prompt_texts, scenario_texts = phone_texts()
     items = []
     for scenario in ScenarioService().list_scenarios():
         if scenario.steps:
-            items.append((scenario.id, scenario.language, scenario.steps[0].message))
+            text = scenario_texts.get(scenario.id, scenario.steps[0].message)
+            items.append((scenario.id, scenario.language, text))
     for key, by_language in get_prompts().items():
         for language, text in by_language.items():
-            items.append((key, language, text))
+            items.append((key, language, prompt_texts.get(key, {}).get(language, text)))
     return items
 
 

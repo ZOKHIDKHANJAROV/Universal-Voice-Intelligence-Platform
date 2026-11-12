@@ -9,7 +9,7 @@ import java.io.File
 class Player(
     private val context: Context,
     /** USAGE_VOICE_COMMUNICATION when answering a call: it follows the call volume and route. */
-    private val usage: Int = AudioAttributes.USAGE_MEDIA,
+    var usage: Int = AudioAttributes.USAGE_MEDIA,
 ) {
     private var player: MediaPlayer? = null
 

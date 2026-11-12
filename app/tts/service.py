@@ -16,6 +16,7 @@ def _build_provider(name: str) -> TextToSpeech:
         return NavoiyHttpTextToSpeech(
             settings.tts_base_url,
             settings.tts_timeout_seconds,
+            speed=settings.tts_navoiy_speed,
         )
 
     if name == "navoiy":
@@ -33,6 +34,9 @@ def _build_provider(name: str) -> TextToSpeech:
         return PiperTextToSpeech(
             settings.tts_binary,
             {"uz": settings.tts_model_path, "ru": settings.tts_model_path_ru},
+            length_scale=settings.tts_piper_length_scale,
+            noise_scale=settings.tts_piper_noise_scale,
+            noise_w=settings.tts_piper_noise_w,
         )
 
     raise ValueError(f"Unknown TTS provider: {name}")
