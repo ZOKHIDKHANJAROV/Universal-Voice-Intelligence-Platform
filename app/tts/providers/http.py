@@ -10,10 +10,17 @@ from app.tts.models import SpeechSynthesisResult
 
 
 class NavoiyHttpTextToSpeech(TextToSpeech):
-    def __init__(self, base_url: str, timeout_seconds: int = 120, speed: float | None = None) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        timeout_seconds: int = 120,
+        speed: float | None = None,
+        emotion: str | None = None,
+    ) -> None:
         self._base_url = base_url.rstrip("/")
         self._timeout_seconds = timeout_seconds
         self._speed = speed
+        self._emotion = emotion
 
     def synthesize(
         self, text: str, output_path: Path, language: str = "uz"
@@ -37,6 +44,8 @@ class NavoiyHttpTextToSpeech(TextToSpeech):
         body: dict[str, object] = {"text": text, "language": language}
         if self._speed is not None:
             body["speed"] = self._speed
+        if self._emotion:
+            body["emotion"] = self._emotion
         payload = json.dumps(
             body,
             ensure_ascii=False,

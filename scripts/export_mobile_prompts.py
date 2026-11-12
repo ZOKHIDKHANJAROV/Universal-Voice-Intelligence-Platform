@@ -36,12 +36,22 @@ DEFAULT_OUT = ROOT / "mobile/android/app/src/main/assets/prompts"
 PHONE_TEXTS = ROOT / "app/data/phone_texts.json"
 
 
+def _phone_data() -> dict:
+    return json.loads(PHONE_TEXTS.read_text(encoding="utf-8")) if PHONE_TEXTS.exists() else {}
+
+
 def phone_texts() -> tuple[dict[str, dict[str, str]], dict[str, str]]:
     """The phone's own wording (prompts, scenario answers) over the server's."""
-    if not PHONE_TEXTS.exists():
-        return {}, {}
-    data = json.loads(PHONE_TEXTS.read_text(encoding="utf-8"))
+    data = _phone_data()
     return data.get("prompts", {}), data.get("scenarios", {})
+
+
+def emotion_for(key: str, language: str) -> str | None:
+    """How Navoiy should sound for this phrase (Uzbek only), from phone_texts.json."""
+    if language != "uz":
+        return None
+    emotions = _phone_data().get("emotions", {})
+    return emotions.get(key, emotions.get("default"))
 
 
 def phrases() -> list[tuple[str, str, str]]:
@@ -58,7 +68,7 @@ def phrases() -> list[tuple[str, str, str]]:
     return items
 
 
-def render(text: str, language: str, rate: int, from_cache: bool) -> bytes:
+def render(text: str, language: str, rate: int, from_cache: bool, emotion: str | None = None) -> bytes:
     """PCM16 mono at ``rate``."""
     if from_cache:
         cached = get_prompt_cache().get_pcm8(text, language)
@@ -66,10 +76,19 @@ def render(text: str, language: str, rate: int, from_cache: bool) -> bytes:
             raise FileNotFoundError("not in the call prompt cache; run `make render-prompts` first")
         return wav_to_pcm16(pcm16_to_wav(cached, TELEPHONY_RATE), rate)
     # Imported here so --from-cache works without the TTS dependencies.
+    from app.core.config import get_settings
     from app.tts.pronunciation import spoken_text
+    from app.tts.providers.http import NavoiyHttpTextToSpeech
     from app.tts.service import synthesize_bytes
 
-    return wav_to_pcm16(synthesize_bytes(spoken_text(text, language), language), rate)
+    spoken = spoken_text(text, language)
+    settings = get_settings()
+    if emotion and settings.tts_provider == "navoiy-http":
+        navoiy = NavoiyHttpTextToSpeech(
+            settings.tts_base_url, settings.tts_timeout_seconds, speed=settings.tts_navoiy_speed, emotion=emotion
+        )
+        return wav_to_pcm16(navoiy.synthesize_bytes(spoken, language), rate)
+    return wav_to_pcm16(synthesize_bytes(spoken, language), rate)
 
 
 def main() -> int:
@@ -93,7 +112,7 @@ def main() -> int:
             print(f"  ok      {label}")
         else:
             try:
-                path.write_bytes(pcm16_to_wav(render(text, language, args.rate, args.from_cache), args.rate))
+                path.write_bytes(pcm16_to_wav(render(text, language, args.rate, args.from_cache, emotion_for(key, language)), args.rate))
                 print(f"  render  {label}")
             except (OSError, ValueError) as exc:
                 failures += 1

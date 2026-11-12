@@ -16,62 +16,62 @@
   {
    "key": "vending_no_water_uz",
    "language": "uz",
-   "text": "Uzur so'raymiz. Iltimos, idish to'g'ri qo'yilganini tekshiring va tugmani qayta bosing. Agar suv chiqmasa, pulingizni qaytarib beramiz. Operator bilan bog'lanish uchun nolni bosing.",
-   "file": "uz-f561950d825e65ea.wav"
+   "text": "Noqulaylik uchun uzr! Idish to'g'ri turganini tekshirib, tugmani yana bir bor bosib ko'ring. Suv baribir chiqmasa, pulingizni qaytarib beramiz.",
+   "file": "uz-105d8b37a262163c.wav"
   },
   {
    "key": "vending_no_water_ru",
    "language": "ru",
-   "text": "Приносим извинения. Пожалуйста, проверьте, правильно ли стоит баклажка, и нажмите кнопку еще раз. Если вода не нальется, мы вернем вам деньги. Нажмите ноль для связи с оператором.",
-   "file": "ru-dd3958f4682f292b.wav"
+   "text": "Извините за неудобство! Проверьте, пожалуйста, ровно ли стоит бутылка, и нажмите кнопку ещё раз. Если вода так и не пойдёт, мы вернём деньги.",
+   "file": "ru-33839e4e251a3efb.wav"
   },
   {
    "key": "vending_payment_uz",
    "language": "uz",
-   "text": "To'lov bilan bog'liq noqulaylik uchun uzr. Pulingizni qaytarish uchun, iltimos apparat raqamini telegram botimizga yuboring yoki operator bilan bog'lanish uchun nolni bosing.",
-   "file": "uz-eae3bba655e574de.wav"
+   "text": "To'lov bilan muammo bo'lgani uchun uzr. Apparat raqamini Telegram botimizga yuboring, pulingizni qaytarib beramiz.",
+   "file": "uz-5955f20b88b0319c.wav"
   },
   {
    "key": "vending_payment_ru",
    "language": "ru",
-   "text": "Извините за проблемы с оплатой. Чтобы вернуть деньги, пожалуйста, отправьте номер аппарата в наш телеграм-бот или нажмите ноль для связи с оператором.",
-   "file": "ru-1fd72305f16a1e70.wav"
+   "text": "Извините, что так вышло с оплатой. Отправьте номер аппарата в наш Телеграм-бот, и мы вернём деньги.",
+   "file": "ru-73442942a766c28b.wav"
   },
   {
    "key": "vending_leak_uz",
    "language": "uz",
-   "text": "Xabaringiz uchun rahmat! Biz nosozlik haqida ustalarga xabar berdik. Ular tez orada yetib borishadi. Operatorga ulanish uchun nolni bosing.",
-   "file": "uz-49a3c169ed69ba92.wav"
+   "text": "Xabar berganingiz uchun katta rahmat! Ustalarga darhol yetkazdik, ular tez orada kelib, tuzatib ketishadi.",
+   "file": "uz-f09237b272e41a93.wav"
   },
   {
    "key": "vending_leak_ru",
    "language": "ru",
-   "text": "Спасибо за сигнал! Мы уже передали экстренную заявку мастерам, они скоро приедут и все починят. Для связи с оператором нажмите ноль.",
-   "file": "ru-d2b3730221430b60.wav"
+   "text": "Спасибо большое, что сообщили! Мы уже передали мастерам, они скоро приедут и всё починят.",
+   "file": "ru-b71bf9cfa23801f3.wav"
   },
   {
    "key": "vending_taste_uz",
    "language": "uz",
-   "text": "Suv sifati bo'yicha shikoyatingiz qabul qilindi. Biz tezda filtrlarni tekshiramiz. Pulingizni qaytarish uchun operatorga ulaning, nolni bosing.",
-   "file": "uz-f65b1d183aac5211.wav"
+   "text": "Rahmat, shikoyatingizni qabul qildim. Filtrlarni tezda tekshiramiz. Pulingizni qaytarish uchun apparat raqamini Telegram botimizga yuboring.",
+   "file": "uz-f1191af2a019660e.wav"
   },
   {
    "key": "vending_taste_ru",
    "language": "ru",
-   "text": "Ваша жалоба на качество воды принята. Мы срочно проверим фильтры на этом аппарате. Для возврата средств нажмите ноль.",
-   "file": "ru-b5850ceaf6d587e6.wav"
+   "text": "Спасибо, жалобу на воду приняли. Мы срочно проверим фильтры. Чтобы вернуть деньги, отправьте номер аппарата в наш Телеграм-бот.",
+   "file": "ru-5950790ca26f7642.wav"
   },
   {
    "key": "greeting",
    "language": "uz",
-   "text": "Assalomu alaykum! Qo'llab-quvvatlash xizmatiga qo'ng'iroq qildingiz.",
-   "file": "uz-69748a82824d22b9.wav"
+   "text": "Assalomu alaykum! Suv apparatlari xizmati. Qanday muammo bo'ldi, aytib bering.",
+   "file": "uz-242356a859893683.wav"
   },
   {
    "key": "greeting",
    "language": "ru",
-   "text": "Здравствуйте! Вы позвонили в службу поддержки.",
-   "file": "ru-54537d63063ea489.wav"
+   "text": "Здравствуйте! Служба поддержки водоматов. Расскажите, что случилось?",
+   "file": "ru-56e1efa08eeddb5c.wav"
   },
   {
    "key": "not_understood",
@@ -124,50 +124,50 @@
   {
    "key": "no_input",
    "language": "uz",
-   "text": "Iltimos, muammoingizni aytib bering.",
-   "file": "uz-5712eaffa258e366.wav"
+   "text": "Sizni eshitmayapman. Muammoingizni qisqacha aytib bering, iltimos.",
+   "file": "uz-3e3be1ced2b0b7b2.wav"
   },
   {
    "key": "no_input",
    "language": "ru",
-   "text": "Пожалуйста, опишите вашу проблему.",
-   "file": "ru-4f0f954ccd3c7352.wav"
+   "text": "Я вас не слышу. Расскажите, пожалуйста, коротко, что случилось.",
+   "file": "ru-48f8ace7313593c1.wav"
   },
   {
    "key": "anything_else",
    "language": "uz",
-   "text": "Yana savolingiz bormi?",
-   "file": "uz-2ddef55e2b5b0a0e.wav"
+   "text": "Yana biror narsada yordam kerakmi?",
+   "file": "uz-967ab0d3f68eaba7.wav"
   },
   {
    "key": "anything_else",
    "language": "ru",
-   "text": "Есть ещё вопросы?",
-   "file": "ru-489bb10f712dd970.wav"
+   "text": "Могу ещё чем-нибудь помочь?",
+   "file": "ru-cae4bca78a30d470.wav"
   },
   {
    "key": "goodbye",
    "language": "uz",
-   "text": "Qo'ng'irog'ingiz uchun rahmat. Xayr!",
-   "file": "uz-d558940f66e593a6.wav"
+   "text": "Qo'ng'iroq qilganingiz uchun rahmat! Kuningiz yaxshi o'tsin.",
+   "file": "uz-28b5e0bc702c8e65.wav"
   },
   {
    "key": "goodbye",
    "language": "ru",
-   "text": "Спасибо за звонок. До свидания!",
-   "file": "ru-09ca6c24c941aa04.wav"
+   "text": "Спасибо, что позвонили! Хорошего дня.",
+   "file": "ru-9b3f09ae8e9fffc2.wav"
   },
   {
    "key": "time_limit",
    "language": "uz",
-   "text": "Qo'ng'iroq vaqti tugadi. Rahmat, xayr!",
-   "file": "uz-e0c773fb11d803e8.wav"
+   "text": "Afsuski, vaqtimiz tugadi. Rahmat, sog' bo'ling!",
+   "file": "uz-687c6f799ca35d4f.wav"
   },
   {
    "key": "time_limit",
    "language": "ru",
-   "text": "Время звонка истекло. Спасибо, до свидания!",
-   "file": "ru-682cad8b281e93d7.wav"
+   "text": "К сожалению, время звонка закончилось. Спасибо и всего доброго!",
+   "file": "ru-a2fddd00bdb8ea17.wav"
   },
   {
    "key": "thinking",
@@ -184,26 +184,26 @@
   {
    "key": "repeat",
    "language": "uz",
-   "text": "Kechirasiz, tushunmadim. Iltimos, muammoingizni boshqacha so'zlar bilan ayting.",
-   "file": "uz-709eddc86c49f1c3.wav"
+   "text": "Kechirasiz, yaxshi tushunmadim. Boshqacharoq aytib bera olasizmi?",
+   "file": "uz-da58fd20c2e67571.wav"
   },
   {
    "key": "repeat",
    "language": "ru",
-   "text": "Извините, не понял. Пожалуйста, опишите проблему другими словами.",
-   "file": "ru-19504f6e7acf5658.wav"
+   "text": "Простите, я не совсем понял. Можете сказать по-другому?",
+   "file": "ru-8a5d327d76c4df35.wav"
   },
   {
    "key": "callback",
    "language": "uz",
-   "text": "Muammoingiz qayd etildi. Operator tez orada sizga qayta qo'ng'iroq qiladi. Xayr!",
-   "file": "uz-bc6f79d82d59508c.wav"
+   "text": "Tushundim, murojaatingizni yozib oldim. Operatorimiz tez orada sizga qo'ng'iroq qiladi. Sog' bo'ling!",
+   "file": "uz-80d6f3f17e33b0f0.wav"
   },
   {
    "key": "callback",
    "language": "ru",
-   "text": "Ваше обращение записано. Оператор скоро вам перезвонит. До свидания!",
-   "file": "ru-6c887c5b65d92a58.wav"
+   "text": "Понял, я записал ваше обращение. Наш оператор скоро вам перезвонит. Всего доброго!",
+   "file": "ru-78a9ed513edd0b7d.wav"
   }
  ]
 }

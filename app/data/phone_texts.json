@@ -1,5 +1,12 @@
 {
   "_comment": "What the offline phone app says instead of the server's wording: friendlier, and without 'press zero' (a phone cannot transfer a call; it promises a callback). Keys not listed here fall back to prompts.json and scenarios.json.",
+  "emotions": {
+    "_comment": "How the Uzbek voice (Navoiy) sounds per phrase: xursand (happy), mehribon (warm), xotirjam (calm). 'default' covers the scenario answers.",
+    "default": "mehribon",
+    "greeting": "xursand",
+    "anything_else": "xursand",
+    "goodbye": "xursand"
+  },
   "prompts": {
     "greeting": {
       "uz": "Assalomu alaykum! Suv apparatlari xizmati. Qanday muammo bo'ldi, aytib bering.",
