@@ -17,7 +17,7 @@
   },
   "prompts": {
     "greeting": {
-      "uz": "Assalomu alaykum! Suv apparatlari xizmati. Qanday muammo bo'ldi, aytib bering.",
+      "uz": "Assalomu alaykum! Qanday muammo bo'ldi?",
       "ru": "Здравствуйте! Что случилось?"
     },
     "no_input": {
