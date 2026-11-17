@@ -34,6 +34,8 @@ class VoskEngine private constructor(private val path: String, private val model
      */
     fun newStream(phraseEndSeconds: Float? = null): SpeechStream {
         val recognizer = Recognizer(model, 16000f)
+        // Per-word confidence: tells which language's model really understood the caller.
+        recognizer.setWords(true)
         // Initial silence up to 30 s and phrases up to 15 s are not cut short.
         if (phraseEndSeconds != null) recognizer.setEndpointerDelays(30f, phraseEndSeconds, 15f)
         return VoskStream(recognizer)
@@ -49,6 +51,8 @@ class VoskEngine private constructor(private val path: String, private val model
     private class VoskStream(private val recognizer: Recognizer) : SpeechStream {
         // A pause inside a sentence ends a phrase for Vosk; keep every phrase.
         private val phrases = mutableListOf<String>()
+        private val confidences = mutableListOf<Double>()
+        private var lastConfidence: Double? = null
 
         override fun accept(audio: ShortArray): Boolean {
             val ended = recognizer.acceptWaveForm(audio, audio.size)
@@ -58,7 +62,13 @@ class VoskEngine private constructor(private val path: String, private val model
 
         override fun partial(): String = words(JSONObject(recognizer.partialResult).optString("partial"))
 
-        override fun take(): String = phrases.joinToString(" ").also { phrases.clear() }
+        override fun take(): String {
+            lastConfidence = confidences.takeIf { it.isNotEmpty() }?.average()
+            confidences.clear()
+            return phrases.joinToString(" ").also { phrases.clear() }
+        }
+
+        override fun confidence(): Double? = lastConfidence
 
         override fun finish(): String {
             add(recognizer.finalResult, "text")
@@ -68,8 +78,14 @@ class VoskEngine private constructor(private val path: String, private val model
         override fun close() = recognizer.close()
 
         private fun add(json: String, key: String) {
-            val text = words(JSONObject(json).optString(key))
+            val result = JSONObject(json)
+            val text = words(result.optString(key))
             if (text.isNotEmpty()) phrases += text
+            val list = result.optJSONArray("result") ?: return
+            for (i in 0 until list.length()) {
+                val word = list.optJSONObject(i) ?: continue
+                if (word.optString("word") != "[unk]") confidences += word.optDouble("conf", 0.0)
+            }
         }
 
         private fun words(text: String) =

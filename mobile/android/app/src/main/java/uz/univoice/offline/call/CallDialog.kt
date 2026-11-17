@@ -12,8 +12,8 @@ data class Utterance(
     val confidence: Double? = null,
 )
 
-/** What the caller said, as one language's model heard it. */
-data class Heard(val language: String, val text: String)
+/** What the caller said, as one language's model heard it, and how sure that model was (0..1). */
+data class Heard(val language: String, val text: String, val confidence: Double? = null)
 
 /**
  * What to do next: play [utterances] in order, then hang up with [endReason],
@@ -90,13 +90,23 @@ class CallDialog(
             )
         }
 
-        // Nothing matched, so the language is still a guess: speak both.
+        // Nothing matched: answer in the language whose model understood the caller best.
+        if (callerLanguage == null) callerLanguage = guessLanguage(spoken)
         return if (++misunderstood < 2) {
             Step(prompts("repeat"), listenMs = config.noInputMs)
         } else {
             callback("not_understood", callerLanguage)
         }
     }
+
+    /**
+     * The language of the reading its model was surest of; Uzbek when no model reports how sure
+     * it was (most callers speak Uzbek).
+     */
+    private fun guessLanguage(spoken: List<Heard>): String =
+        spoken.filter { it.confidence != null }.maxByOrNull { it.confidence!! }?.language
+            ?: spoken.firstOrNull { it.language == "uz" }?.language
+            ?: spoken.first().language
 
     /** Nothing was said for as long as the last step allowed. */
     fun silence(elapsedMs: Long): Step = when {

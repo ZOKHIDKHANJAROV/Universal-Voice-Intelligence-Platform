@@ -93,6 +93,9 @@ class Settings(BaseSettings):
     tts_vosk_model_path: str = ""
     tts_vosk_speaker: int = 0
     tts_vosk_speech_rate: float | None = None
+    # Lower = steadier, less breaking voice; empty = model default (0.8).
+    tts_vosk_noise_level: float | None = None
+    tts_vosk_duration_noise_level: float | None = None
     tts_output_dir: Path = Path("/var/lib/univoice/audio")
     # Pre-rendered 8 kHz phrases played on calls (see scripts/render_prompts.py).
     tts_prompt_cache_dir: Path = Path("/var/lib/univoice/audio/prompts")

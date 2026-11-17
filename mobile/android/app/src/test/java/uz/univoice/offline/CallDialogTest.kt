@@ -87,12 +87,21 @@ class CallDialogTest {
     fun theSecondMisunderstandingPromisesACallback() {
         val d = dialog()
         val first = d.heard(listOf(Heard("uz", "bugun havo yaxshi")), 5_000)
-        assertEquals(listOf("repeat" to "uz", "repeat" to "ru"), first.keys())
+        assertEquals(listOf("repeat" to "uz"), first.keys())
         assertNull(first.endReason)
         val second = d.heard(listOf(Heard("uz", "men kitob oqiyman")), 12_000)
-        assertEquals(listOf("callback" to "uz", "callback" to "ru"), second.keys())
+        assertEquals(listOf("callback" to "uz"), second.keys())
         assertEquals("not_understood", second.endReason)
         assertTrue(second.callback)
+    }
+
+    @Test
+    fun withoutAMatchTheBotAnswersInTheLanguageItUnderstoodBest() {
+        val d = dialog()
+        val step = d.heard(listOf(Heard("uz", "men kitob", 0.41), Heard("ru", "расскажите анекдот", 0.87)), 5_000)
+        assertEquals(listOf("repeat" to "ru"), step.keys())
+        val silent = d.silence(20_000)
+        assertEquals(listOf("no_input" to "ru"), silent.keys())
     }
 
     @Test

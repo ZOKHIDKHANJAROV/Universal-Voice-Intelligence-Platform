@@ -27,6 +27,9 @@ interface SpeechStream : Closeable {
 
     /** Flushes the phrase in progress and returns everything not yet taken. */
     fun finish(): String
+
+    /** How sure the model was of the last taken text, 0..1; null when it cannot tell. */
+    fun confidence(): Double? = null
 }
 
 enum class Engine(val title: String) {

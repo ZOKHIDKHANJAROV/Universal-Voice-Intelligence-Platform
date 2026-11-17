@@ -12,12 +12,22 @@ class VoskTextToSpeech(TextToSpeech):
     from https://alphacephei.com/vosk/models.
     """
 
-    def __init__(self, model_path: str, speaker_id: int = 0, speech_rate: float | None = None) -> None:
+    def __init__(
+        self,
+        model_path: str,
+        speaker_id: int = 0,
+        speech_rate: float | None = None,
+        noise_level: float | None = None,
+        duration_noise_level: float | None = None,
+    ) -> None:
         if not model_path:
             raise ValueError("TTS_VOSK_MODEL_PATH is not set")
         self._model_path = model_path
         self._speaker_id = speaker_id
         self._speech_rate = speech_rate
+        # Lower = steadier voice (the model's default is 0.8).
+        self._noise_level = noise_level
+        self._duration_noise_level = duration_noise_level
         self._synth = None
 
     def _engine(self):
@@ -32,7 +42,14 @@ class VoskTextToSpeech(TextToSpeech):
         if language != "ru":
             raise ValueError("vosk-tts voices are Russian only")
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        self._engine().synth(text, str(output_path), speaker_id=self._speaker_id, speech_rate=self._speech_rate)
+        self._engine().synth(
+            text,
+            str(output_path),
+            speaker_id=self._speaker_id,
+            speech_rate=self._speech_rate,
+            noise_level=self._noise_level,
+            duration_noise_level=self._duration_noise_level,
+        )
         with wave.open(str(output_path), "rb") as wav_file:
             duration_seconds = wav_file.getnframes() / wav_file.getframerate()
         return SpeechSynthesisResult(

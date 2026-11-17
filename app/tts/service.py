@@ -45,6 +45,8 @@ def _build_provider(name: str) -> TextToSpeech:
             settings.tts_vosk_model_path,
             settings.tts_vosk_speaker,
             speech_rate=settings.tts_vosk_speech_rate,
+            noise_level=settings.tts_vosk_noise_level,
+            duration_noise_level=settings.tts_vosk_duration_noise_level,
         )
 
     raise ValueError(f"Unknown TTS provider: {name}")

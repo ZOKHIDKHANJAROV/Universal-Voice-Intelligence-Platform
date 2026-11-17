@@ -70,8 +70,8 @@
   {
    "key": "greeting",
    "language": "ru",
-   "text": "Здравствуйте! Служба поддержки водоматов. Расскажите, что случилось?",
-   "file": "ru-56e1efa08eeddb5c.wav"
+   "text": "Здравствуйте! Что случилось?",
+   "file": "ru-16dcd710e1669761.wav"
   },
   {
    "key": "not_understood",

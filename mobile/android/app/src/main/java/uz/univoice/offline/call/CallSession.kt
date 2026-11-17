@@ -26,6 +26,7 @@ import uz.univoice.offline.stt.VoskEngine
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * One answered call: greets, listens, answers with the pre-recorded audio,
@@ -51,6 +52,7 @@ class CallSession(
 
     /** A USB sound card, if one is plugged in: the phone's own microphone is deaf during a call. */
     private val usb = UsbAudio.find(context)
+    private val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     /** Index in [MIC_SOURCES] of the audio source that works on this phone during a call. */
     private var micSource = 0
 
@@ -103,6 +105,21 @@ class CallSession(
     // ----- the bot speaks -----
 
     private suspend fun say(step: Step) {
+        // By cable the call volume stays low while the bot listens (so the line does not squeal);
+        // it goes up only while the bot talks. Media playback is muted during a call, so the
+        // bot's voice has to use the call volume.
+        val listening = audio.getStreamVolume(AudioManager.STREAM_VOICE_CALL)
+        if (usb.output != null) {
+            audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, audio.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), 0)
+        }
+        try {
+            speak(step)
+        } finally {
+            if (usb.output != null) audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, listening, 0)
+        }
+    }
+
+    private suspend fun speak(step: Step) {
         for (u in step.utterances) {
             log(
                 Role.BOT, u.text, language = u.language, audioKey = u.key, scenarioId = u.scenarioId,
@@ -155,6 +172,7 @@ class CallSession(
         var skip = SKIP_CHUNKS // the end of our own voice still in the microphone
         var count = 0
         var peak = 0
+        var clipped = 0
         try {
             while (true) {
                 val wait = if (speechSeen) Long.MAX_VALUE else deadline - SystemClock.elapsedRealtime()
@@ -180,13 +198,18 @@ class CallSession(
                 }
                 if (skip-- > 0) continue
                 count++
-                for (sample in chunk) peak = maxOf(peak, abs(sample.toInt()))
+                for (sample in chunk) {
+                    val level = abs(sample.toInt())
+                    peak = maxOf(peak, level)
+                    if (level >= CLIP_LEVEL) clipped++
+                }
                 audio.write(chunk.toBytes())
                 val ended = coroutineScope {
                     streams.map { (_, stream) -> async(Dispatchers.Default) { stream.accept(chunk) } }.awaitAll()
                 }.any { it }
                 if (ended) {
-                    val readings = streams.map { (language, stream) -> Heard(language, stream.finish()) }
+                    val readings = streams.map { (language, stream) -> stream.finish().let { text -> Heard(language, text, stream.confidence()) } }
+                    Log.i(TAG, "heard: " + readings.joinToString { "${it.language}=%.2f".format(it.confidence ?: -1.0) })
                     if (readings.any { it.text.isNotBlank() }) {
                         val file = File(store.audioDir, "call$conversationId-${System.currentTimeMillis()}.wav")
                         withContext(Dispatchers.IO) { Wav.write(file, audio.toByteArray().toShorts()) }
@@ -207,7 +230,7 @@ class CallSession(
             if ((peak == 0 && count > 30) || (count == 0 && timeoutMs > 3_000)) {
                 warnMic("Mikrofon jim: telefon qoʻngʻiroq paytida mikrofonni bermayapti · Микрофон молчит: телефон не отдаёт его во время звонка")
             }
-            Log.i(TAG, "listened: peak=$peak chunks=$count speech=$speechSeen")
+            Log.i(TAG, "listened: peak=$peak clipped=$clipped chunks=$count speech=$speechSeen")
         }
     }
 
@@ -283,11 +306,23 @@ class CallSession(
 
         /** 100 ms each: dropped after the bot stops talking, so it does not hear itself. */
         private const val SKIP_CHUNKS = 2
+
+        /** Samples this loud count as clipped in the log: the caller's line is too hot. */
+        private const val CLIP_LEVEL = 32000
     }
 }
 
 /** Speaker on and the call volume up while the bot talks, put back afterwards. */
 class CallAudio(context: Context) {
+    private companion object {
+        /**
+         * Share of the maximum call volume while the bot listens by cable. The phone's headphone
+         * output is far louder than the sound card's microphone input expects: at 60% a tenth of
+         * the caller's speech was clipped, and the line squealed.
+         */
+        const val WIRED_CALL_VOLUME = 0.2f
+    }
+
     private val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private var speaker = false
     private var volume = 0
@@ -301,8 +336,13 @@ class CallAudio(context: Context) {
         val wired = audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any {
             it.type == android.media.AudioDeviceInfo.TYPE_WIRED_HEADSET || it.type == android.media.AudioDeviceInfo.TYPE_WIRED_HEADPHONES
         }
-        audio.isSpeakerphoneOn = !wired
-        audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, audio.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), 0)
+        // Only when it changes: on this Samsung a needless switch during a call once crashed the
+        // audio service (it re-routes the call through every device, a USB card included).
+        if (audio.isSpeakerphoneOn != !wired) audio.isSpeakerphoneOn = !wired
+        val max = audio.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
+        // By cable, full call volume feeds the line back into itself through the sound card
+        // (the caller hears squealing); a bit over half is loud enough for the recognizer.
+        audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, if (wired) maxOf(1, (max * WIRED_CALL_VOLUME).roundToInt()) else max, 0)
         // The streams the playback probe tries, at full volume too.
         for (stream in intArrayOf(AudioManager.STREAM_MUSIC, AudioManager.STREAM_ALARM, AudioManager.STREAM_RING)) {
             others[stream] = audio.getStreamVolume(stream)
@@ -312,7 +352,7 @@ class CallAudio(context: Context) {
 
     @Suppress("DEPRECATION")
     fun exit() {
-        audio.isSpeakerphoneOn = speaker
+        if (audio.isSpeakerphoneOn != speaker) audio.isSpeakerphoneOn = speaker
         audio.setStreamVolume(AudioManager.STREAM_VOICE_CALL, volume, 0)
         for ((stream, level) in others) runCatching { audio.setStreamVolume(stream, level, 0) }
     }

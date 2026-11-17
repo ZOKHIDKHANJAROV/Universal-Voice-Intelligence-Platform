@@ -25,6 +25,8 @@ import os
 import sys
 from pathlib import Path
 
+import numpy as np
+
 from app.audio.resample import pcm16_to_wav, wav_to_pcm16
 from app.services.scenario_service import ScenarioService
 from app.tts.prompt_cache import TELEPHONY_RATE, get_prompt_cache
@@ -92,6 +94,24 @@ def render(text: str, language: str, rate: int, from_cache: bool, emotion: str |
     return wav_to_pcm16(synthesize_bytes(spoken, language), rate)
 
 
+# Phone lines are quiet: prompts are raised to this loudness (RMS, dBFS), peaks softly limited.
+TARGET_RMS_DB = -14.0
+LIMIT_FROM = 0.6
+
+
+def level(pcm: bytes) -> bytes:
+    """Bring a 16-bit mono clip to TARGET_RMS_DB; repeated calls leave it as is."""
+    samples = np.frombuffer(pcm, dtype=np.int16).astype(np.float64) / 32768.0
+    rms = float(np.sqrt(np.mean(samples**2))) if samples.size else 0.0
+    if rms < 1e-4 or abs(20 * np.log10(rms) - TARGET_RMS_DB) < 0.5:
+        return pcm
+    samples = samples * (10 ** (TARGET_RMS_DB / 20) / rms)
+    over = np.abs(samples) > LIMIT_FROM
+    head = 1.0 - LIMIT_FROM
+    samples[over] = np.sign(samples[over]) * (LIMIT_FROM + head * np.tanh((np.abs(samples[over]) - LIMIT_FROM) / head))
+    return (np.clip(samples, -1.0, 32767 / 32768) * 32768).astype(np.int16).tobytes()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -114,10 +134,16 @@ def main() -> int:
         label = f"[{language}] {key}"
         force = args.force and args.language in (None, language)
         if path.exists() and not force:
-            print(f"  ok      {label}")
+            pcm = wav_to_pcm16(path.read_bytes(), args.rate)
+            louder = level(pcm)
+            if louder != pcm:
+                path.write_bytes(pcm16_to_wav(louder, args.rate))
+                print(f"  level   {label}")
+            else:
+                print(f"  ok      {label}")
         else:
             try:
-                path.write_bytes(pcm16_to_wav(render(text, language, args.rate, args.from_cache, emotion_for(key, language)), args.rate))
+                path.write_bytes(pcm16_to_wav(level(render(text, language, args.rate, args.from_cache, emotion_for(key, language))), args.rate))
                 print(f"  render  {label}")
             except (OSError, ValueError) as exc:
                 failures += 1
